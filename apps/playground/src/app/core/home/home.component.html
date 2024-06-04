@@ -1,0 +1,65 @@
+<div class="row row-cols-md-3 g-4">
+  <div class="col">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Flight Count</h5>
+        <p class="card-text display-1">
+          {{ viewModel.flightManagementSummary.flightCount() }}
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Passengers Count</h5>
+        <p class="card-text display-1">
+          {{ viewModel.flightManagementSummary.passengerCount() }}
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Average Passengers</h5>
+        <p class="card-text display-1">
+          {{ viewModel.flightManagementSummary.averagePassengerCountPerFlight() }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row row-cols-md-3 g-4 pt-4">
+  <div class="col">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Max Price</h5>
+        <p class="card-text display-1">
+          {{ viewModel.flightShoppingSummary.maxBasePrice() | currency }}
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Min Price</h5>
+        <p class="card-text display-1">
+          {{ viewModel.flightShoppingSummary.minBasePrice() | currency }}
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Average Price</h5>
+        <p class="card-text display-1">
+          {{ viewModel.flightShoppingSummary.averagePrice() | currency }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

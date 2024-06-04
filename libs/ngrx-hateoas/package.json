@@ -1,0 +1,13 @@
+{
+  "name": "@angular-architects/ngrx-hateoas",
+  "version": "0.0.8",
+  "peerDependencies": {
+    "@angular/common": "^17.3.0",
+    "@angular/core": "^17.3.0",
+    "@ngrx/signals": "17.2.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}

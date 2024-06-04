@@ -1,0 +1,12 @@
+<h5 class="card-title">Price</h5>
+
+<form #flightPriceForm="ngForm">
+    <div class="mb-3">
+        <label for="basePrice" class="form-label">Base Price</label>
+        <input class="form-control" type="number" id="amount" name="basePrice" [ngModel]="model().basePrice">
+    </div>
+    <div class="mb-3">
+        <label for="seatReservationSurcharge" class="form-label">Seat Reservation Surcharge</label>
+        <input class="form-control" type="number" id="amount" name="seatReservationSurcharge" [ngModel]="model().seatReservationSurcharge">
+    </div>
+</form>

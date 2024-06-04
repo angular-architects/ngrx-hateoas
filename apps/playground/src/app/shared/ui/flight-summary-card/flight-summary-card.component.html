@@ -1,0 +1,15 @@
+@if(flight(); as flight) {
+<div class="card">
+    <div class="card-body">
+      <h5 class="card-title">{{flight.connection.from}} - {{flight.connection.to}}</h5>
+      <p class="card-subtitle mb-2 text-muted">{{flight.connection.icaoFrom}} - {{flight.connection.icaoTo}}</p>
+      <p class="card-text">Take Off: {{flight.times.takeOff | date:'medium'}}</p>
+      <p class="card-text">Landing: {{flight.times.landing | date:'medium'}}</p>
+      <p class="card-text">Base Price: <strong>{{flight.price?.basePrice ? (flight.price?.basePrice | currency) : 'not set'}}</strong></p>
+      <p class="card-text">Seat Reservation Surcharge: <strong>{{flight.price?.seatReservationSurcharge ? (flight.price?.seatReservationSurcharge | currency) : 'not set'}}</strong></p>
+    </div>
+    <div class="card-footer d-flex justify-content-between align-items-center">
+      <ng-content />
+    </div>
+</div>
+}

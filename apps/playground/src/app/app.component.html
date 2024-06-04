@@ -1,0 +1,32 @@
+<div class="d-flex flex-column h-100">
+  <nav class="navbar navbar-expand-sm bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" routerLink="home">{{ title }}</a>
+      <div class="navbar-collapse">
+        <div class="navbar-nav">
+          <a class="nav-link active" [routerLink]="['/core']">Home</a>
+          <a class="nav-link active" [routerLink]="['/flight']">Flight Search</a>
+        </div>
+      </div>
+    </div>
+    <div class="navbar-nav px-3">
+      @if(userInfo()) {
+        <div class="nav-item">
+          <button class="btn btn-info text-nowrap">
+            Logout <span class="badge text-bg-light">{{userInfo.name()}}</span>
+          </button>
+        </div>
+      }
+    </div>
+  </nav>
+
+<div class="container-fluid">
+  <div class="py-4">
+    <!-- @if(rootVmError) {
+      <div class="alert alert-danger d-flex align-items-center" role="alert">
+        Root View Model could not be loaded: {{ rootVmError }}
+      </div>
+    } -->
+    <router-outlet></router-outlet>
+  </div>
+</div>

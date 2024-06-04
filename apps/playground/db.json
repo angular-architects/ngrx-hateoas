@@ -1,0 +1,75 @@
+{
+    "userinfo": {
+        "name": "John Doe",
+        "preferred_username": "jdoe"
+    },
+    "homeVm": {
+        "flightManagementSummary": {
+            "flightCount": 5,
+            "passengerCount": 0,
+            "averagePassengerCountPerFlight": 0
+        },
+        "flightShoppingSummary": {
+            "maxBasePrice": 100,
+            "minBasePrice": 100,
+            "averagePrice": 100
+        }
+    },
+    "flights": [
+        {
+            "id": 1,
+            "connection": {
+                "from": "Munich",
+                "to": "Hamburg",
+                "icaoFrom": "EDDM",
+                "icaoTo": "EDDH"
+            },
+            "times": {
+                "takeOff": "2024-05-07T13:49:29.293",
+                "landing": "2024-05-07T15:49:29.293"
+            },
+            "operator": {
+                "name": "Lufthansa",
+                "shortName": "LH",
+                "aircraftId": 1
+            },
+            "price": {
+                "basePrice": 100,
+                "seatReservationSurcharge": 10,
+                "premiumSurcharge": 50,
+                "businessSurcharge": 100
+            }
+        },
+        {
+            "id": 2,
+            "connection": {
+                "from": "Berlin",
+                "to": "Frankfurt",
+                "icaoFrom": "EDDB",
+                "icaoTo": "EDDF"
+            },
+            "times": {
+                "takeOff": "2024-05-08T15:12:39.4311481",
+                "landing": "2024-05-08T16:12:39.4311494"
+            },
+            "operator": {
+                "name": "Lufthansa",
+                "shortName": "LH",
+                "aircraftId": 2
+            },
+            "price": null
+        }
+    ],
+    "aircrafts": [
+        {
+            "id": 1,
+            "registration": "D-EYPA",
+            "type": "PA28"
+        },
+        {
+            "id": 2,
+            "registration": "D-AATW",
+            "type": "A220-100"
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+<div class="card mb-3">
+    <div class="card-body">
+        <ng-content />
+    </div>
+    <div class="card-footer">
+        <button [disabled]="disabled()" class="btn btn-primary mb-3" (click)="onExecute()">Save</button>
+        @if(showSuccess()) {
+            <div class="alert alert-success">
+                Successfully Saved!
+            </div>
+        }
+        @if(showError()) {
+            <div class="alert alert-danger">
+                Error on saving!
+            </div>
+        }
+    </div>
+</div>

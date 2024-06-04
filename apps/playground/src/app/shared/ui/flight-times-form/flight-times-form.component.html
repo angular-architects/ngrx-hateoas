@@ -1,0 +1,12 @@
+<h5 class="card-title">Times</h5>
+
+<form #flightTimesForm="ngForm">
+    <div class="mb-3">
+        <label for="takeOff" class="form-label">Take Off</label>
+        <input class="form-control" type="datetime" id="takeOff" name="takeOff" [ngModel]="model().takeOff">
+    </div>
+    <div class="mb-3">
+        <label for="landing" class="form-label">Landing</label>
+        <input class="form-control" type="datetime" id="landing" name="landing" [ngModel]="model().landing">
+    </div>
+</form>

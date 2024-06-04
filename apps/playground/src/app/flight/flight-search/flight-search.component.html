@@ -1,0 +1,57 @@
+
+    <div class="row">
+        <div class="col">
+            <span class="lead">Flight Search</span>
+            @if(state.flightCreateVm.isAvailable()) {
+                <button class="btn btn-secondary float-end" [routerLink]="['../../create']">Create</button>
+            }
+        </div>
+    </div>
+    <div class="row pt-3">
+        <div class="col">
+            <form #searchForm="ngForm">
+                <div class="mb-3">
+                    <label for="from" class="form-label">From</label>
+                    <input class="form-control" id="from" name="from" [(ngModel)]="viewModel['from']" />
+                </div>
+                <div class="mb-3">
+                    <label for="to" class="form-label">To</label>
+                    <input class="form-control" id="to" name="to" [(ngModel)]="viewModel['to']" />
+                </div>
+                @if(viewModel() | hasLink:'flightSearchVm') {
+                    <button 
+                    [disabled]="!searchForm.valid" 
+                    class="btn btn-primary"
+                    [routerLink]="['/flight/search', (viewModel() | getLink:'flightSearchVm').href + '?from=' + (viewModel['from']() ?? '') + '&to=' + (viewModel['to']() ?? '')]">
+                        Search
+                    </button>
+                }
+            </form>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="row">
+        <span class="lead pb-3">Search Results</span>
+    </div>
+
+    @if(!viewModel['flights']) {
+        <div class="row">
+            <p>Search for flights to show something here!</p>
+        </div>
+    } @else {
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+
+            @for(flight of $any(viewModel()['flights']); track flight.id) {
+                <div class="col">
+                    <app-flight-summary-card [flight]="flight">
+                        @if(flight | hasLink:'flightEditVm') {
+                            <a class="btn btn-primary" [routerLink]="['/flight/edit', (flight | getLink:'flightEditVm').href]">Edit</a>
+                          }
+                    </app-flight-summary-card> 
+                </div>
+            }
+
+        </div>
+    }
