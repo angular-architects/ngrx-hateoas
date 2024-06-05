@@ -1,10 +1,10 @@
-import { ActivatedRoute, ActivatedRouteSnapshot, Router, Routes } from "@angular/router";
+import { ActivatedRouteSnapshot, Routes } from "@angular/router";
 import { FlightCreateComponent } from ".//flight-create/flight-create.component";
 import { FlightEditComponent } from "./flight-edit/flight-edit.component";
 import { FlightSearchComponent } from "./flight-search/flight-search.component";
 import { inject } from "@angular/core";
 import { FlightState } from "./flight.state";
-import { HateoasService, whenTrue } from "@angular-architects/ngrx-hateoas"
+import { whenTrue } from "@angular-architects/ngrx-hateoas"
 import { AppState } from "../app.state";
 
 export const FLIHGT_ROUTES: Routes = [{
@@ -14,25 +14,15 @@ export const FLIHGT_ROUTES: Routes = [{
 }, {
     path: "search",
     component: FlightSearchComponent,
-    canActivate: [ async (routeSnapshot: ActivatedRouteSnapshot) => {
-        const appState = inject(AppState);
-        const hateoasService = inject(HateoasService);
-        const router = inject(Router);
-        const activatedRoute = inject(ActivatedRoute);
-        await whenTrue(appState.rootApi.isLoaded);
-        const flightSearchVmUrl = hateoasService.getLink(appState.rootApi.resource(), 'flightSearchVm')?.href;
-        const path = routeSnapshot.pathFromRoot;
-        router.navigate(['/flight/search', flightSearchVmUrl]);
-        return false;
-    }]
+    canActivate: [() => inject(FlightState).loadFlightSearchVmFromLink(inject(AppState).rootApi.resource(), 'flightSearchVm')]
 }, {
     path: "search/:url",
     component: FlightSearchComponent,
-    canActivate: [(routeSnapshot: ActivatedRouteSnapshot) => inject(FlightState).loadFlightSearchVm(routeSnapshot.paramMap.get('url'), true)]
+    canActivate: [(routeSnapshot: ActivatedRouteSnapshot) => inject(FlightState).loadFlightSearchVmFromUrl(routeSnapshot.paramMap.get('url'), true)]
 }, {
     path: "edit/:url",
     component: FlightEditComponent,
-    canActivate: [(routeSnapshot: ActivatedRouteSnapshot) => inject(FlightState).loadFlightEditVm(routeSnapshot.paramMap.get('url'), true)]
+    canActivate: [(routeSnapshot: ActivatedRouteSnapshot) => inject(FlightState).loadFlightEditVmFromUrl(routeSnapshot.paramMap.get('url'), true)]
 }, {
     path: "create",
     component: FlightCreateComponent,

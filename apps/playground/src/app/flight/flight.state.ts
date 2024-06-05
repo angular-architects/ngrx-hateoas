@@ -1,7 +1,5 @@
-import { inject } from "@angular/core";
 import { signalStore, withHooks } from "@ngrx/signals";
 import { initialDynamicResource, withHypermediaResource, withHypermediaAction, withLinkedHypermediaResource } from "@angular-architects/ngrx-hateoas";
-import { AppState } from "../app.state";
 import { initialFlightCreateVm } from "./flight-create/flight-create.models";
 import { initialFlightEditVm } from "./flight-edit/flight-edit.models";
 
