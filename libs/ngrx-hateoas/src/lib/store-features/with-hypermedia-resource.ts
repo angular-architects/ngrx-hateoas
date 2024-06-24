@@ -1,8 +1,8 @@
 import { inject } from "@angular/core";
 import { SignalStoreFeature, patchState, signalStoreFeature, withMethods, withState } from "@ngrx/signals";
-import { HttpClient } from "@angular/common/http";
 import { DeepPatchableSignal, toDeepPatchableSignal } from "../util/deep-patchable-signal";
 import { HateoasService } from "../services/hateoas.service";
+import { RequestService } from "../services/request.service";
 
 export type HypermediaResourceState<ResourceName extends string, TResource> = 
 { 
@@ -80,12 +80,12 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
         }),
         withMethods((store: any) => {
 
-            const httpClient = inject(HttpClient); 
+            const requestService = inject(RequestService); 
             const hateoasService = inject(HateoasService);
 
             const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [stateKey]: { ...store[stateKey](), resource: newVal } }), store[stateKey].resource);
             
-            const loadFromUrlMethod = (url: string | null, fromCache: boolean = false): Promise<void> => {
+            const loadFromUrlMethod = async (url: string | null, fromCache: boolean = false): Promise<void> => {
                 if(!url) {
                     patchState(store, { [stateKey]: { ...store[stateKey](), url: '', isLoading: false, isLoaded: false, resource: initialValue } });
                     return Promise.resolve();
@@ -93,21 +93,13 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
                     if(!fromCache || store[stateKey].resource()?._links?.['self']?.href !== url) {
                         patchState(store, { [stateKey]: { ...store[stateKey](), url: '', isLoading: true } });
 
-                        return new Promise((resolve, reject) => {
-                            httpClient.get<TResource>(url).subscribe({
-                                next: resource => {
-                                    patchState(store, { [stateKey]: { ...store[stateKey](), url, isLoading: false, isLoaded: true, resource} });
-                                    resolve();
-                                },
-                                error: () => {
-                                    patchState(store, { [stateKey]: { ...store[stateKey](), url, isLoading: false, resource: initialValue} });
-                                    reject();
-                                }
-                            }); 
-                        });
-                        
-                    } else {
-                        return Promise.resolve();
+                        try {
+                            const resource = await requestService.request<TResource>('GET', url);
+                            patchState(store, { [stateKey]: { ...store[stateKey](), url, isLoading: false, isLoaded: true, resource} });
+                        } catch(e) {
+                            patchState(store, { [stateKey]: { ...store[stateKey](), url, isLoading: false, resource: initialValue} });
+                            throw e;
+                        }   
                     }
                 } 
             };
@@ -119,24 +111,18 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
                 }
             };
 
-            const reloadMethod = (): Promise<void> => {
+            const reloadMethod = async (): Promise<void> => {
                 const currentUrl = store[stateKey].url();
                 if(currentUrl) {
                     patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: true } });
                     
-                    return new Promise((resolve, reject) => {
-                        httpClient.get<TResource>(currentUrl).subscribe({
-                            next: resource => {
-                                patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: false, resource } });
-                                resolve();
-                            },
-                            error: () => {
-                                patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: false, resource: initialValue } });
-                                reject();
-                            }
-                        });
-                    });
-
+                    try {
+                        const resource = await requestService.request<TResource>('GET', currentUrl);
+                        patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: false, resource } });
+                    } catch(e) {
+                        patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: false, resource: initialValue } });
+                        throw e;
+                    }
                 }
                 return Promise.resolve();
             };
