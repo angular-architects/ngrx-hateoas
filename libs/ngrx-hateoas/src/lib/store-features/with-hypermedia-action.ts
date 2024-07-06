@@ -77,6 +77,7 @@ export function withHypermediaAction<ActionName extends string>(actionName: Acti
 
             const rxConnectToResource = rxMethod<actionRxInput>(
                 pipe( 
+                    // ToDo: use HateoasService
                     tap(_ => patchState(store, { [stateKey]: { ...store[stateKey](), href: '', method: '', isAvailable: false } })),
                     map(input => ({href: input.resource?._actions?.[input.action]?.href, method: input.resource?._actions?.[input.action]?.method})),
                     filter(actionMeta => isValidUrl(actionMeta.href) && isValidActionVerb(actionMeta.method)),

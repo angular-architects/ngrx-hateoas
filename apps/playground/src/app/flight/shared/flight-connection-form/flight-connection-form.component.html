@@ -1,0 +1,20 @@
+<h5 class="card-title">Connection</h5>
+
+<form (appUpdate)="model.set($event)">
+    <div class="mb-3">
+        <label for="from" class="form-label">From</label>
+        <input class="form-control" id="from" name="from" required [ngModel]="model().from">
+    </div>
+    <div class="mb-3">
+        <label for="to" class="form-label">To</label>
+        <input class="form-control" id="to" name="to" required [ngModel]="model().to">
+    </div>
+    <div class="mb-3">
+        <label for="icaoFrom" class="form-label">ICAO From</label>
+        <input class="form-control" id="icaoFrom" name="icaoFrom" maxlength="4" [ngModel]="model().icaoFrom">
+    </div>
+    <div class="mb-3">
+        <label for="icaoTo" class="form-label">ICAO To</label>
+        <input class="form-control" id="icaoTo" name="icaoTo" maxlength="4" [ngModel]="model().icaoTo">
+    </div>
+</form>

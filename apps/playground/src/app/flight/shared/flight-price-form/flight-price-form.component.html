@@ -1,6 +1,6 @@
 <h5 class="card-title">Price</h5>
 
-<form #flightPriceForm="ngForm">
+<form (appUpdate)="model.set($event)">
     <div class="mb-3">
         <label for="basePrice" class="form-label">Base Price</label>
         <input class="form-control" type="number" id="amount" name="basePrice" [ngModel]="model().basePrice">

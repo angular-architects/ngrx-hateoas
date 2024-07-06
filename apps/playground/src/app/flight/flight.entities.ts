@@ -1,3 +1,16 @@
+
+export type Aircraft = {
+    id: number,
+    registration: string,
+    type: string
+}
+
+export const initialAircraft: Aircraft = {
+    id: 0,
+    registration: '',
+    type: ''
+}
+
 export type FlightConnection = {
     from: string;
     to: string;
@@ -58,3 +71,32 @@ export const initialFlight: Flight = {
     operator: initialFlightOperator,
     price: undefined
 };
+
+export type FlightEditVm = {
+    flight: Flight;
+    aircrafts: Array<Aircraft>;
+}
+
+export const  initialFlightEditVm = {
+    flight: initialFlight,
+    aircrafts: []
+}
+
+export type FlightCreateVm = {
+    template: {
+        connection: FlightConnection,
+        times: FlightTimes,
+        operator: FlightOperator
+    },
+    aircrafts: Aircraft[]
+};
+
+export const initialFlightCreateVm: FlightCreateVm = {
+    template: {
+        connection: initialFlightConnection,
+        times: initialFlightTimes,
+        operator: initialFlightOperator
+    },
+    aircrafts: []
+};
+

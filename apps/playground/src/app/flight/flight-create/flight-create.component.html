@@ -6,10 +6,10 @@
 
 <div class="row">
     <div class="col">
-        <app-action-card #saveActionCard [disabled]="!(connection.isValid)" (execute)="onSaveFlight()">
-            <app-flight-connection-form #connection [model]="viewModel.template.connection()" (modelChange)="viewModel.template.connection.patch($event)" />
-            <!-- <app-flight-times-form #times [(model)]="viewModel.template.times!" />
-            <app-flight-operator-form #operator [(model)]="viewModel.template.operator!" [aircrafts]="viewModel.aircrafts" /> -->
+        <app-action-card #saveActionCard [disabled]="!saveEnabled()" (execute)="onSaveFlight()">
+            <app-flight-connection-form [model]="flightConnection()" (modelChange)="flightConnection.set($event)" />
+            <app-flight-times-form [model]="flightTimes()" (modelChange)="flightTimes.set($event)" />
+            <app-flight-operator-form [aircrafts]="aircrafts()" [model]="flightOperator()" (modelChange)="flightOperator.set($event)" />
         </app-action-card>
     </div>
 </div>

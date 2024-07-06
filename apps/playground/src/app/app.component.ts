@@ -9,7 +9,16 @@ import { AppState } from './app.state';
   templateUrl: './app.component.html'
 })
 export class AppComponent {
-  title = 'Flight 42';
+  title = 'Flight Management Client';
   appState = inject(AppState);
-  userInfo = this.appState.userInfo.resource;  
+  rootApiLoaded = this.appState.rootApi.isLoaded;
+
+  logIn() {
+    window.location.href  = './login?redirectUri=' + encodeURIComponent(window.origin);
+  }
+
+  logOut() {
+    window.location.href  = './logout';
+  }
+
 }

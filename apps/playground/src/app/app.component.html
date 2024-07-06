@@ -4,16 +4,20 @@
       <a class="navbar-brand" routerLink="home">{{ title }}</a>
       <div class="navbar-collapse">
         <div class="navbar-nav">
-          <a class="nav-link active" [routerLink]="['/core']">Home</a>
-          <a class="nav-link active" [routerLink]="['/flight']">Flight Search</a>
+          <a class="nav-link active" [routerLink]="['home']">Home</a>
+          <a class="nav-link active" [routerLink]="['flight/search']">Flight Search</a>
         </div>
       </div>
     </div>
     <div class="navbar-nav px-3">
-      @if(userInfo()) {
+      @if(!appState.userInfo.isAvailable()) {
         <div class="nav-item">
-          <button class="btn btn-info text-nowrap">
-            Logout <span class="badge text-bg-light">{{userInfo.name()}}</span>
+          <button class="btn btn-secondary" (click)="logIn()">Login</button>
+        </div>
+      } @else {
+        <div class="nav-item">
+          <button class="btn btn-info text-nowrap" (click)="logOut()">
+            Logout <span class="badge text-bg-light">{{appState.userInfo.resource.name()}}</span>
           </button>
         </div>
       }
@@ -22,11 +26,11 @@
 
 <div class="container-fluid">
   <div class="py-4">
-    <!-- @if(rootVmError) {
+    @if(!rootApiLoaded()) {
       <div class="alert alert-danger d-flex align-items-center" role="alert">
-        Root View Model could not be loaded: {{ rootVmError }}
+        Root View Model not loaded
       </div>
-    } -->
+    }
     <router-outlet></router-outlet>
   </div>
 </div>

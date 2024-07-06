@@ -1,6 +1,6 @@
 <h5 class="card-title">Times</h5>
 
-<form #flightTimesForm="ngForm">
+<form (appUpdate)="model.set($event)">
     <div class="mb-3">
         <label for="takeOff" class="form-label">Take Off</label>
         <input class="form-control" type="datetime" id="takeOff" name="takeOff" [ngModel]="model().takeOff">

@@ -81,6 +81,7 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
 
             const rxConnectToLinkRoot = rxMethod<linkedRxInput>(
                 pipe( 
+                    // ToDo: Use HateoasService
                     map(input => input.resource?._links?.[input.linkName]?.href),
                     filter(href => isValidUrl(href)),
                     tap(href => patchState(store, { [stateKey]: { ...store[stateKey](), url: href, isLoading: true, isAvailable: true } })),

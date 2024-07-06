@@ -9,7 +9,9 @@
       <p class="card-text">Seat Reservation Surcharge: <strong>{{flight.price?.seatReservationSurcharge ? (flight.price?.seatReservationSurcharge | currency) : 'not set'}}</strong></p>
     </div>
     <div class="card-footer d-flex justify-content-between align-items-center">
-      <ng-content />
+      @if(flight | hasLink:'flightEditVm') {
+        <a class="btn btn-primary" [routerLink]="['/flight/edit', (flight | getLink:'flightEditVm').href]">Edit</a>
+      }
     </div>
 </div>
 }

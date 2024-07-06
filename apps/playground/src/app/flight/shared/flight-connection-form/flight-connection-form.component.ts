@@ -1,21 +1,14 @@
 import { Component, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { FlightConnection, initialFlightConnection } from '../../models/flight';
+import { initialFlightConnection } from '../../flight.entities';
+import { FormUpdateDirective } from '../../../shared/directives/form-update.directive';
 
 @Component({
   selector: 'app-flight-connection-form',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, FormUpdateDirective],
   templateUrl: './flight-connection-form.component.html'
 })
 export class FlightConnectionFormComponent {
-
   model = model(initialFlightConnection);
-
-  isValid = false;
-
-  patchModel(patchState: Partial<FlightConnection>) {
-    this.model.update(currentValue => ({ ...currentValue, ...patchState }));
-  }
-
 }

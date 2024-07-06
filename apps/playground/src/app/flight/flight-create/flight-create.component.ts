@@ -1,9 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActionCardComponent } from '../../shared/ui/action-card/action-card.component';
-import { FlightConnectionFormComponent } from '../../shared/ui/flight-connection-form/flight-connection-form.component';
-import { FlightOperatorFormComponent } from '../../shared/ui/flight-operator-form/flight-operator-form.component';
-import { FlightTimesFormComponent } from '../../shared/ui/flight-times-form/flight-times-form.component';
+import { FlightConnectionFormComponent } from '../shared/flight-connection-form/flight-connection-form.component';
+import { FlightOperatorFormComponent } from '../shared/flight-operator-form/flight-operator-form.component';
+import { FlightTimesFormComponent } from '../shared/flight-times-form/flight-times-form.component';
 import { FlightState } from '../flight.state';
 
 @Component({
@@ -13,14 +13,21 @@ import { FlightState } from '../flight.state';
   templateUrl: './flight-create.component.html'
 })
 export class FlightCreateComponent {
+  location = inject(Location);
+  flightState = inject(FlightState);
+  
+  viewModel = this.flightState.getFlightCreateVmAsPatchable();
 
-  _flightState = inject(FlightState);
-  _location = inject(Location);
+  saveEnabled = this.flightState.createFlight.isAvailable;
 
-  viewModel = this._flightState.getFlightCreateVmAsPatchable();
+  aircrafts = this.viewModel.aircrafts;
+  
+  flightConnection = this.viewModel.template.connection;
+  flightTimes = this.viewModel.template.times;
+  flightOperator = this.viewModel.template.operator;
 
-  onSaveFlight() {
-    this._flightState.executeCreateFlight();
+  async onSaveFlight() {
+    await this.flightState.executeCreateFlight();
+    this.location.back();
   }
-
 }

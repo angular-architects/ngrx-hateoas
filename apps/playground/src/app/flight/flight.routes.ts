@@ -4,8 +4,8 @@ import { FlightEditComponent } from "./flight-edit/flight-edit.component";
 import { FlightSearchComponent } from "./flight-search/flight-search.component";
 import { inject } from "@angular/core";
 import { FlightState } from "./flight.state";
-import { whenTrue } from "@angular-architects/ngrx-hateoas"
 import { AppState } from "../app.state";
+import { whenTrue } from "@angular-architects/ngrx-hateoas";
 
 export const FLIHGT_ROUTES: Routes = [{
     path: '',
@@ -26,5 +26,5 @@ export const FLIHGT_ROUTES: Routes = [{
 }, {
     path: "create",
     component: FlightCreateComponent,
-    canActivate: [ () => whenTrue(inject(FlightState).flightCreateVm.initiallyLoaded) ]
+    canActivate: [() => whenTrue(inject(FlightState).flightCreateVm.initiallyLoaded)]
 }];
