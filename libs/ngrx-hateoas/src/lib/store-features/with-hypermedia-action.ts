@@ -1,9 +1,9 @@
 import { Signal, computed, inject } from "@angular/core";
 import { SignalStoreFeature, patchState, signalStoreFeature, withMethods, withState } from "@ngrx/signals";
-import { HttpClient } from "@angular/common/http";
 import { filter, map, pipe, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { isValidActionVerb, isValidUrl } from "../util/helpers";
+import { RequestService } from "../services/request.service";
 
 export type HypermediaActionState<ActionName extends string> = 
 { 
@@ -71,7 +71,7 @@ export function withHypermediaAction<ActionName extends string>(actionName: Acti
             error: null
            }
         }),
-        withMethods((store: any, httpClient = inject(HttpClient)) => {
+        withMethods((store: any, requestService = inject(RequestService)) => {
 
             let internalResourceLink: Signal<unknown> | null = null;
 
@@ -86,7 +86,7 @@ export function withHypermediaAction<ActionName extends string>(actionName: Acti
             );
 
             return {
-                [executeMethodName]: (): Promise<void> => {
+                [executeMethodName]: async (): Promise<void> => {
                     if(store[stateKey].isAvailable() && internalResourceLink !== null) {
                         const method = store[stateKey].method();
                         const href = store[stateKey].href();
@@ -99,25 +99,15 @@ export function withHypermediaAction<ActionName extends string>(actionName: Acti
                                                           hasError: false,
                                                            error: null 
                                                         } });
-                          
-                        const result = new Promise<void>((resolve, reject) => {
-                            httpClient.request(method, href, { body })
-                                  .subscribe({
-                                    next: () => {
-                                        patchState(store, { [stateKey]: { ...store[stateKey](), isExecuting: false, hasExecutedSuccessfully: true } });
-                                        resolve();
-                                    },
-                                    error: (e) => {
-                                        patchState(store, { [stateKey]: { ...store[stateKey](), isExecuting: false, hasExecutedWithError: true, hasError: true, error: e } })
-                                        reject();
-                                    }
-                                  });
-                        });
 
-                        return result;
+                        try {
+                            await requestService.request(method, href, body);
+                            patchState(store, { [stateKey]: { ...store[stateKey](), isExecuting: false, hasExecutedSuccessfully: true } });
+                        } catch(e) {
+                            patchState(store, { [stateKey]: { ...store[stateKey](), isExecuting: false, hasExecutedWithError: true, hasError: true, error: e } });
+                            throw e;
+                        } 
                     }
-                    
-                    return Promise.resolve();
                 },
                 [connectMehtodName]: (resourceLink: Signal<unknown>, action: string) => { 
                     if(internalResourceLink === null) {

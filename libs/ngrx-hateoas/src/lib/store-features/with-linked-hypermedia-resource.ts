@@ -1,10 +1,10 @@
 import { Signal, computed, inject } from "@angular/core";
 import { SignalStoreFeature, patchState, signalStoreFeature, withMethods, withState } from "@ngrx/signals";
-import { HttpClient } from "@angular/common/http";
 import { filter, map, pipe, switchMap, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { isValidUrl } from "../util/helpers";
 import { DeepPatchableSignal, toDeepPatchableSignal } from "../util/deep-patchable-signal";
+import { RequestService } from "../services/request.service";
 
 export type LinkedHypermediaResourceState<ResourceName extends string, TResource> = 
 { 
@@ -77,7 +77,7 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
             resource: initialValue,
            } 
         }),
-        withMethods((store: any, httpClient = inject(HttpClient)) => {
+        withMethods((store: any, requestService = inject(RequestService)) => {
 
             const rxConnectToLinkRoot = rxMethod<linkedRxInput>(
                 pipe( 
@@ -85,7 +85,7 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                     map(input => input.resource?._links?.[input.linkName]?.href),
                     filter(href => isValidUrl(href)),
                     tap(href => patchState(store, { [stateKey]: { ...store[stateKey](), url: href, isLoading: true, isAvailable: true } })),
-                    switchMap(href => httpClient.get<TResource>(href)),
+                    switchMap(href => requestService.request<TResource>('GET', href)),
                     tap(resource => patchState(store, { [stateKey]: { ...store[stateKey](), resource, isLoading: false, initiallyLoaded: true } }))
                 )
             );
@@ -97,28 +97,19 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                     const input = computed(() => ({ resource: linkRoot(), linkName }));
                     rxConnectToLinkRoot(input);
                 },
-                [reloadMethodName]: (): Promise<void> => {
+                [reloadMethodName]: async (): Promise<void> => {
                     const currentUrl = store[stateKey].url();
                     if(currentUrl) {
                         patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: true } });
 
-                        return new Promise((resolve, reject) => {
-                            httpClient.get<TResource>(currentUrl).subscribe({
-                                next: resource => {
-                                    patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: false, resource } });
-                                    setTimeout(() => { console.log('loading done'); resolve()}, 3000);
-                                    //resolve();
-                                },
-                                error: () => {
-                                    patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: false, resource: initialValue } });
-                                    reject();
-                                }
-                            }); 
-                        });
-                        
+                        try {
+                            const resource = await requestService.request('GET', currentUrl);
+                            patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: false, resource } });
+                        } catch(e) {
+                            patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: false, resource: initialValue } });
+                            throw e;
+                        }
                     }
-
-                    return Promise.resolve();
                 },
                 [getAsPatchableMethodName]: (): DeepPatchableSignal<TResource> => {
                     return patchableSignal;
