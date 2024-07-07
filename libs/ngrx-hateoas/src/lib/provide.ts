@@ -1,11 +1,13 @@
 import { EnvironmentProviders, InjectionToken, makeEnvironmentProviders, Provider } from "@angular/core";
 import { HateoasConfig, HateoasService } from "./services/hateoas.service";
 import { RequestService } from "./services/request.service";
+import { ResourceAction, ResourceLink, ResourceSocket } from "./models";
 
 export enum HateoasFeatureKind {
     AntiForgery,
     LoginRedirect,
-    CustomHeaders
+    CustomHeaders,
+    MetadataProvider
 }
 
 export interface HateoasFeature {
@@ -41,6 +43,24 @@ const defaultCustomHeaderOptions: CustomHeadersOptions = {
     headers: {}
 }
 
+export interface MetadataProvider {
+    linkLookup(resource: unknown, linkName: string): ResourceLink | undefined;
+    actionLookup(resource: unknown, actionName: string): ResourceAction | undefined;
+    socketLookup(resource: unknown, socketName: string): ResourceSocket | undefined;
+}
+
+const defaultMetadataProvider: MetadataProvider = {
+    linkLookup(resource: unknown, linkName: string): ResourceLink | undefined {
+        return (resource as any)?._links?.[linkName];
+    },
+    actionLookup(resource: unknown, actionName: string): ResourceAction | undefined {
+        return (resource as any)?._actions?.[actionName];
+    },
+    socketLookup(resource: unknown, socketName: string): ResourceSocket | undefined {
+        return (resource as any)?._sockets?.[socketName];
+    }
+}
+
 export const HATEOAS_ANTI_FORGERY = new InjectionToken<AntiForgeryOptions>('HATEOAS_ANTI_FORGERY');
 
 export function withAntiForgery(options?: AntiForgeryOptions): HateoasFeature {
@@ -72,6 +92,17 @@ export function withCustomHeaders(options?: CustomHeadersOptions): HateoasFeatur
             { provide: HATEOAS_CUSTOM_HEADERS, useValue: { ...defaultCustomHeaderOptions, ...options } }
         ]
     };
+}
+
+export const HATEOAS_METADATA_PROVIDER = new InjectionToken<MetadataProvider>('HATEOAS_METADATA_PROVIDER');
+
+export function withMetadataProvider(provider?: MetadataProvider): HateoasFeature {
+    return {
+        kind: HateoasFeatureKind.MetadataProvider,
+        providers: [
+            { provide: HATEOAS_METADATA_PROVIDER, useValue: { ...defaultMetadataProvider, ...provider }}
+        ]
+    }
 }
 
 export function provideHateoas(...features: HateoasFeature[]): EnvironmentProviders {

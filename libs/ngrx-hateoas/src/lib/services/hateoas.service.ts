@@ -1,5 +1,5 @@
 import { Injectable, inject } from "@angular/core";
-import { Resource, ResourceAction, ResourceLink, ResourceSocket } from "../models";
+import { ResourceAction, ResourceLink, ResourceSocket } from "../models";
 
 export class HateoasConfig {
     linkLookup(resource: unknown, linkName: string): ResourceLink | undefined {

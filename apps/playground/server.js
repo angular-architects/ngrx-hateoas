@@ -112,6 +112,7 @@ server.get('/views/flightEditVm/:flightId', (req, res) => {
 });
 
 server.post('/flights', (req, res) => {
+  req.body.id = Math.ceil(Math.random() * 100);
   db.flights.push(req.body);
   res.sendStatus(204);
 });

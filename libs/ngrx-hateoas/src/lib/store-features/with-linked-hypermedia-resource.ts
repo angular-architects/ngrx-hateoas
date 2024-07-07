@@ -5,6 +5,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { isValidUrl } from "../util/helpers";
 import { DeepPatchableSignal, toDeepPatchableSignal } from "../util/deep-patchable-signal";
 import { RequestService } from "../services/request.service";
+import { HateoasService } from "../services/hateoas.service";
 
 export type LinkedHypermediaResourceState<ResourceName extends string, TResource> = 
 { 
@@ -79,11 +80,13 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
         }),
         withMethods((store: any, requestService = inject(RequestService)) => {
 
+            const hateoasService = inject(HateoasService);
+
             const rxConnectToLinkRoot = rxMethod<linkedRxInput>(
                 pipe( 
-                    // ToDo: Use HateoasService
-                    map(input => input.resource?._links?.[input.linkName]?.href),
+                    map(input => hateoasService.getLink(input.resource, input.linkName)?.href),
                     filter(href => isValidUrl(href)),
+                    map(href => href!),
                     tap(href => patchState(store, { [stateKey]: { ...store[stateKey](), url: href, isLoading: true, isAvailable: true } })),
                     switchMap(href => requestService.request<TResource>('GET', href)),
                     tap(resource => patchState(store, { [stateKey]: { ...store[stateKey](), resource, isLoading: false, initiallyLoaded: true } }))

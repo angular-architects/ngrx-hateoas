@@ -4,6 +4,7 @@ import { filter, map, pipe, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { isValidActionVerb, isValidUrl } from "../util/helpers";
 import { RequestService } from "../services/request.service";
+import { HateoasService } from "../services/hateoas.service";
 
 export type HypermediaActionState<ActionName extends string> = 
 { 
@@ -73,15 +74,16 @@ export function withHypermediaAction<ActionName extends string>(actionName: Acti
         }),
         withMethods((store: any, requestService = inject(RequestService)) => {
 
+            const hateoasService = inject(HateoasService);
             let internalResourceLink: Signal<unknown> | null = null;
 
             const rxConnectToResource = rxMethod<actionRxInput>(
                 pipe( 
-                    // ToDo: use HateoasService
                     tap(_ => patchState(store, { [stateKey]: { ...store[stateKey](), href: '', method: '', isAvailable: false } })),
-                    map(input => ({href: input.resource?._actions?.[input.action]?.href, method: input.resource?._actions?.[input.action]?.method})),
-                    filter(actionMeta => isValidUrl(actionMeta.href) && isValidActionVerb(actionMeta.method)),
-                    tap(actionMeta => patchState(store, { [stateKey]: { ...store[stateKey](), href: actionMeta.href, method: actionMeta.method, isAvailable: true } }))
+                    map(input => hateoasService.getAction(input.resource, input.action)),
+                    filter(action => isValidUrl(action?.href) && isValidActionVerb(action?.method)),
+                    map(action => action!),
+                    tap(action => patchState(store, { [stateKey]: { ...store[stateKey](), href: action.href, method: action.method, isAvailable: true } }))
                 )
             );
 

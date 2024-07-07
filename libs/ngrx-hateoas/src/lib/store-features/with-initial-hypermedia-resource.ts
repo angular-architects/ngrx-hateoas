@@ -18,7 +18,7 @@ export function withInitialHypermediaResource<ResourceName extends string, TReso
         withHypermediaResource<ResourceName, TResource>(resourceName, initialValue),
         withHooks({
             onInit(store: any) {
-                store['loadRootApiFromUrl'](url);
+                store[loadFromUrlMethodName](url);
             }
         })
     );
