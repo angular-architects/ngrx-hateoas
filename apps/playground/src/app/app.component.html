@@ -1,7 +1,7 @@
 <div class="d-flex flex-column h-100">
   <nav class="navbar navbar-expand-sm bg-body-tertiary">
     <div class="container-fluid">
-      <a class="navbar-brand" routerLink="home">{{ title }}</a>
+      <a class="navbar-brand" routerLink="home">Flight 42</a>
       <div class="navbar-collapse">
         <div class="navbar-nav">
           <a class="nav-link active" [routerLink]="['home']">Home</a>
@@ -17,7 +17,7 @@
       } @else {
         <div class="nav-item">
           <button class="btn btn-info text-nowrap" (click)="logOut()">
-            Logout <span class="badge text-bg-light">{{appState.userInfo.resource.name()}}</span>
+            Logout <span class="badge text-bg-light">{{ appState.userInfo.resource.name() }}</span>
           </button>
         </div>
       }

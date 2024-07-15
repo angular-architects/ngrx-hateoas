@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { AppState } from './app.state';
 
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -9,9 +10,13 @@ import { AppState } from './app.state';
   templateUrl: './app.component.html'
 })
 export class AppComponent {
-  title = 'Flight Management Client';
+
   appState = inject(AppState);
   rootApiLoaded = this.appState.rootApi.isLoaded;
+
+  constructor() {
+    
+  }
 
   logIn() {
     window.location.href  = './login?redirectUri=' + encodeURIComponent(window.origin);
