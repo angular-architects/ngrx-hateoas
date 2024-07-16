@@ -3,10 +3,10 @@ import { withHypermediaResource, HypermediaResourceState, HypermediaResourceMeth
 
 export function withInitialHypermediaResource<ResourceName extends string, TResource>(
     resourceName: ResourceName, initialValue: TResource, url: string): SignalStoreFeature<
-        { state: {}; signals: {}; methods: {} },
+        { state: {}; computed: {}; methods: {} },
         {
             state: HypermediaResourceState<ResourceName, TResource>;
-            signals: {},
+            computed: {},
             methods: HypermediaResourceMethods<ResourceName, TResource>;
         }
     >;

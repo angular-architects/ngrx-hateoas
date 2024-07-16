@@ -46,10 +46,10 @@ type actionRxInput = {
 
 export function withHypermediaAction<ActionName extends string>(
     actionName: ActionName): SignalStoreFeature<
-        { state: {}; signals: {}; methods: {} },
+        { state: {}; computed: {}; methods: {} },
         {
             state: HypermediaActionState<ActionName>;
-            signals: {},
+            computed: {},
             methods: HypermediaActionMethods<ActionName>;
         }
     >;

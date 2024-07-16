@@ -54,10 +54,10 @@ type linkedRxInput = {
 
 export function withLinkedHypermediaResource<ResourceName extends string, TResource>(
     resourceName: ResourceName, initialValue: TResource): SignalStoreFeature<
-        { state: {}; signals: {}; methods: {} },
+        { state: {}; computed: {}; methods: {} },
         {
             state: LinkedHypermediaResourceState<ResourceName, TResource>;
-            signals: {},
+            computed: {},
             methods: LinkedHypermediaResourceMethods<ResourceName, TResource>;
         }
     >;

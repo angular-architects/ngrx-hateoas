@@ -43,7 +43,7 @@
 } @else {
     <div class="row row-cols-1 row-cols-md-2 g-4">
 
-        @for(flight of $any(viewModel()['flights']); track flight.id) {
+        @for(flight of $any(viewModel())['flights']; track flight.id) {
             <div class="col">
                 <app-flight-summary-card [flight]="flight">
                     @if(flight | hasLink:'flightEditVm') {

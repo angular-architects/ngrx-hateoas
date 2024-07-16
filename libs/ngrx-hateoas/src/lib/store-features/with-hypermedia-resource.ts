@@ -54,10 +54,10 @@ export type HypermediaResourceMethods<ResourceName extends string, TResource> =
 
 export function withHypermediaResource<ResourceName extends string, TResource>(
     resourceName: ResourceName, initialValue: TResource): SignalStoreFeature<
-        { state: {}; signals: {}; methods: {} },
+        { state: {}; computed: {}; methods: {} },
         {
             state: HypermediaResourceState<ResourceName, TResource>;
-            signals: {},
+            computed: {},
             methods: HypermediaResourceMethods<ResourceName, TResource>;
         }
     >;

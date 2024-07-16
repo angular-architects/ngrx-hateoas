@@ -15,10 +15,10 @@ GetPatchableResourceMethod<ResourceName, TResource>;
 
 export function withPatchableResource<ResourceName extends string, TResource>(
     resourceName: ResourceName, initialValue: TResource): SignalStoreFeature<
-        { state: HypermediaResourceState<ResourceName, TResource>; signals: {}; methods: {} },
+        { state: HypermediaResourceState<ResourceName, TResource>; computed: {}; methods: {} },
         {
             state: {};
-            signals: {},
+            computed: {},
             methods: PatchableResourceMethods<ResourceName, TResource>;
         }
     >;
