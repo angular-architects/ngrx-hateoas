@@ -104,7 +104,16 @@ server.get('/views/flightEditVm/:flightId', (req, res) => {
   flight.connection._actions = { update: { method: 'PUT', href: `http://localhost:5100/flights/${flightId}/connection` } };
   flight.times._actions = { update: { method: 'PUT', href: `http://localhost:5100/flights/${flightId}/times` } }
   flight.operator._actions = { update: { method: 'PUT', href: `http://localhost:5100/flights/${flightId}/operator` } }
-  flight.price._actions = { update: { method: 'PUT', href: `http://localhost:5100/flights/${flightId}/price` } }
+  if(flight.price) {
+    flight.price._actions = { update: { method: 'PUT', href: `http://localhost:5100/flights/${flightId}/price` } }
+  } else {
+    flight.price = {
+      basePrice: 0,
+      seatReservationSurcharge: 0,
+      premiumSurcharge: 0,
+      businessSurcharge: 0
+    }
+  }
   res.jsonp({
     flight,
     aircrafts: db.aircrafts
