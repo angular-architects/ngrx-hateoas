@@ -1,10 +1,10 @@
 {
   "name": "@angular-architects/ngrx-hateoas",
-  "version": "18.0.0-beta.0",
+  "version": "18.0.0-beta.1",
   "peerDependencies": {
     "@angular/common": "^18.0.0",
     "@angular/core": "^18.0.0",
-    "@ngrx/signals": "^18.0.0-rc.2"
+    "@ngrx/signals": "^18.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
