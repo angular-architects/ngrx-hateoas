@@ -2,19 +2,9 @@ import { Signal } from "@angular/core";
 import { toObservable } from "@angular/core/rxjs-interop";
 import { filter, firstValueFrom } from "rxjs";
 
-export function isValidUrl(href: string | undefined | null) {
-
+export function isValidHref(href: string | undefined | null): boolean {
   if (href === undefined || href === null) return false;
-
-  let url;
-
-  try {
-    url = new URL(href);
-  } catch (_) {
-    return false;
-  }
-
-  return url.protocol === "http:" || url.protocol === "https:";
+  return href.startsWith('/') || href.startsWith('http');
 }
 
 export function isValidActionVerb(method: string | undefined | null) {

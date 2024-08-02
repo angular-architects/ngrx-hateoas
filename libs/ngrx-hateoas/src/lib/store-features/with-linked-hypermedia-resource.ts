@@ -2,7 +2,7 @@ import { Signal, computed, inject } from "@angular/core";
 import { SignalStoreFeature, patchState, signalStoreFeature, withMethods, withState } from "@ngrx/signals";
 import { filter, map, pipe, switchMap, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { isValidUrl } from "../util/helpers";
+import { isValidHref } from "../util/helpers";
 import { DeepPatchableSignal, toDeepPatchableSignal } from "../util/deep-patchable-signal";
 import { RequestService } from "../services/request.service";
 import { HateoasService } from "../services/hateoas.service";
@@ -85,7 +85,7 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
             const rxConnectToLinkRoot = rxMethod<linkedRxInput>(
                 pipe( 
                     map(input => hateoasService.getLink(input.resource, input.linkName)?.href),
-                    filter(href => isValidUrl(href)),
+                    filter(href => isValidHref(href)),
                     map(href => href!),
                     tap(href => patchState(store, { [stateKey]: { ...store[stateKey](), url: href, isLoading: true, isAvailable: true } })),
                     switchMap(href => requestService.request<TResource>('GET', href)),

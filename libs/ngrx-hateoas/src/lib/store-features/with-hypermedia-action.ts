@@ -2,7 +2,7 @@ import { Signal, computed, inject } from "@angular/core";
 import { SignalStoreFeature, patchState, signalStoreFeature, withMethods, withState } from "@ngrx/signals";
 import { filter, map, pipe, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { isValidActionVerb, isValidUrl } from "../util/helpers";
+import { isValidActionVerb, isValidHref } from "../util/helpers";
 import { RequestService } from "../services/request.service";
 import { HateoasService } from "../services/hateoas.service";
 
@@ -81,7 +81,7 @@ export function withHypermediaAction<ActionName extends string>(actionName: Acti
                 pipe( 
                     tap(_ => patchState(store, { [stateKey]: { ...store[stateKey](), href: '', method: '', isAvailable: false } })),
                     map(input => hateoasService.getAction(input.resource, input.action)),
-                    filter(action => isValidUrl(action?.href) && isValidActionVerb(action?.method)),
+                    filter(action => isValidHref(action?.href) && isValidActionVerb(action?.method)),
                     map(action => action!),
                     tap(action => patchState(store, { [stateKey]: { ...store[stateKey](), href: action.href, method: action.method, isAvailable: true } }))
                 )
