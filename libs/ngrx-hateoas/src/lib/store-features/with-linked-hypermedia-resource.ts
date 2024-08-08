@@ -87,6 +87,7 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                     map(input => hateoasService.getLink(input.resource, input.linkName)?.href),
                     filter(href => isValidHref(href)),
                     map(href => href!),
+                    filter(href => store[stateKey].url() !== href),
                     tap(href => patchState(store, { [stateKey]: { ...store[stateKey](), url: href, isLoading: true, isAvailable: true } })),
                     switchMap(href => requestService.request<TResource>('GET', href)),
                     tap(resource => patchState(store, { [stateKey]: { ...store[stateKey](), resource, isLoading: false, initiallyLoaded: true } }))
