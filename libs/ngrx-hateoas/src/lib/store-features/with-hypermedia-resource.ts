@@ -90,7 +90,7 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
                     patchState(store, { [stateKey]: { ...store[stateKey](), url: '', isLoading: false, isLoaded: false, resource: initialValue } });
                     return Promise.resolve();
                 } else {
-                    if(!fromCache || store[stateKey].resource()?._links?.['self']?.href !== url) {
+                    if(!fromCache || hateoasService.getLink(store[stateKey].resource(), 'self')?.href !== url) {
                         patchState(store, { [stateKey]: { ...store[stateKey](), url: '', isLoading: true } });
 
                         try {
@@ -112,12 +112,13 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
             };
 
             const reloadMethod = async (): Promise<void> => {
-                const currentUrl = store[stateKey].url();
-                if(currentUrl) {
-                    patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: true } });
+                const selfUrl = hateoasService.getLink(store[stateKey].resource(), 'self')?.href;
+                const url = selfUrl ?? store[stateKey].url();
+                if(url) {
+                    patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: true, url } });
                     
                     try {
-                        const resource = await requestService.request<TResource>('GET', currentUrl);
+                        const resource = await requestService.request<TResource>('GET', url);
                         patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: false, resource } });
                     } catch(e) {
                         patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: false, resource: initialValue } });
