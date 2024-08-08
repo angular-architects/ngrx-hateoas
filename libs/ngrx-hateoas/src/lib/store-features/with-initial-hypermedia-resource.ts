@@ -2,7 +2,7 @@ import { SignalStoreFeature, signalStoreFeature, withHooks } from "@ngrx/signals
 import { withHypermediaResource, HypermediaResourceState, HypermediaResourceMethods, generateLoadHypermediaResourceFromUrlMethodName } from "./with-hypermedia-resource";
 
 export function withInitialHypermediaResource<ResourceName extends string, TResource>(
-    resourceName: ResourceName, initialValue: TResource, url: string): SignalStoreFeature<
+    resourceName: ResourceName, initialValue: TResource, url: string | (() => string)): SignalStoreFeature<
         { state: {}; computed: {}; methods: {} },
         {
             state: HypermediaResourceState<ResourceName, TResource>;
@@ -10,7 +10,7 @@ export function withInitialHypermediaResource<ResourceName extends string, TReso
             methods: HypermediaResourceMethods<ResourceName, TResource>;
         }
     >;
-export function withInitialHypermediaResource<ResourceName extends string, TResource>(resourceName: ResourceName, initialValue: TResource, url: string) {
+export function withInitialHypermediaResource<ResourceName extends string, TResource>(resourceName: ResourceName, initialValue: TResource, url: string | (() => string)) {
 
     const loadFromUrlMethodName = generateLoadHypermediaResourceFromUrlMethodName(resourceName);
 
@@ -18,7 +18,13 @@ export function withInitialHypermediaResource<ResourceName extends string, TReso
         withHypermediaResource<ResourceName, TResource>(resourceName, initialValue),
         withHooks({
             onInit(store: any) {
-                store[loadFromUrlMethodName](url);
+                let initialUrl;
+                if(typeof url === 'string') {
+                    initialUrl = url;
+                } else {
+                    initialUrl = url();
+                }
+                store[loadFromUrlMethodName](initialUrl);
             }
         })
     );

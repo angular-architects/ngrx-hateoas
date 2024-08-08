@@ -1,6 +1,6 @@
 {
   "name": "@angular-architects/ngrx-hateoas",
-  "version": "18.0.0-beta.2",
+  "version": "18.0.0-beta.4",
   "peerDependencies": {
     "@angular/common": "^18.0.0",
     "@angular/core": "^18.0.0",
