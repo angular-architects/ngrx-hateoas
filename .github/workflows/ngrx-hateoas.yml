@@ -22,9 +22,9 @@ jobs:
           npm install
 
       # Execute all unit tests
-      - name: Execute unit tests
+      - name: Execute tests
         run: |
-          npm test
+          npm run test:github
 
       # Build library
       - name: Build library

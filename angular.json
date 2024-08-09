@@ -104,24 +104,6 @@
           "options": {
             "buildTarget": "playground:build"
           }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
-            "tsConfig": "apps/playground/tsconfig.spec.json",
-            "assets": [
-              "apps/playground/src/favicon.ico",
-              "apps/playground/src/assets"
-            ],
-            "styles": [
-              "apps/playground/src/styles.css"
-            ],
-            "scripts": []
-          }
         }
       }
     }
