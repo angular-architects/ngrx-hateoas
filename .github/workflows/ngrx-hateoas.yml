@@ -1,0 +1,32 @@
+name: libs/ngrx-hateoas
+
+on: [push, pull_request]
+
+jobs:
+  buid:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout repository
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Install Node.js
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+
+      # Restore dependencies
+      - name: Restore dependencies
+        run: |
+          npm install
+
+      # Execute all unit tests
+      - name: Execute unit tests
+        run: |
+          npm test
+
+      # Build library
+      - name: Build library
+        run: |
+          npm run build
