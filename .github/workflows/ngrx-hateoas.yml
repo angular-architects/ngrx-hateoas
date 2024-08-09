@@ -3,7 +3,8 @@ name: libs/ngrx-hateoas
 on: [push, pull_request]
 
 jobs:
-  buid:
+  test_and_build:
+    name: 'Test and Build'
     runs-on: ubuntu-latest
     steps:
       # Checkout repository
