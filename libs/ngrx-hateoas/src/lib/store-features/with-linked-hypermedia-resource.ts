@@ -2,7 +2,7 @@ import { Signal, computed, inject } from "@angular/core";
 import { SignalStoreFeature, patchState, signalStoreFeature, withMethods, withState } from "@ngrx/signals";
 import { filter, map, pipe, switchMap, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { isValidHref } from "../util/helpers";
+import { isValidHref } from "../util/is-valid-href";
 import { DeepPatchableSignal, toDeepPatchableSignal } from "../util/deep-patchable-signal";
 import { RequestService } from "../services/request.service";
 import { HateoasService } from "../services/hateoas.service";

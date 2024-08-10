@@ -2,7 +2,8 @@ import { Signal, computed, inject } from "@angular/core";
 import { SignalStoreFeature, patchState, signalStoreFeature, withMethods, withState } from "@ngrx/signals";
 import { filter, map, pipe, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { isValidActionVerb, isValidHref } from "../util/helpers";
+import { isValidActionVerb } from "../util/isValidActionVerb";
+import { isValidHref } from "../util/isValidHref";
 import { RequestService } from "../services/request.service";
 import { HateoasService } from "../services/hateoas.service";
 
