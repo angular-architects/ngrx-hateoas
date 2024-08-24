@@ -8,7 +8,7 @@ const testModel = {
   }
 }
 
-describe('getAction', () => {
+describe('GetActionPipe', () => {
 
   let getActionPipe: GetActionPipe;
 

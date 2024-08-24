@@ -8,7 +8,7 @@ const testModel = {
   }
 }
 
-describe('getLink', () => {
+describe('GetLinkPipe', () => {
 
   let getLinkPipe: GetLinkPipe;
 

@@ -8,7 +8,7 @@ const testModel = {
   }
 }
 
-describe('getSocket', () => {
+describe('GetSocketPipe', () => {
 
   let getSocketPipe: GetSocketPipe;
 
