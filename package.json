@@ -7,7 +7,7 @@
     "server": "node ./apps/playground/server.js",
     "build": "ng build ngrx-hateoas",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
+    "test": "ng test --code-coverage",
     "test:github": "ng test --browsers=ChromeHeadless --watch=false --code-coverage"
   },
   "private": true,

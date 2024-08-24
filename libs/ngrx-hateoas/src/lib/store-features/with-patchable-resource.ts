@@ -11,7 +11,7 @@ export function generateGetPatchableResourceMethodName(resourceName: string) {
 }
 
 export type PatchableResourceMethods<ResourceName extends string, TResource> = 
-GetPatchableResourceMethod<ResourceName, TResource>;
+    GetPatchableResourceMethod<ResourceName, TResource>;
 
 export function withPatchableResource<ResourceName extends string, TResource>(
     resourceName: ResourceName, initialValue: TResource): SignalStoreFeature<
@@ -25,7 +25,7 @@ export function withPatchableResource<ResourceName extends string, TResource>(
 export function withPatchableResource<ResourceName extends string, TResource>(resourceName: ResourceName, initialValue: TResource) {
 
     const stateKey = `${resourceName}`;
-    const getAsPatchalbeMethodName = generateGetPatchableResourceMethodName(resourceName);
+    const getAsPatchableMethodName = generateGetPatchableResourceMethodName(resourceName);
 
     return signalStoreFeature(
         withMethods((store: any) => {
@@ -33,7 +33,7 @@ export function withPatchableResource<ResourceName extends string, TResource>(re
             const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [stateKey]: { ...store[stateKey](), resource: newVal } }), store[stateKey].resource);
 
             return {
-                [getAsPatchalbeMethodName]: (): DeepPatchableSignal<TResource> => {
+                [getAsPatchableMethodName]: (): DeepPatchableSignal<TResource> => {
                     return patchableSignal;
                 }
             };

@@ -10,7 +10,7 @@ export class GetActionPipe implements PipeTransform {
 
   private hateoasService = inject(HateoasService);
 
-  transform(resource: any, actionName: string): ResourceAction {
+  transform(resource: unknown, actionName: string): ResourceAction {
     const action = this.hateoasService.getAction(resource, actionName);
 
     if (action === undefined) {

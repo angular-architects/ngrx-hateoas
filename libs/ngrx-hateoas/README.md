@@ -1,24 +1,39 @@
-# NgrxHateoas
+# NGRX Hateoas
 
-This library was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.0.
+A library to bring hypermedia json into the ngrx signal store following the HATEOAS approach to make it easily useable within Angular.
 
-## Code scaffolding
+## Objective
 
-Run `ng generate component component-name --project ngrx-hateoas` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module --project ngrx-hateoas`.
-> Note: Don't forget to add `--project ngrx-hateoas` or else it will be added to the default project in your `angular.json` file. 
+If you provide resources from your web api with hypermedia containing links to related resources as well as information about possible actions on your resource, then this library makes interacting with your web api as simple as possible.
 
-## Build
+A possible hypermedia json could look like the following example: 
 
-Run `ng build ngrx-hateoas` to build the project. The build artifacts will be stored in the `dist/` directory.
+```json
+{
+    "_links": {
+        "self": { "href": "http://myapp.dom.tld/resource" },
+        "linkedResource": { "href": "http://myapp.dom.tld/linked-resource" }
+    },
+    "_actions": {
+        "delete": { "method": "DELETE", "href": "http://myapp.dom.tld/resource"}
+    },
+    "stringProp": "foo",
+    "subObj": {
+        "numProp": 5, 
+        "_links": {
+            "subObjLinkedResource": { "href": "http://myapp.dom.tld/sub-obj-linked-resource" }
+        },
+        "_actions": {
+            "create": { "href": "http://myapp.dom.tld/resource/sub-obj", "method": "POST"}
+        }
+    }
+}
+```
 
-## Publishing
+The library helps you to use the metadata within the json structure. To create such hypermedia json you can use various libraries. For .NET we recommend to use the Fancy.ResourceLinker.Hateoas NuGet package. For Java we recommend the Spring.HATEOAS library.
 
-After building your library with `ng build ngrx-hateoas`, go to the dist folder `cd dist/ngrx-hateoas` and run `npm publish`.
+## Sample Application
+There is a sample application [Fancy.ResourceLinker.Sample](https://github.com/fancyDevelopment/Fancy.ResourceLinker.Sample) which demonstrates end to end real world usage of hypermedia in Angular and also some other aspects of a real wold system.
 
-## Running unit tests
-
-Run `ng test ngrx-hateoas` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+## Documentation
+Detailed documentatin is planned with the first production ready release. Until then have a look at the playground app within this repository that demonstrates the usage of the library.

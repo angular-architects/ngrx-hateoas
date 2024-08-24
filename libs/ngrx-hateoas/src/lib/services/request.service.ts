@@ -1,10 +1,13 @@
 import { HATEOAS_ANTI_FORGERY, HATEOAS_CUSTOM_HEADERS, HATEOAS_LOGIN_REDIRECT } from './../provide';
-import { Injectable, inject } from "@angular/core";
+import { Injectable, InjectionToken, inject } from "@angular/core";
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
+export const WINDOW = new InjectionToken<Window>('Global window object', { factory: () => window });
+
 @Injectable()
 export class RequestService {
+    private window = inject(WINDOW);
     private antiForgeryOptions = inject(HATEOAS_ANTI_FORGERY, { optional: true });
     private loginRedirectOptions = inject(HATEOAS_LOGIN_REDIRECT, { optional: true });
     private customHeadersOptions = inject(HATEOAS_CUSTOM_HEADERS, { optional: true });
@@ -34,8 +37,8 @@ export class RequestService {
         } catch(errorResponse: any) {
             if(errorResponse.status === 401 && this.loginRedirectOptions) {
                 // Redirect to sign in 
-                const currentUrl = window.location.href;
-                window.location.href = `${this.loginRedirectOptions.loginUrl}?${this.loginRedirectOptions.redirectUrlParamName}=` + encodeURIComponent(currentUrl);
+                const currentUrl = this.window.location.href;
+                this.window.location.href = `${this.loginRedirectOptions.loginUrl}?${this.loginRedirectOptions.redirectUrlParamName}=` + encodeURIComponent(currentUrl);
                 return undefined;
             } else {
                 throw errorResponse;

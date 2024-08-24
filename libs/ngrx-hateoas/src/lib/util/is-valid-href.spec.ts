@@ -1,4 +1,4 @@
-import { isValidHref } from "./helpers";
+import { isValidHref } from "./is-valid-href";
 
 describe('isValidHref', () => {
 
