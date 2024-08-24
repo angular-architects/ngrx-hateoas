@@ -10,7 +10,7 @@ export class GetSocketPipe implements PipeTransform {
 
   private hateoasService = inject(HateoasService);
 
-  transform(resource: any, socketName: string): ResourceSocket {
+  transform(resource: unknown, socketName: string): ResourceSocket {
     const socket = this.hateoasService.getSocket(resource, socketName);
 
     if (socket === undefined) {

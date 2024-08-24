@@ -10,7 +10,7 @@ export class GetLinkPipe implements PipeTransform {
 
     private hateoasService = inject(HateoasService);
 
-    transform(resource: any, linkName: string): ResourceLink {
+    transform(resource: unknown, linkName: string): ResourceLink {
         const link = this.hateoasService.getLink(resource, linkName);
 
         if (link === undefined) {
