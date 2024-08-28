@@ -31,3 +31,8 @@ jobs:
       - name: Build library
         run: |
           npm run build
+
+      # Lint library
+      - name: Lint library
+        run: |
+          npm run lint

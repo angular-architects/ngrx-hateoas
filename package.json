@@ -8,7 +8,8 @@
     "build": "ng build ngrx-hateoas",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --code-coverage",
-    "test:github": "ng test --browsers=ChromeHeadless --watch=false --code-coverage"
+    "test:github": "ng test --browsers=ChromeHeadless --watch=false --code-coverage",
+    "lint": "ng lint"
   },
   "private": true,
   "dependencies": {
@@ -31,7 +32,10 @@
     "@angular/cli": "^18.1.0",
     "@angular/compiler-cli": "^18.1.0",
     "@types/jasmine": "~5.1.0",
+    "angular-eslint": "18.3.0",
+    "eslint": "^9.9.0",
     "jasmine-core": "~5.1.0",
+    "json-server": "0.17.4",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
@@ -39,6 +43,6 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "ng-packagr": "^18.1.0",
     "typescript": "~5.4.2",
-    "json-server": "0.17.4"
+    "typescript-eslint": "8.1.0"
   }
 }
