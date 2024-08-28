@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
 import { signalStore, withState } from '@ngrx/signals';
-import { provideHateoas } from '../provide';
 import { HypermediaResourceState } from './with-hypermedia-resource';
 import { withPatchableResource } from './with-patchable-resource';
 

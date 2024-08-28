@@ -1,4 +1,4 @@
-import { fakeAsync, TestBed, tick } from "@angular/core/testing";
+import { TestBed } from "@angular/core/testing";
 import { patchState, signalStore, withMethods, withState } from "@ngrx/signals";
 import { toDeepPatchableSignal } from "./deep-patchable-signal";
 import { signal } from "@angular/core";
@@ -7,7 +7,7 @@ type TestModel = {
     numProp: number,
     objProp: {
         stringProp: string
-    },
+    }
 }
 
 const initialTestModel: TestModel = {
