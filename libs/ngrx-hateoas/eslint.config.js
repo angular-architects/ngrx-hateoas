@@ -23,6 +23,12 @@ module.exports = tseslint.config(
           style: "kebab-case",
         },
       ],
+      "@typescript-eslint/consistent-type-definitions": [
+        "off"
+      ],
+      "@typescript-eslint/no-unsafe-function-type": [
+        "off"
+      ]
     },
   },
   {

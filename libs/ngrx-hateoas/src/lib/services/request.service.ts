@@ -14,11 +14,11 @@ export class RequestService {
 
     private httpClient = inject(HttpClient);
 
-    public async request<T>(method: 'GET' | 'PUT' | 'POST' | 'DELETE', url: string, body?: any): Promise<T | undefined> {
+    public async request<T>(method: 'GET' | 'PUT' | 'POST' | 'DELETE', url: string, body?: unknown): Promise<T | undefined> {
         let headers = new HttpHeaders().set('Content-Type', 'application/json');
 
         if(this.customHeadersOptions) {
-            for(let key in this.customHeadersOptions.headers) {
+            for(const key in this.customHeadersOptions.headers) {
                 headers = headers.set(key, this.customHeadersOptions.headers[key]);
             };
         }
@@ -32,10 +32,9 @@ export class RequestService {
         }
 
         try {
-            let response = await firstValueFrom(this.httpClient.request<T>(method, url, { body, headers }));
-            return response;
-        } catch(errorResponse: any) {
-            if(errorResponse.status === 401 && this.loginRedirectOptions) {
+            return await firstValueFrom(this.httpClient.request<T>(method, url, { body, headers }));
+        } catch(errorResponse) {
+            if(typeof errorResponse === 'object' && errorResponse !== null && 'status' in errorResponse && errorResponse.status === 401 && this.loginRedirectOptions) {
                 // Redirect to sign in 
                 const currentUrl = this.window.location.href;
                 this.window.location.href = `${this.loginRedirectOptions.loginUrl}?${this.loginRedirectOptions.redirectUrlParamName}=` + encodeURIComponent(currentUrl);

@@ -141,7 +141,7 @@ describe('RequestService', () => {
             
             currentLocation = '/angular/route'
 
-            let windowsStub = {
+            const windowsStub = {
                 location: {
                     set href(value: string) { currentLocation = value; },
                     get href() { return currentLocation; }
@@ -207,7 +207,7 @@ describe('RequestService', () => {
         let httpTestingController: HttpTestingController;
 
         beforeEach(() => {
-            let customHeaderOptions: CustomHeadersOptions = {
+            const customHeaderOptions: CustomHeadersOptions = {
                 headers: {
                     'X-Foo': 'Bar'
                 }

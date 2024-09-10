@@ -1,4 +1,4 @@
-import { inject } from "@angular/core";
+import { inject, Signal } from "@angular/core";
 import { SignalStoreFeature, patchState, signalStoreFeature, withMethods, withState } from "@ngrx/signals";
 import { DeepPatchableSignal, toDeepPatchableSignal } from "../util/deep-patchable-signal";
 import { HateoasService } from "../services/hateoas.service";
@@ -54,10 +54,10 @@ export type HypermediaResourceMethods<ResourceName extends string, TResource> =
 
 export function withHypermediaResource<ResourceName extends string, TResource>(
     resourceName: ResourceName, initialValue: TResource): SignalStoreFeature<
-        { state: {}; computed: {}; methods: {} },
+        { state: object; computed: Record<string, Signal<unknown>>; methods: Record<string, Function> },
         {
             state: HypermediaResourceState<ResourceName, TResource>;
-            computed: {},
+            computed: Record<string, Signal<unknown>>;
             methods: HypermediaResourceMethods<ResourceName, TResource>;
         }
     >;
@@ -85,7 +85,7 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
 
             const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [stateKey]: { ...store[stateKey](), resource: newVal } }), store[stateKey].resource);
             
-            const loadFromUrlMethod = async (url: string | null, fromCache: boolean = false): Promise<void> => {
+            const loadFromUrlMethod = async (url: string | null, fromCache = false): Promise<void> => {
                 if(!url) {
                     patchState(store, { [stateKey]: { ...store[stateKey](), url: '', isLoading: false, isLoaded: false, resource: initialValue } });
                     return Promise.resolve();

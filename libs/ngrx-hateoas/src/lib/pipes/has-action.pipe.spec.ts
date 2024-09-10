@@ -1,6 +1,6 @@
 import { HasActionPipe } from './has-action.pipe';
 import { TestBed } from '@angular/core/testing';
-import { HateoasConfig, HateoasService } from '../services/hateoas.service';
+import { HateoasService } from '../services/hateoas.service';
 
 const testModel = {
   _actions: {
@@ -13,7 +13,7 @@ describe('HasActionPipe', () => {
   let hasActionPipe: HasActionPipe
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [ HasActionPipe, HateoasService, HateoasConfig ]});
+    TestBed.configureTestingModule({ providers: [ HasActionPipe, HateoasService ]});
     hasActionPipe = TestBed.inject(HasActionPipe);
   });
     

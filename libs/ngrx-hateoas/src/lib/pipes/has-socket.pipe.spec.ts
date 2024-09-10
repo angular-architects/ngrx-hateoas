@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { HateoasConfig, HateoasService } from '../services/hateoas.service';
+import { HateoasService } from '../services/hateoas.service';
 import { HasSocketPipe } from './has-socket.pipe';
 
 const testModel = {
@@ -13,7 +13,7 @@ describe('HasSocketPipe', () => {
   let hasSocketPipe: HasSocketPipe;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [ HasSocketPipe, HateoasService, HateoasConfig ]});
+    TestBed.configureTestingModule({ providers: [ HasSocketPipe, HateoasService ]});
     hasSocketPipe = TestBed.inject(HasSocketPipe);
   });
     

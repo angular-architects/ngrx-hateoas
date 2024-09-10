@@ -1,12 +1,13 @@
 import { SignalStoreFeature, signalStoreFeature, withHooks } from "@ngrx/signals";
 import { withHypermediaResource, HypermediaResourceState, HypermediaResourceMethods, generateLoadHypermediaResourceFromUrlMethodName } from "./with-hypermedia-resource";
+import { Signal } from "@angular/core";
 
 export function withInitialHypermediaResource<ResourceName extends string, TResource>(
     resourceName: ResourceName, initialValue: TResource, url: string | (() => string)): SignalStoreFeature<
-        { state: {}; computed: {}; methods: {} },
+        { state: object; computed: Record<string, Signal<unknown>>; methods: Record<string, Function> },
         {
             state: HypermediaResourceState<ResourceName, TResource>;
-            computed: {},
+            computed: Record<string, Signal<unknown>>;
             methods: HypermediaResourceMethods<ResourceName, TResource>;
         }
     >;

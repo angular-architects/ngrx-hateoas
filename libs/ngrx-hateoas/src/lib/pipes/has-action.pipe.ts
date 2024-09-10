@@ -9,7 +9,7 @@ export class HasActionPipe implements PipeTransform {
 
   private hateoasService = inject(HateoasService);
 
-  transform(resource: any, actionName: string): boolean {
+  transform(resource: unknown, actionName: string): boolean {
     return this.hateoasService.getAction(resource, actionName) !== undefined;
   }
 

@@ -20,13 +20,12 @@ export interface ResourceSocket {
     href: string
 }
 
-export type Resource = {
-}
+export type Resource = Record<string, unknown>;
 
 export type DynamicResourceValue = DynamicResource | Resource | number | string | boolean | DynamicResource[] | Resource[] | number[] | boolean[] | null;
 
 export type DynamicResource = Resource & {
-    [key: string]: DynamicResourceValue;
+    [key: string]: DynamicResource | number | string | boolean | DynamicResource[] | number[] | boolean[] | null;
 }
 
 export const initialDynamicResource: DynamicResource = {};

@@ -1,21 +1,10 @@
 import { Injectable, inject } from "@angular/core";
 import { ResourceAction, ResourceLink, ResourceSocket } from "../models";
-
-export class HateoasConfig {
-    linkLookup(resource: unknown, linkName: string): ResourceLink | undefined {
-        return (resource as any)?._links?.[linkName];
-    }
-    actionLookup(resource: unknown, actionName: string): ResourceAction | undefined {
-        return (resource as any)?._actions?.[actionName];
-    }
-    socketLookup(resource: unknown, socketName: string): ResourceSocket | undefined {
-        return (resource as any)?._sockets?.[socketName];
-    }
-}
+import { HATEOAS_METADATA_PROVIDER } from "../provide";
 
 @Injectable()
 export class HateoasService {
-    private hateoasConfig = inject(HateoasConfig);
+    private hateoasConfig = inject(HATEOAS_METADATA_PROVIDER);
 
     getLink(resource: unknown, linkName: string): ResourceLink | undefined {
         return this.hateoasConfig.linkLookup(resource, linkName);

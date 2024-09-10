@@ -9,7 +9,7 @@ export class HasLinkPipe implements PipeTransform {
 
     private hateoasService = inject(HateoasService);
 
-    transform(resource: any, linkName: string): boolean {
+    transform(resource: unknown, linkName: string): boolean {
         return this.hateoasService.getLink(resource, linkName ) !== undefined;
     }
     

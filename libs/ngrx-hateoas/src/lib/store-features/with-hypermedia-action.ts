@@ -41,16 +41,16 @@ export type HypermediaActionMethods<ActionName extends string> =
     ExecuteHypermediaActionMethod<ActionName> & ConnectHypermediaActionMethod<ActionName>
 
 type actionRxInput = {
-    resource: any,
+    resource: unknown,
     action: string
 }
 
 export function withHypermediaAction<ActionName extends string>(
     actionName: ActionName): SignalStoreFeature<
-        { state: {}; computed: {}; methods: {} },
+        { state: object; computed: Record<string, Signal<unknown>>; methods: Record<string, Function> },
         {
             state: HypermediaActionState<ActionName>;
-            computed: {},
+            computed: Record<string, Signal<unknown>>;
             methods: HypermediaActionMethods<ActionName>;
         }
     >;
@@ -80,7 +80,7 @@ export function withHypermediaAction<ActionName extends string>(actionName: Acti
 
             const rxConnectToResource = rxMethod<actionRxInput>(
                 pipe( 
-                    tap(_ => patchState(store, { [stateKey]: { ...store[stateKey](), href: '', method: '', isAvailable: false } })),
+                    tap(() => patchState(store, { [stateKey]: { ...store[stateKey](), href: '', method: '', isAvailable: false } })),
                     map(input => hateoasService.getAction(input.resource, input.action)),
                     filter(action => isValidHref(action?.href) && isValidActionVerb(action?.method)),
                     map(action => action!),

@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { HateoasConfig, HateoasService } from './hateoas.service';
+import { HateoasService } from './hateoas.service';
 import { ResourceAction, ResourceLink, ResourceSocket } from '../models';
+import { HATEOAS_METADATA_PROVIDER, MetadataProvider } from '../provide';
 
-const dummyHateoasConfig: HateoasConfig = {
+const dummyHateoasMetadataProvider: MetadataProvider = {
     linkLookup(resource, linkName) {
         return { href: (resource as any)['myMeta'][`_link_${linkName}`] } satisfies ResourceLink;
     },
@@ -11,7 +12,7 @@ const dummyHateoasConfig: HateoasConfig = {
     },
     socketLookup(resource, socketName) {
         return { href: (resource as any)['myMeta'][`_socket_${socketName}`], method: 'update' } satisfies ResourceSocket;
-    },
+    }
 }
 
 const testObj = {
@@ -27,7 +28,7 @@ describe('HateoasService', () => {
     let hateoasService: HateoasService;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({ providers: [ { provide: HateoasConfig, useValue: dummyHateoasConfig  }, HateoasService ]});
+        TestBed.configureTestingModule({ providers: [ { provide: HATEOAS_METADATA_PROVIDER, useValue: dummyHateoasMetadataProvider  }, HateoasService ]});
         hateoasService = TestBed.inject(HateoasService);
     });
 

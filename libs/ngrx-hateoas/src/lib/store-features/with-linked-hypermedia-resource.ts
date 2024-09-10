@@ -48,16 +48,16 @@ export type LinkedHypermediaResourceMethods<ResourceName extends string, TResour
     & GetAsPatchableLinkedHypermediaResourceMethod<ResourceName, TResource>;
 
 type linkedRxInput = {
-    resource: any,
+    resource: unknown,
     linkName: string
 }
 
 export function withLinkedHypermediaResource<ResourceName extends string, TResource>(
     resourceName: ResourceName, initialValue: TResource): SignalStoreFeature<
-        { state: {}; computed: {}; methods: {} },
+        { state: object; computed: Record<string, Signal<unknown>>; methods: Record<string, Function> },
         {
             state: LinkedHypermediaResourceState<ResourceName, TResource>;
-            computed: {},
+            computed: Record<string, Signal<unknown>>;
             methods: LinkedHypermediaResourceMethods<ResourceName, TResource>;
         }
     >;
@@ -78,7 +78,7 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
             resource: initialValue,
            } 
         }),
-        withMethods((store: any, requestService = inject(RequestService)) => {
+        withMethods((store, requestService = inject(RequestService)) => {
 
             const hateoasService = inject(HateoasService);
 

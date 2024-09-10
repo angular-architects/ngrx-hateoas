@@ -1,6 +1,7 @@
 import { SignalStoreFeature, patchState, signalStoreFeature, withMethods } from "@ngrx/signals";
 import { HypermediaResourceState } from "./with-hypermedia-resource";
 import { DeepPatchableSignal, toDeepPatchableSignal } from "../util/deep-patchable-signal";
+import { Signal } from "@angular/core";
 
 export type GetPatchableResourceMethod<ResourceName extends string, TResource> = { 
     [K in ResourceName as `get${Capitalize<ResourceName>}AsPatchable`]: () => DeepPatchableSignal<TResource>
@@ -15,13 +16,14 @@ export type PatchableResourceMethods<ResourceName extends string, TResource> =
 
 export function withPatchableResource<ResourceName extends string, TResource>(
     resourceName: ResourceName, initialValue: TResource): SignalStoreFeature<
-        { state: HypermediaResourceState<ResourceName, TResource>; computed: {}; methods: {} },
+        { state: HypermediaResourceState<ResourceName, TResource>; computed: Record<string, Signal<unknown>>; methods: Record<string, Function> },
         {
-            state: {};
-            computed: {},
+            state: object,
+            computed: Record<string, Signal<unknown>>,
             methods: PatchableResourceMethods<ResourceName, TResource>;
         }
     >;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function withPatchableResource<ResourceName extends string, TResource>(resourceName: ResourceName, initialValue: TResource) {
 
     const stateKey = `${resourceName}`;
