@@ -5,13 +5,13 @@ import { HATEOAS_METADATA_PROVIDER, MetadataProvider } from '../provide';
 
 const dummyHateoasMetadataProvider: MetadataProvider = {
     linkLookup(resource, linkName) {
-        return { href: (resource as any)['myMeta'][`_link_${linkName}`] } satisfies ResourceLink;
+        return { href: (resource as Record<string, Record<string, string>>)['myMeta'][`_link_${linkName}`] } satisfies ResourceLink;
     },
     actionLookup(resource, actionName) {
-        return { href: (resource as any)['myMeta'][`_action_${actionName}`], method: 'PUT' } satisfies ResourceAction;
+        return { href: (resource as Record<string, Record<string, string>>)['myMeta'][`_action_${actionName}`], method: 'PUT' } satisfies ResourceAction;
     },
     socketLookup(resource, socketName) {
-        return { href: (resource as any)['myMeta'][`_socket_${socketName}`], method: 'update' } satisfies ResourceSocket;
+        return { href: (resource as Record<string, Record<string, string>>)['myMeta'][`_socket_${socketName}`], method: 'update' } satisfies ResourceSocket;
     }
 }
 

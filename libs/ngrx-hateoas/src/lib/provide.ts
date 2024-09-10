@@ -1,7 +1,7 @@
 import { EnvironmentProviders, InjectionToken, makeEnvironmentProviders, Provider } from "@angular/core";
 import { HateoasService } from "./services/hateoas.service";
 import { RequestService } from "./services/request.service";
-import { DynamicResource, Resource, ResourceAction, ResourceLink, ResourceSocket } from "./models";
+import { Resource, ResourceAction, ResourceLink, ResourceSocket } from "./models";
 
 export enum HateoasFeatureKind {
     AntiForgery,
@@ -49,30 +49,52 @@ export interface MetadataProvider {
     socketLookup(resource: unknown, socketName: string): ResourceSocket | undefined;
 }
 
-function isResource(resource: unknown): resource is DynamicResource {
+function isResource(resource: unknown): resource is Resource {
     return typeof resource === 'object' && resource !== null;
 }
 
-function isResourceLinkCollection(resourceLinks: unknown): resourceLinks is Record<string, ResourceLink> {
+function isResourceLinkRecord(resourceLinks: unknown): resourceLinks is Record<string, ResourceLink> {
     return typeof resourceLinks === 'object' && resourceLinks !== null;
 }
 
+function isResourceActionRecord(resourceActions: unknown): resourceActions is Record<string, ResourceAction> {
+    return typeof resourceActions === 'object' && resourceActions !== null;
+}
+
+function isResourceSocketRecord(resourceSockets: unknown): resourceSockets is Record<string, ResourceSocket> {
+    return typeof resourceSockets === 'object' && resourceSockets !== null;
+}
+
 function isResourceLink(resourceLink: unknown): resourceLink is ResourceLink {
-    return typeof resourceLink === 'object' && resourceLink !== null &&  'href' in resourceLink;
+    return typeof resourceLink === 'object' && resourceLink !== null && 'href' in resourceLink;
+}
+
+function isResourceAction(resourceAction: unknown): resourceAction is ResourceAction {
+    return typeof resourceAction === 'object' && resourceAction !== null && 'href' in resourceAction && 'method' in resourceAction;
+}
+
+function isResourceSocket(resourceSocket: unknown): resourceSocket is ResourceSocket {
+    return typeof resourceSocket === 'object' && resourceSocket !== null && 'href' in resourceSocket && 'method' in resourceSocket;
 }
 
 const defaultMetadataProvider: MetadataProvider = {
     linkLookup(resource: unknown, linkName: string): ResourceLink | undefined {
-        if(isResource(resource) && isResourceLinkCollection(resource['_links'] && isResourceLink(resource['_links'][linkName])))
+        if(isResource(resource) && isResourceLinkRecord(resource['_links']) && isResourceLink(resource['_links'][linkName]))
             return resource['_links'][linkName];
         else
             return undefined;
     },
     actionLookup(resource: unknown, actionName: string): ResourceAction | undefined {
-        return (resource as any)?._actions?.[actionName];
+        if(isResource(resource) && isResourceActionRecord(resource['_actions']) && isResourceAction(resource['_actions'][actionName]))
+            return resource['_actions'][actionName];
+        else
+            return undefined;
     },
     socketLookup(resource: unknown, socketName: string): ResourceSocket | undefined {
-        return (resource as any)?._sockets?.[socketName];
+        if(isResource(resource) && isResourceSocketRecord(resource['_sockets']) && isResourceSocket(resource['_sockets'][socketName]))
+            return resource['_sockets'][socketName];
+        else
+            return undefined;
     }
 }
 

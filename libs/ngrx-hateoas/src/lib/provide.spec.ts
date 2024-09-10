@@ -1,6 +1,6 @@
 import { TestBed } from "@angular/core/testing";
 import { AntiForgeryOptions, CustomHeadersOptions, HATEOAS_ANTI_FORGERY, HATEOAS_CUSTOM_HEADERS, HATEOAS_LOGIN_REDIRECT, HATEOAS_METADATA_PROVIDER, LoginRedirectOptions, MetadataProvider, provideHateoas, withAntiForgery, withCustomHeaders, withLoginRedirect, withMetadataProvider } from "./provide";
-import { DynamicResource, DynamicResourceValue, ResourceAction, ResourceLink, ResourceSocket } from "./models";
+import { ResourceAction, ResourceLink, ResourceSocket } from "./models";
 
 describe('provideHateaos', () => {
 
@@ -68,13 +68,13 @@ describe('provideHateaos', () => {
 
             const dummyMetadataProvider: MetadataProvider = {
                 linkLookup(resource, linkName) {
-                    return { href: (resource as any)['myMeta'][`_link_${linkName}`] } satisfies ResourceLink;
+                    return { href: (resource as Record<string, Record<string, string>>)['myMeta'][`_link_${linkName}`] } satisfies ResourceLink;
                 },
                 actionLookup(resource, actionName) {
-                    return { href: (resource as any)['myMeta'][`_action_${actionName}`], method: 'PUT' } satisfies ResourceAction;
+                    return { href: (resource as Record<string, Record<string, string>>)['myMeta'][`_action_${actionName}`], method: 'PUT' } satisfies ResourceAction;
                 },
                 socketLookup(resource, socketName) {
-                    return { href: (resource as any)['myMeta'][`_socket_${socketName}`], method: 'update' } satisfies ResourceSocket;
+                    return { href: (resource as Record<string, Record<string, string>>)['myMeta'][`_socket_${socketName}`], method: 'update' } satisfies ResourceSocket;
                 }
             }
 

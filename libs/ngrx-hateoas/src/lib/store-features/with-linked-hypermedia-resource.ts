@@ -7,15 +7,17 @@ import { DeepPatchableSignal, toDeepPatchableSignal } from "../util/deep-patchab
 import { RequestService } from "../services/request.service";
 import { HateoasService } from "../services/hateoas.service";
 
+export type ResourceStateProps<TResource> = { 
+    url: string, 
+    isLoading: boolean,
+    isAvailable: boolean,
+    initiallyLoaded: boolean,
+    resource: TResource
+}
+
 export type LinkedHypermediaResourceState<ResourceName extends string, TResource> = 
 { 
-    [K in ResourceName]: { 
-        url: string, 
-        isLoading: boolean,
-        isAvailable: boolean,
-        initiallyLoaded: boolean,
-        resource: TResource
-    }
+    [K in ResourceName]: ResourceStateProps<TResource>
 };
 
 export type ConnectLinkedHypermediaResourceMethod<ResourceName extends string> = { 
@@ -52,6 +54,10 @@ type linkedRxInput = {
     linkName: string
 }
 
+function getState<TResource>(store: unknown, stateKey: string): ResourceStateProps<TResource> {
+    return (store as Record<string, Signal<ResourceStateProps<TResource>>>)[stateKey]()
+}
+
 export function withLinkedHypermediaResource<ResourceName extends string, TResource>(
     resourceName: ResourceName, initialValue: TResource): SignalStoreFeature<
         { state: object; computed: Record<string, Signal<unknown>>; methods: Record<string, Function> },
@@ -70,7 +76,7 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
 
     return signalStoreFeature(
         withState({
-           [resourceName]: {
+           [stateKey]: {
             url: '',
             isLoading: false,
             isAvailable: false,
@@ -87,14 +93,14 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                     map(input => hateoasService.getLink(input.resource, input.linkName)?.href),
                     filter(href => isValidHref(href)),
                     map(href => href!),
-                    filter(href => store[stateKey].url() !== href),
-                    tap(href => patchState(store, { [stateKey]: { ...store[stateKey](), url: href, isLoading: true, isAvailable: true } })),
+                    filter(href => getState(store, stateKey).url !== href),
+                    tap(href => patchState(store, { [stateKey]: { ...getState<TResource>(store, stateKey), url: href, isLoading: true, isAvailable: true } })),
                     switchMap(href => requestService.request<TResource>('GET', href)),
-                    tap(resource => patchState(store, { [stateKey]: { ...store[stateKey](), resource, isLoading: false, initiallyLoaded: true } }))
+                    tap(resource => patchState(store, { [stateKey]: { ...getState<TResource>(store, stateKey), resource, isLoading: false, initiallyLoaded: true } }))
                 )
             );
 
-            const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [stateKey]: { ...store[stateKey](), resource: newVal } }), store[stateKey].resource);
+            const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [stateKey]: { ...getState<TResource>(store, stateKey), resource: newVal } }), (store as Record<string, ResourceStateProps<Signal<TResource>>>)[stateKey].resource);
 
             return {
                 [connectMehtodName]: (linkRoot: Signal<unknown>, linkName: string) => { 
@@ -102,15 +108,15 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                     rxConnectToLinkRoot(input);
                 },
                 [reloadMethodName]: async (): Promise<void> => {
-                    const currentUrl = store[stateKey].url();
+                    const currentUrl = getState(store, stateKey).url;
                     if(currentUrl) {
-                        patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: true } });
+                        patchState(store, { [stateKey]: { ...getState<TResource>(store, stateKey), isLoading: true } });
 
                         try {
-                            const resource = await requestService.request('GET', currentUrl);
-                            patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: false, resource } });
+                            const resource = await requestService.request<TResource>('GET', currentUrl);
+                            patchState(store, { [stateKey]: { ...getState<TResource>(store, stateKey), isLoading: false, resource } });
                         } catch(e) {
-                            patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: false, resource: initialValue } });
+                            patchState(store, { [stateKey]: { ...getState<TResource>(store, stateKey), isLoading: false, resource: initialValue } });
                             throw e;
                         }
                     }

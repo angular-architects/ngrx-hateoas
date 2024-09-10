@@ -14,7 +14,7 @@ export class RequestService {
 
     private httpClient = inject(HttpClient);
 
-    public async request<T>(method: 'GET' | 'PUT' | 'POST' | 'DELETE', url: string, body?: unknown): Promise<T | undefined> {
+    public async request<T>(method: 'GET' | 'PUT' | 'POST' | 'DELETE', url: string, body?: unknown): Promise<T> {
         let headers = new HttpHeaders().set('Content-Type', 'application/json');
 
         if(this.customHeadersOptions) {
@@ -38,10 +38,8 @@ export class RequestService {
                 // Redirect to sign in 
                 const currentUrl = this.window.location.href;
                 this.window.location.href = `${this.loginRedirectOptions.loginUrl}?${this.loginRedirectOptions.redirectUrlParamName}=` + encodeURIComponent(currentUrl);
-                return undefined;
-            } else {
-                throw errorResponse;
             }
+            throw errorResponse;
         }
     }
 
