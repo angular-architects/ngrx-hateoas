@@ -7,7 +7,7 @@ import { DeepPatchableSignal, toDeepPatchableSignal } from "../util/deep-patchab
 import { RequestService } from "../services/request.service";
 import { HateoasService } from "../services/hateoas.service";
 
-export type ResourceStateProps<TResource> = { 
+export type LinkedHypermediaResourceProps<TResource> = { 
     url: string, 
     isLoading: boolean,
     isAvailable: boolean,
@@ -17,7 +17,7 @@ export type ResourceStateProps<TResource> = {
 
 export type LinkedHypermediaResourceState<ResourceName extends string, TResource> = 
 { 
-    [K in ResourceName]: ResourceStateProps<TResource>
+    [K in ResourceName]: LinkedHypermediaResourceProps<TResource>
 };
 
 export type ConnectLinkedHypermediaResourceMethod<ResourceName extends string> = { 
@@ -54,8 +54,8 @@ type linkedRxInput = {
     linkName: string
 }
 
-function getState<TResource>(store: unknown, stateKey: string): ResourceStateProps<TResource> {
-    return (store as Record<string, Signal<ResourceStateProps<TResource>>>)[stateKey]()
+function getState<TResource>(store: unknown, stateKey: string): LinkedHypermediaResourceProps<TResource> {
+    return (store as Record<string, Signal<LinkedHypermediaResourceProps<TResource>>>)[stateKey]()
 }
 
 export function withLinkedHypermediaResource<ResourceName extends string, TResource>(
@@ -100,7 +100,7 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                 )
             );
 
-            const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [stateKey]: { ...getState<TResource>(store, stateKey), resource: newVal } }), (store as Record<string, ResourceStateProps<Signal<TResource>>>)[stateKey].resource);
+            const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [stateKey]: { ...getState<TResource>(store, stateKey), resource: newVal } }), (store as Record<string, LinkedHypermediaResourceProps<Signal<TResource>>>)[stateKey].resource);
 
             return {
                 [connectMehtodName]: (linkRoot: Signal<unknown>, linkName: string) => { 

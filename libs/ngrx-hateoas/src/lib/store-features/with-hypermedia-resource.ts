@@ -4,14 +4,15 @@ import { DeepPatchableSignal, toDeepPatchableSignal } from "../util/deep-patchab
 import { HateoasService } from "../services/hateoas.service";
 import { RequestService } from "../services/request.service";
 
-export type HypermediaResourceState<ResourceName extends string, TResource> = 
-{ 
-    [K in ResourceName]: { 
-        url: string, 
+export type HypermediaResourceProps<TResource> = {
+    url: string, 
         isLoading: boolean,
         isLoaded: boolean,
         resource: TResource
-    }
+}
+
+export type HypermediaResourceState<ResourceName extends string, TResource> = { 
+    [K in ResourceName]: HypermediaResourceProps<TResource>
 };
 
 export type LoadHypermediaResourceFromUrlMethod<ResourceName extends string> = { 
@@ -52,6 +53,10 @@ export type HypermediaResourceMethods<ResourceName extends string, TResource> =
     & ReloadHypermediaResourceMethod<ResourceName>
     & GetAsPatchableHypermediaResourceMethod<ResourceName, TResource>;
 
+function getState<TResource>(store: unknown, stateKey: string): HypermediaResourceProps<TResource> {
+    return (store as Record<string, Signal<HypermediaResourceProps<TResource>>>)[stateKey]()
+}
+
 export function withHypermediaResource<ResourceName extends string, TResource>(
     resourceName: ResourceName, initialValue: TResource): SignalStoreFeature<
         { state: object; computed: Record<string, Signal<unknown>>; methods: Record<string, Function> },
@@ -78,26 +83,26 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
             resource: initialValue,
            } 
         }),
-        withMethods((store: any) => {
+        withMethods((store) => {
 
             const requestService = inject(RequestService); 
             const hateoasService = inject(HateoasService);
 
-            const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [stateKey]: { ...store[stateKey](), resource: newVal } }), store[stateKey].resource);
+            const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [stateKey]: { ...getState(store, stateKey), resource: newVal } }), (store as Record<string, HypermediaResourceProps<Signal<TResource>>>)[stateKey].resource);
             
             const loadFromUrlMethod = async (url: string | null, fromCache = false): Promise<void> => {
                 if(!url) {
-                    patchState(store, { [stateKey]: { ...store[stateKey](), url: '', isLoading: false, isLoaded: false, resource: initialValue } });
+                    patchState(store, { [stateKey]: { ...getState(store, stateKey), url: '', isLoading: false, isLoaded: false, resource: initialValue } });
                     return Promise.resolve();
                 } else {
-                    if(!fromCache || hateoasService.getLink(store[stateKey].resource(), 'self')?.href !== url) {
-                        patchState(store, { [stateKey]: { ...store[stateKey](), url: '', isLoading: true } });
+                    if(!fromCache || hateoasService.getLink(getState<TResource>(store, stateKey).resource, 'self')?.href !== url) {
+                        patchState(store, { [stateKey]: { ...getState<TResource>(store, stateKey), url: '', isLoading: true } });
 
                         try {
                             const resource = await requestService.request<TResource>('GET', url);
-                            patchState(store, { [stateKey]: { ...store[stateKey](), url, isLoading: false, isLoaded: true, resource} });
+                            patchState(store, { [stateKey]: { ...getState(store, stateKey), url, isLoading: false, isLoaded: true, resource} });
                         } catch(e) {
-                            patchState(store, { [stateKey]: { ...store[stateKey](), url, isLoading: false, resource: initialValue} });
+                            patchState(store, { [stateKey]: { ...getState(store, stateKey), url, isLoading: false, resource: initialValue} });
                             throw e;
                         }   
                     }
@@ -112,16 +117,16 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
             };
 
             const reloadMethod = async (): Promise<void> => {
-                const selfUrl = hateoasService.getLink(store[stateKey].resource(), 'self')?.href;
-                const url = selfUrl ?? store[stateKey].url();
+                const selfUrl = hateoasService.getLink(getState(store, stateKey).resource, 'self')?.href;
+                const url = selfUrl ?? getState(store, stateKey).url;
                 if(url) {
-                    patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: true, url } });
+                    patchState(store, { [stateKey]: { ...getState<TResource>(store, stateKey), isLoading: true, url } });
                     
                     try {
                         const resource = await requestService.request<TResource>('GET', url);
-                        patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: false, resource } });
+                        patchState(store, { [stateKey]: { ...getState(store, stateKey), isLoading: false, resource } });
                     } catch(e) {
-                        patchState(store, { [stateKey]: { ...store[stateKey](), isLoading: false, resource: initialValue } });
+                        patchState(store, { [stateKey]: { ...getState(store, stateKey), isLoading: false, resource: initialValue } });
                         throw e;
                     }
                 }

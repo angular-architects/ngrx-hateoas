@@ -18,14 +18,15 @@ export function withInitialHypermediaResource<ResourceName extends string, TReso
     return signalStoreFeature(
         withHypermediaResource<ResourceName, TResource>(resourceName, initialValue),
         withHooks({
-            onInit(store: any) {
+            onInit(store) {
                 let initialUrl;
                 if(typeof url === 'string') {
                     initialUrl = url;
                 } else {
                     initialUrl = url();
                 }
-                store[loadFromUrlMethodName](initialUrl);
+                
+                (store[loadFromUrlMethodName] as (url: string) => void)(initialUrl);
             }
         })
     );

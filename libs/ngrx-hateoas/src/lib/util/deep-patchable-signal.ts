@@ -16,6 +16,7 @@ export type DeepPatchableSignal<T> = Signal<T> & Patchable<T> &
 
 export function toDeepPatchableSignal<T>(patchFunc: (newVal: T) => void, signal: Signal<T>): DeepPatchableSignal<T> {
   return new Proxy(signal, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     get(target: any, prop) {
 
       if (prop === 'patch' || prop === 'set') {

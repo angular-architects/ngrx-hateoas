@@ -30,6 +30,7 @@ export function withPatchableResource<ResourceName extends string, TResource>(re
     const getAsPatchableMethodName = generateGetPatchableResourceMethodName(resourceName);
 
     return signalStoreFeature(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         withMethods((store: any) => {
 
             const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [stateKey]: { ...store[stateKey](), resource: newVal } }), store[stateKey].resource);
