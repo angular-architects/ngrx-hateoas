@@ -19,12 +19,12 @@ describe('GetSocketPipe', () => {
     
   it('gets a socket from hypermedia json', () => {
     const transformResult = getSocketPipe.transform(testModel, 'foo');
-    expect(transformResult.href).toBe('/api/foo');
-    expect(transformResult.method).toBe('newData');
+    expect(transformResult?.href).toBe('/api/foo');
+    expect(transformResult?.method).toBe('newData');
   });
 
-  it('throws an exception for a non existing socket', () => {
-    expect(() => getSocketPipe.transform(testModel, 'foo1')).toThrowError('The requested socket does not exist on the specified resource. Use the "hasSocket" pipe to check the existance of the link first');
+  it('returns undefined for a non existing socket', () => {
+    expect(() => getSocketPipe.transform(testModel, 'foo1')).toBeUndefined();
   });
   
 });

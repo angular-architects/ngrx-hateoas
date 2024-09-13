@@ -14,10 +14,6 @@ export class AppComponent {
   appState = inject(AppState);
   rootApiLoaded = this.appState.rootApi.isLoaded;
 
-  constructor() {
-    
-  }
-
   logIn() {
     window.location.href  = './login?redirectUri=' + encodeURIComponent(window.origin);
   }

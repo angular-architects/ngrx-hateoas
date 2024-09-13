@@ -10,14 +10,8 @@ export class GetLinkPipe implements PipeTransform {
 
     private hateoasService = inject(HateoasService);
 
-    transform(resource: unknown, linkName: string): ResourceLink {
-        const link = this.hateoasService.getLink(resource, linkName);
-
-        if (link === undefined) {
-            throw new Error('The requested link does not exist on the specified resource. Use the "hasLink" pipe to check the existance of the link first');
-        }
-
-        return link;
+    transform(resource: unknown, linkName: string): ResourceLink | undefined {
+        return this.hateoasService.getLink(resource, linkName);
     }
 
 }

@@ -10,14 +10,8 @@ export class GetSocketPipe implements PipeTransform {
 
   private hateoasService = inject(HateoasService);
 
-  transform(resource: unknown, socketName: string): ResourceSocket {
-    const socket = this.hateoasService.getSocket(resource, socketName);
-
-    if (socket === undefined) {
-      throw new Error('The requested socket does not exist on the specified resource. Use the "hasSocket" pipe to check the existance of the link first');
-    }
-
-    return socket;
+  transform(resource: unknown, socketName: string): ResourceSocket | undefined {
+    return this.hateoasService.getSocket(resource, socketName);
   }
 
 }
