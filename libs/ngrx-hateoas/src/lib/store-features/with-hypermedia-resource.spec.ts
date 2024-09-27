@@ -56,10 +56,10 @@ describe('withHypermediaResource', () => {
     });
 
     it('sets correct initial resource state', () => {
-        expect(store.testModel.url()).toBe('');
-        expect(store.testModel.isLoaded()).toBeFalse();
-        expect(store.testModel.isLoading()).toBeFalse();
-        expect(store.testModel.resource()).toBe(initialTestModel);
+        expect(store.testModelState.url()).toBe('');
+        expect(store.testModelState.isLoaded()).toBeFalse();
+        expect(store.testModelState.isLoading()).toBeFalse();
+        expect(store.testModel()).toBe(initialTestModel);
     });
 
     it('has correct resource methods', () => {
@@ -79,18 +79,18 @@ describe('withHypermediaResource', () => {
 
         const loadPromise = store.loadTestModelFromUrl('api/test-model');
 
-        expect(store.testModel.isLoading()).toBeTrue();
-        expect(store.testModel.isLoaded()).toBeFalse();
+        expect(store.testModelState.isLoading()).toBeTrue();
+        expect(store.testModelState.isLoaded()).toBeFalse();
 
         httpTestingController.expectOne('api/test-model').flush(resourceFromUrl);
         httpTestingController.verify();
 
         await loadPromise;
 
-        expect(store.testModel.url()).toBe('api/test-model');
-        expect(store.testModel.isLoading()).toBeFalse();
-        expect(store.testModel.isLoaded()).toBeTrue();
-        expect(store.testModel.resource.objProp.stringProp()).toBe('from Url');
+        expect(store.testModelState.url()).toBe('api/test-model');
+        expect(store.testModelState.isLoading()).toBeFalse();
+        expect(store.testModelState.isLoaded()).toBeTrue();
+        expect(store.testModel.objProp.stringProp()).toBe('from Url');
     });
 
     it('loads the resource from link and sets state correctly', async () => {
@@ -101,20 +101,20 @@ describe('withHypermediaResource', () => {
             }
         };
 
-        const loadPromise = store.loadTestModelFromLink(store.rootModel.resource(), 'testModel');
+        const loadPromise = store.loadTestModelFromLink(store.rootModel(), 'testModel');
 
-        expect(store.testModel.isLoading()).toBeTrue();
-        expect(store.testModel.isLoaded()).toBeFalse();
+        expect(store.testModelState.isLoading()).toBeTrue();
+        expect(store.testModelState.isLoaded()).toBeFalse();
 
         httpTestingController.expectOne('api/test-model?origin=fromLink').flush(resourceFromLink);
         httpTestingController.verify();
 
         await loadPromise;
 
-        expect(store.testModel.url()).toBe('api/test-model?origin=fromLink');
-        expect(store.testModel.isLoading()).toBeFalse();
-        expect(store.testModel.isLoaded()).toBeTrue();
-        expect(store.testModel.resource.objProp.stringProp()).toBe('from Link');
+        expect(store.testModelState.url()).toBe('api/test-model?origin=fromLink');
+        expect(store.testModelState.isLoading()).toBeFalse();
+        expect(store.testModelState.isLoaded()).toBeTrue();
+        expect(store.testModel.objProp.stringProp()).toBe('from Link');
     });
 
     it('reloads the resource and sets state correctly', async () => {
@@ -138,18 +138,18 @@ describe('withHypermediaResource', () => {
 
         loadPromise = store.reloadTestModel();
 
-        expect(store.testModel.isLoading()).toBeTrue();
-        expect(store.testModel.isLoaded()).toBeTrue();
+        expect(store.testModelState.isLoading()).toBeTrue();
+        expect(store.testModelState.isLoaded()).toBeTrue();
 
         httpTestingController.expectOne('api/test-model').flush(resourceFromUrlReloaded);
         httpTestingController.verify();
 
         await loadPromise;
 
-        expect(store.testModel.url()).toBe('api/test-model');
-        expect(store.testModel.isLoading()).toBeFalse();
-        expect(store.testModel.isLoaded()).toBeTrue();
-        expect(store.testModel.resource.objProp.stringProp()).toBe('from Url Reloaded');
+        expect(store.testModelState.url()).toBe('api/test-model');
+        expect(store.testModelState.isLoading()).toBeFalse();
+        expect(store.testModelState.isLoaded()).toBeTrue();
+        expect(store.testModel.objProp.stringProp()).toBe('from Url Reloaded');
     });
 
     it('gets the resource as patchable', () => {
@@ -157,13 +157,13 @@ describe('withHypermediaResource', () => {
 
         resource.patch({ numProp: 5, objProp: { stringProp: 'patched1' } });
 
-        expect(store.testModel.resource.numProp()).toBe(5);
-        expect(store.testModel.resource.objProp.stringProp()).toBe('patched1');
+        expect(store.testModel.numProp()).toBe(5);
+        expect(store.testModel.objProp.stringProp()).toBe('patched1');
 
         resource.objProp.stringProp.patch('patched2');
 
-        expect(store.testModel.resource.numProp()).toBe(5);
-        expect(store.testModel.resource.objProp.stringProp()).toBe('patched2');
+        expect(store.testModel.numProp()).toBe(5);
+        expect(store.testModel.objProp.stringProp()).toBe('patched2');
     });
 
     it('uses self url on reload', async () => {
@@ -184,8 +184,8 @@ describe('withHypermediaResource', () => {
 
         loadPromise = store.reloadTestModel();
 
-        expect(store.testModel.isLoading()).toBeTrue();
-        expect(store.testModel.isLoaded()).toBeTrue();
+        expect(store.testModelState.isLoading()).toBeTrue();
+        expect(store.testModelState.isLoaded()).toBeTrue();
 
         httpTestingController.expectOne('/self-url');
         httpTestingController.verify();

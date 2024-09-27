@@ -4,16 +4,23 @@ import { DeepPatchableSignal, toDeepPatchableSignal } from "../util/deep-patchab
 import { HateoasService } from "../services/hateoas.service";
 import { RequestService } from "../services/request.service";
 
-export type HypermediaResourceProps<TResource> = {
+export type HypermediaResourceStateProps = {
     url: string, 
-        isLoading: boolean,
-        isLoaded: boolean,
-        resource: TResource
+    isLoading: boolean,
+    isLoaded: boolean
 }
 
-export type HypermediaResourceState<ResourceName extends string, TResource> = { 
-    [K in ResourceName]: HypermediaResourceProps<TResource>
+export type HypermediaResourceData<ResourceName extends string, TResource> = { 
+    [K in `${ResourceName}`]: TResource
 };
+
+export type HypermediaResourceState<ResourceName extends string> = { 
+    [K in `${ResourceName}State`]: HypermediaResourceStateProps
+};
+
+export type HypermediaResourceStoreState<ResourceName extends string, TResource> = 
+    HypermediaResourceData<ResourceName, TResource>
+    & HypermediaResourceState<ResourceName>;
 
 export type LoadHypermediaResourceFromUrlMethod<ResourceName extends string> = { 
     [K in ResourceName as `load${Capitalize<ResourceName>}FromUrl`]: (url: string | null, fromCache?: boolean) => Promise<void>
@@ -47,28 +54,45 @@ export function generateGetAsPatchableHypermediaResourceMethodName(resourceName:
     return `get${resourceName.charAt(0).toUpperCase() + resourceName.slice(1)}AsPatchable`;
 }
 
-export type HypermediaResourceMethods<ResourceName extends string, TResource> = 
+export type HypermediaResourceStoreMethods<ResourceName extends string, TResource> = 
     LoadHypermediaResourceFromUrlMethod<ResourceName>
     & LoadHypermediaResourceFromLinkMethod<ResourceName> 
     & ReloadHypermediaResourceMethod<ResourceName>
     & GetAsPatchableHypermediaResourceMethod<ResourceName, TResource>;
 
-function getState<TResource>(store: unknown, stateKey: string): HypermediaResourceProps<TResource> {
-    return (store as Record<string, Signal<HypermediaResourceProps<TResource>>>)[stateKey]()
+function getData<TResource>(store: unknown, dataKey: string): TResource {
+    return (store as Record<string, Signal<TResource>>)[dataKey]()
+}
+
+function getState(store: unknown, stateKey: string): HypermediaResourceStateProps {
+    return (store as Record<string, Signal<HypermediaResourceStateProps>>)[stateKey]()
+}
+
+function updateData<TResource>(dataKey: string, data: TResource) {
+    return () => ({ [dataKey]: data});
+}
+
+function updateState(stateKey: string, partialState: Partial<HypermediaResourceStateProps>) {
+    return (state: any) => ({ [stateKey]: { ...state[stateKey], ...partialState } });
 }
 
 export function withHypermediaResource<ResourceName extends string, TResource>(
     resourceName: ResourceName, initialValue: TResource): SignalStoreFeature<
-        { state: object; computed: Record<string, Signal<unknown>>; methods: Record<string, Function> },
+        { 
+            state: object; 
+            computed: Record<string, Signal<unknown>>; 
+            methods: Record<string, Function> 
+        },
         {
-            state: HypermediaResourceState<ResourceName, TResource>;
+            state: HypermediaResourceStoreState<ResourceName, TResource>;
             computed: Record<string, Signal<unknown>>;
-            methods: HypermediaResourceMethods<ResourceName, TResource>;
+            methods: HypermediaResourceStoreMethods<ResourceName, TResource>;
         }
     >;
 export function withHypermediaResource<ResourceName extends string, TResource>(resourceName: ResourceName, initialValue: TResource) {
 
-    const stateKey = `${resourceName}`;
+    const dataKey = `${resourceName}`;
+    const stateKey = `${resourceName}State`;
     const loadFromUrlMethodName = generateLoadHypermediaResourceFromUrlMethodName(resourceName);
     const loadFromLinkMethodName = generateLoadHypermediaResourceFromLinkMethodName(resourceName);
     const reloadMethodName = generateReloadHypermediaResourceMethodName(resourceName);
@@ -79,30 +103,36 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
            [stateKey]: {
             url: '',
             isLoading: false,
-            isLoaded: false,
-            resource: initialValue,
-           } 
+            isLoaded: false
+           },
+           [dataKey]: initialValue 
         }),
         withMethods((store) => {
 
             const requestService = inject(RequestService); 
             const hateoasService = inject(HateoasService);
 
-            const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [stateKey]: { ...getState(store, stateKey), resource: newVal } }), (store as Record<string, HypermediaResourceProps<Signal<TResource>>>)[stateKey].resource);
+            const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [dataKey]: newVal }), (store as Record<string, Signal<TResource>>)[dataKey]);
             
             const loadFromUrlMethod = async (url: string | null, fromCache = false): Promise<void> => {
                 if(!url) {
-                    patchState(store, { [stateKey]: { ...getState(store, stateKey), url: '', isLoading: false, isLoaded: false, resource: initialValue } });
+                    patchState(store, 
+                               updateData(dataKey, initialValue), 
+                               updateState(stateKey, { url: '', isLoading: false, isLoaded: false }));
                     return Promise.resolve();
                 } else {
-                    if(!fromCache || hateoasService.getLink(getState<TResource>(store, stateKey).resource, 'self')?.href !== url) {
-                        patchState(store, { [stateKey]: { ...getState<TResource>(store, stateKey), url: '', isLoading: true } });
+                    if(!fromCache || hateoasService.getLink(getData(store, dataKey), 'self')?.href !== url) {
+                        patchState(store, updateState(stateKey, { url: '', isLoading: true }));
 
                         try {
                             const resource = await requestService.request<TResource>('GET', url);
-                            patchState(store, { [stateKey]: { ...getState(store, stateKey), url, isLoading: false, isLoaded: true, resource} });
+                            patchState(store, 
+                                       updateData(dataKey, resource), 
+                                       updateState(stateKey, { url, isLoading: false, isLoaded: true }));
                         } catch(e) {
-                            patchState(store, { [stateKey]: { ...getState(store, stateKey), url, isLoading: false, resource: initialValue} });
+                            patchState(store,
+                                       updateData(dataKey, initialValue),
+                                       updateState(stateKey, { url, isLoading: false }));
                             throw e;
                         }   
                     }
@@ -117,16 +147,16 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
             };
 
             const reloadMethod = async (): Promise<void> => {
-                const selfUrl = hateoasService.getLink(getState(store, stateKey).resource, 'self')?.href;
+                const selfUrl = hateoasService.getLink(getData(store, dataKey), 'self')?.href;
                 const url = selfUrl ?? getState(store, stateKey).url;
                 if(url) {
-                    patchState(store, { [stateKey]: { ...getState<TResource>(store, stateKey), isLoading: true, url } });
+                    patchState(store, updateState(stateKey, { url, isLoading: true }));
                     
                     try {
                         const resource = await requestService.request<TResource>('GET', url);
-                        patchState(store, { [stateKey]: { ...getState(store, stateKey), isLoading: false, resource } });
+                        patchState(store, updateData(dataKey, resource), updateState(stateKey, { isLoading: false }));
                     } catch(e) {
-                        patchState(store, { [stateKey]: { ...getState(store, stateKey), isLoading: false, resource: initialValue } });
+                        patchState(store, updateData(dataKey, initialValue), updateState(stateKey, { isLoading: false }));
                         throw e;
                     }
                 }

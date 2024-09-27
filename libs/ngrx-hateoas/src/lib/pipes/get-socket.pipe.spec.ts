@@ -24,7 +24,7 @@ describe('GetSocketPipe', () => {
   });
 
   it('returns undefined for a non existing socket', () => {
-    expect(() => getSocketPipe.transform(testModel, 'foo1')).toBeUndefined();
+    expect(getSocketPipe.transform(testModel, 'foo1')).toBeUndefined();
   });
   
 });

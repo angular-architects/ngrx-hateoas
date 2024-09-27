@@ -7,9 +7,9 @@ import { isValidHref } from "../util/is-valid-href";
 import { RequestService } from "../services/request.service";
 import { HateoasService } from "../services/hateoas.service";
 
-export type HypermediaActionProps = { 
+export type HypermediaActionStateProps = { 
     href: string
-    method: 'PUT' | 'POST' | 'DELETE',
+    method: '' | 'PUT' | 'POST' | 'DELETE',
     isAvailable: boolean
     isExecuting: boolean 
     hasExecutedSuccessfully: boolean
@@ -18,17 +18,17 @@ export type HypermediaActionProps = {
     error: unknown
 }
 
-export type HypermediaActionState<ActionName extends string> = 
+export type HypermediaActionStoreState<ActionName extends string> = 
 { 
-    [K in ActionName]: HypermediaActionProps
+    [K in `${ActionName}State`]: HypermediaActionStateProps
 };
 
 export type ExecuteHypermediaActionMethod<ActionName extends string> = { 
-    [K in ActionName as `execute${Capitalize<ActionName>}`]: () => Promise<void>
+    [K in ActionName]: () => Promise<void>
 };
 
 export function generateExecuteHypermediaActionMethodName(actionName: string) {
-    return `execute${actionName.charAt(0).toUpperCase() + actionName.slice(1)}`;
+    return actionName;
 }
 
 export type ConnectHypermediaActionMethod<ActionName extends string> = { 
@@ -47,22 +47,30 @@ type actionRxInput = {
     action: string
 }
 
-function getState(store: unknown, stateKey: string): HypermediaActionProps {
-    return (store as Record<string, Signal<HypermediaActionProps>>)[stateKey]()
+function getState(store: unknown, stateKey: string): HypermediaActionStateProps {
+    return (store as Record<string, Signal<HypermediaActionStateProps>>)[stateKey]()
+}
+
+function updateState(stateKey: string, partialState: Partial<HypermediaActionStateProps>) {
+    return (state: any) => ({ [stateKey]: { ...state[stateKey], ...partialState } });
 }
 
 export function withHypermediaAction<ActionName extends string>(
     actionName: ActionName): SignalStoreFeature<
-        { state: object; computed: Record<string, Signal<unknown>>; methods: Record<string, Function> },
+        { 
+            state: object;
+            computed: Record<string, Signal<unknown>>;
+            methods: Record<string, Function> 
+        },
         {
-            state: HypermediaActionState<ActionName>;
+            state: HypermediaActionStoreState<ActionName>;
             computed: Record<string, Signal<unknown>>;
             methods: HypermediaActionMethods<ActionName>;
         }
     >;
 export function withHypermediaAction<ActionName extends string>(actionName: ActionName) {
 
-    const stateKey = `${actionName}`;
+    const stateKey = `${actionName}State`;
     const executeMethodName = generateExecuteHypermediaActionMethodName(actionName);
     const connectMehtodName = generateConnectHypermediaActionMethodName(actionName);
 
@@ -86,11 +94,11 @@ export function withHypermediaAction<ActionName extends string>(actionName: Acti
 
             const rxConnectToResource = rxMethod<actionRxInput>(
                 pipe( 
-                    tap(() => patchState(store, { [stateKey]: { ...getState(store, stateKey), href: '', method: '', isAvailable: false } })),
+                    tap(() => patchState(store, updateState(stateKey, { href: '', method: '', isAvailable: false } ))),
                     map(input => hateoasService.getAction(input.resource, input.action)),
                     filter(action => isValidHref(action?.href) && isValidActionVerb(action?.method)),
                     map(action => action!),
-                    tap(action => patchState(store, { [stateKey]: { ...getState(store, stateKey), href: action.href, method: action.method, isAvailable: true } }))
+                    tap(action => patchState(store, updateState(stateKey, { href: action.href, method: action.method, isAvailable: true } )))
                 )
             );
 
@@ -99,21 +107,25 @@ export function withHypermediaAction<ActionName extends string>(actionName: Acti
                     if(getState(store, stateKey).isAvailable && internalResourceLink !== null) {
                         const method = getState(store, stateKey).method;
                         const href = getState(store, stateKey).href;
+
+                        if(!method || !href) throw new Error('Action is not available');
+
                         const body = method !== 'DELETE' ? internalResourceLink() : undefined
 
-                        patchState(store, { [stateKey]: { ...getState(store, stateKey), 
-                                                          isExecuting: true, 
-                                                          hasExecutedSuccessfully: false,
-                                                          hasExecutedWithError: false,
-                                                          hasError: false,
-                                                           error: null 
-                                                        } });
+                        patchState(store, 
+                            updateState(stateKey, { 
+                                isExecuting: true, 
+                                hasExecutedSuccessfully: false,
+                                hasExecutedWithError: false,
+                                hasError: false,
+                                error: null 
+                            }));
 
                         try {
                             await requestService.request(method, href, body);
-                            patchState(store, { [stateKey]: { ...getState(store, stateKey), isExecuting: false, hasExecutedSuccessfully: true } });
+                            patchState(store, updateState(stateKey, { isExecuting: false, hasExecutedSuccessfully: true } ));
                         } catch(e) {
-                            patchState(store, { [stateKey]: { ...getState(store, stateKey), isExecuting: false, hasExecutedWithError: true, hasError: true, error: e } });
+                            patchState(store, updateState(stateKey, { isExecuting: false, hasExecutedWithError: true, hasError: true, error: e } ));
                             throw e;
                         } 
                     }

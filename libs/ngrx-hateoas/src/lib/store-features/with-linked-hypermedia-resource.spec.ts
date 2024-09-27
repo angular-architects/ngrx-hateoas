@@ -33,7 +33,7 @@ const TestStore = signalStore(
     withLinkedHypermediaResource('testModel', initialTestModel),
     withHooks({
         onInit(store) {
-            store.connectTestModel(store.rootModel.resource, 'testModel');
+            store.connectTestModel(store.rootModel, 'testModel');
         },
     })
 );

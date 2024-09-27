@@ -24,7 +24,7 @@ describe('GetActionPipe', () => {
   });
 
   it('returns undefined for a non existing action', () => {
-    expect(() => getActionPipe.transform(testModel, 'create1')).toBeUndefined();
+    expect(getActionPipe.transform(testModel, 'create1')).toBeUndefined();
   });
 
 });

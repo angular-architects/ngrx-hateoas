@@ -23,7 +23,7 @@ describe('GetLinkPipe', () => {
   });
 
   it('returns undefined for a non existing link', () => {
-    expect(() => getLinkPipe.transform(testModel, 'foo1')).toBeUndefined();
+    expect(getLinkPipe.transform(testModel, 'foo1')).toBeUndefined();
   });
   
 });

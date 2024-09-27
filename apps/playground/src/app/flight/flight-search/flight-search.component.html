@@ -47,7 +47,7 @@
             <div class="col">
                 <app-flight-summary-card [flight]="flight">
                     @if(flight | hasLink:'flightEditVm') {
-                        <a class="btn btn-primary" [routerLink]="['/flight/edit', (flight | getLink:'flightEditVm').href]">Edit</a>
+                        <a class="btn btn-primary" [routerLink]="['/flight/edit', (flight | getLink:'flightEditVm')?.href]">Edit</a>
                       }
                 </app-flight-summary-card> 
             </div>

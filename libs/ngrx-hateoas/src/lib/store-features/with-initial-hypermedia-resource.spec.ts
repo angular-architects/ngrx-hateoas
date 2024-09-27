@@ -42,24 +42,24 @@ describe('withInitialHypermediaResource', () => {
 
     it('requrests model from fixed url automaticallay and provides correct states', fakeAsync(() => {
         const store = TestBed.inject(TestStoreWithFixedUrl);
-        expect(store.rootModel.isLoaded()).toBeFalse();
-        expect(store.rootModel.isLoading()).toBeTrue();
+        expect(store.rootModelState.isLoaded()).toBeFalse();
+        expect(store.rootModelState.isLoading()).toBeTrue();
         httpTestingController.expectOne('/api').flush(initialRootModel);
         httpTestingController.verify();
         tick();
-        expect(store.rootModel.isLoaded()).toBeTrue();
-        expect(store.rootModel.isLoading()).toBeFalse();
+        expect(store.rootModelState.isLoaded()).toBeTrue();
+        expect(store.rootModelState.isLoading()).toBeFalse();
     }));
 
     it('requests model from injected url automaticallay and provides correct states', fakeAsync(() => {
         const store = TestBed.inject(TestStoreWithInjectedUrl);
-        expect(store.rootModel.isLoaded()).toBeFalse();
-        expect(store.rootModel.isLoading()).toBeTrue();
+        expect(store.rootModelState.isLoaded()).toBeFalse();
+        expect(store.rootModelState.isLoading()).toBeTrue();
         httpTestingController.expectOne('/api/injected').flush(initialRootModel);
         httpTestingController.verify();
         tick();
-        expect(store.rootModel.isLoaded()).toBeTrue();
-        expect(store.rootModel.isLoading()).toBeFalse();
+        expect(store.rootModelState.isLoaded()).toBeTrue();
+        expect(store.rootModelState.isLoading()).toBeFalse();
     }));
 
 });
