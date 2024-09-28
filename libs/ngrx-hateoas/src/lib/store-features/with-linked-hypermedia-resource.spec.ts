@@ -52,11 +52,11 @@ describe('withLinkedHypermediaResource', () => {
     });
 
     it('sets correct initial resource state', () => {
-        expect(store.testModel.url()).toBe('');
-        expect(store.testModel.initiallyLoaded()).toBeFalse();
-        expect(store.testModel.isAvailable()).toBeFalse();
-        expect(store.testModel.isLoading()).toBeFalse();
-        expect(store.testModel.resource()).toBe(initialTestModel);
+        expect(store.testModelState.url()).toBe('');
+        expect(store.testModelState.initiallyLoaded()).toBeFalse();
+        expect(store.testModelState.isAvailable()).toBeFalse();
+        expect(store.testModelState.isLoading()).toBeFalse();
+        expect(store.testModel()).toBe(initialTestModel);
     });
 
     it('has correct resource methods', () => {
@@ -83,20 +83,20 @@ describe('withLinkedHypermediaResource', () => {
    
         await loadRootModel;
 
-        expect(store.testModel.url()).toBe('/api/test-model');
-        expect(store.testModel.initiallyLoaded()).toBeFalse();
-        expect(store.testModel.isLoading()).toBeTrue();
-        expect(store.testModel.isAvailable()).toBeTrue();
+        expect(store.testModelState.url()).toBe('/api/test-model');
+        expect(store.testModelState.initiallyLoaded()).toBeFalse();
+        expect(store.testModelState.isLoading()).toBeTrue();
+        expect(store.testModelState.isAvailable()).toBeTrue();
 
         httpTestingController.expectOne('/api/test-model').flush(testModelFromLink);
         httpTestingController.verify();
 
         await firstValueFrom(timer(0));
 
-        expect(store.testModel.url()).toBe('/api/test-model');
-        expect(store.testModel.initiallyLoaded()).toBeTrue();
-        expect(store.testModel.isLoading()).toBeFalse();
-        expect(store.testModel.isAvailable()).toBeTrue();
+        expect(store.testModelState.url()).toBe('/api/test-model');
+        expect(store.testModelState.initiallyLoaded()).toBeTrue();
+        expect(store.testModelState.isLoading()).toBeFalse();
+        expect(store.testModelState.isAvailable()).toBeTrue();
 
         loadRootModel = store.reloadRootModel();
 
@@ -105,10 +105,10 @@ describe('withLinkedHypermediaResource', () => {
 
         await loadRootModel;
 
-        expect(store.testModel.url()).toBe('/api/test-model-changed');
-        expect(store.testModel.initiallyLoaded()).toBeTrue();
-        expect(store.testModel.isLoading()).toBeTrue();
-        expect(store.testModel.isAvailable()).toBeTrue();
+        expect(store.testModelState.url()).toBe('/api/test-model-changed');
+        expect(store.testModelState.initiallyLoaded()).toBeTrue();
+        expect(store.testModelState.isLoading()).toBeTrue();
+        expect(store.testModelState.isAvailable()).toBeTrue();
 
         httpTestingController.expectOne('/api/test-model-changed');
         httpTestingController.verify();
@@ -138,10 +138,10 @@ describe('withLinkedHypermediaResource', () => {
 
         await firstValueFrom(timer(0));
 
-        expect(store.testModel.url()).toBe('/api/test-model');
-        expect(store.testModel.initiallyLoaded()).toBeTrue();
-        expect(store.testModel.isLoading()).toBeFalse();
-        expect(store.testModel.isAvailable()).toBeTrue();
+        expect(store.testModelState.url()).toBe('/api/test-model');
+        expect(store.testModelState.initiallyLoaded()).toBeTrue();
+        expect(store.testModelState.isLoading()).toBeFalse();
+        expect(store.testModelState.isAvailable()).toBeTrue();
 
         loadRootModel = store.reloadRootModel();
 

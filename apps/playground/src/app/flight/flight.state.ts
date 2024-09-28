@@ -19,7 +19,7 @@ export const FlightState = signalStore(
         store.connectUpdateFlightOperator(store.flightEditVm.flight.operator, 'update');
         store.connectUpdateFlightPrice(store.flightEditVm.flight.price, 'update');
         store.connectFlightCreateVm(store.flightSearchVm, 'flightCreateVm');
-        store.connectCreateFlight(store.flightCreateVm.resource.template, 'create');
+        store.connectCreateFlight(store.flightCreateVm.template, 'create');
     }
 })
 );

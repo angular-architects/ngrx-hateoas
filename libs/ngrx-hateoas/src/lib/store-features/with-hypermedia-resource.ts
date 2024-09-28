@@ -73,6 +73,7 @@ function updateData<TResource>(dataKey: string, data: TResource) {
 }
 
 function updateState(stateKey: string, partialState: Partial<HypermediaResourceStateProps>) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (state: any) => ({ [stateKey]: { ...state[stateKey], ...partialState } });
 }
 

@@ -26,5 +26,5 @@ export const FLIHGT_ROUTES: Routes = [{
 }, {
     path: "create",
     component: FlightCreateComponent,
-    canActivate: [() => whenTrue(inject(FlightState).flightCreateVm.initiallyLoaded)]
+    canActivate: [() => whenTrue(inject(FlightState).flightCreateVmState.initiallyLoaded)]
 }];

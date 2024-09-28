@@ -5,7 +5,10 @@ import { Signal } from "@angular/core";
 export function withInitialHypermediaResource<ResourceName extends string, TResource>(
     resourceName: ResourceName, initialValue: TResource, url: string | (() => string)): SignalStoreFeature<
         { 
-            state: object; computed: Record<string, Signal<unknown>>; methods: Record<string, Function> },
+            state: object; 
+            computed: Record<string, Signal<unknown>>; 
+            methods: Record<string, Function> 
+        },
         {
             state: HypermediaResourceStoreState<ResourceName, TResource>;
             computed: Record<string, Signal<unknown>>;

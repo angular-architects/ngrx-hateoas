@@ -52,6 +52,7 @@ function getState(store: unknown, stateKey: string): HypermediaActionStateProps 
 }
 
 function updateState(stateKey: string, partialState: Partial<HypermediaActionStateProps>) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (state: any) => ({ [stateKey]: { ...state[stateKey], ...partialState } });
 }
 
