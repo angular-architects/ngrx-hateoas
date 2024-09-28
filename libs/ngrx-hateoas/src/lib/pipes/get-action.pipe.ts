@@ -10,14 +10,8 @@ export class GetActionPipe implements PipeTransform {
 
   private hateoasService = inject(HateoasService);
 
-  transform(resource: unknown, actionName: string): ResourceAction {
-    const action = this.hateoasService.getAction(resource, actionName);
-
-    if (action === undefined) {
-      throw new Error('The requested action does not exist on the specified resource. Use the "hasAction" pipe to check the existance of the link first');
-    }
-
-    return action;
+  transform(resource: unknown, actionName: string): ResourceAction | undefined {
+    return this.hateoasService.getAction(resource, actionName);
   }
 
 }

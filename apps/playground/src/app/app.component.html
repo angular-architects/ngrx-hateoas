@@ -10,14 +10,14 @@
       </div>
     </div>
     <div class="navbar-nav px-3">
-      @if(!appState.userInfo.isAvailable()) {
+      @if(!appState.userInfoState.isAvailable()) {
         <div class="nav-item">
           <button class="btn btn-secondary" (click)="logIn()">Login</button>
         </div>
       } @else {
         <div class="nav-item">
           <button class="btn btn-info text-nowrap" (click)="logOut()">
-            Logout <span class="badge text-bg-light">{{ appState.userInfo.resource.name() }}</span>
+            Logout <span class="badge text-bg-light">{{ appState.userInfo.name() }}</span>
           </button>
         </div>
       }

@@ -11,5 +11,5 @@ export const CORE_ROUTES: Routes = [{
 }, {
     path: 'home',
     component: HomeComponent,
-    canActivate: [ () => whenTrue(inject(CoreState).homeVm.initiallyLoaded) ]
+    canActivate: [ () => whenTrue(inject(CoreState).homeVmState.initiallyLoaded) ]
 }];

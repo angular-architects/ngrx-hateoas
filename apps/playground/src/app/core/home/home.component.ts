@@ -9,5 +9,5 @@ import { CoreState } from '../core.state';
   templateUrl: './home.component.html'
 })
 export class HomeComponent {
-  viewModel = inject(CoreState).homeVm.resource;
+  viewModel = inject(CoreState).homeVm;
 }

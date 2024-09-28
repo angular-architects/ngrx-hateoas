@@ -18,7 +18,7 @@ export class FlightCreateComponent {
   
   viewModel = this.flightState.getFlightCreateVmAsPatchable();
 
-  saveEnabled = this.flightState.createFlight.isAvailable;
+  saveEnabled = this.flightState.createFlightState.isAvailable;
 
   aircrafts = this.viewModel.aircrafts;
   
@@ -27,7 +27,7 @@ export class FlightCreateComponent {
   flightOperator = this.viewModel.template.operator;
 
   async onSaveFlight() {
-    await this.flightState.executeCreateFlight();
+    await this.flightState.createFlight();
     this.location.back();
   }
 }

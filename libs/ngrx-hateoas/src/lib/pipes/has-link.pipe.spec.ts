@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { HateoasConfig, HateoasService } from '../services/hateoas.service';
+import { HateoasService } from '../services/hateoas.service';
 import { HasLinkPipe } from './has-link.pipe';
 
 const testModel = {
@@ -13,7 +13,7 @@ describe('HasLinkPipe', () => {
   let hasLinkPipe: HasLinkPipe;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [ HasLinkPipe, HateoasService, HateoasConfig ]});
+    TestBed.configureTestingModule({ providers: [ HasLinkPipe, HateoasService ]});
     hasLinkPipe = TestBed.inject(HasLinkPipe);
   });
     

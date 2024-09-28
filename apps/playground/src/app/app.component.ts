@@ -12,11 +12,7 @@ import { AppState } from './app.state';
 export class AppComponent {
 
   appState = inject(AppState);
-  rootApiLoaded = this.appState.rootApi.isLoaded;
-
-  constructor() {
-    
-  }
+  rootApiLoaded = this.appState.rootApiState.isLoaded;
 
   logIn() {
     window.location.href  = './login?redirectUri=' + encodeURIComponent(window.origin);

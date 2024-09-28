@@ -141,7 +141,7 @@ describe('RequestService', () => {
             
             currentLocation = '/angular/route'
 
-            let windowsStub = {
+            const windowsStub = {
                 location: {
                     set href(value: string) { currentLocation = value; },
                     get href() { return currentLocation; }
@@ -165,9 +165,13 @@ describe('RequestService', () => {
             const serverRequest = httpTestingController.expectOne('/api/test');
             expect(serverRequest.request.method).toBe('GET');
             serverRequest.flush(null, { status: 401, statusText: 'Unauthorized' });
-            const clientRequest = await clientRequestPromise;
-            expect(clientRequest).toBeUndefined();
-            expect(currentLocation).toBe('/login-path?redirect-url=%2Fangular%2Froute');
+            try {
+                await clientRequestPromise;
+            } catch {
+                expect(currentLocation).toBe('/login-path?redirect-url=%2Fangular%2Froute');
+                return;
+            }
+            expect(false).toBeTrue();
         });
 
         it('makes PUT requests correctly', async () => {    
@@ -175,9 +179,13 @@ describe('RequestService', () => {
             const serverRequest = httpTestingController.expectOne('/api/test');
             expect(serverRequest.request.method).toBe('PUT');
             serverRequest.flush(null, { status: 401, statusText: 'Unauthorized' });
-            const clientRequest = await clientRequestPromise;
-            expect(clientRequest).toBeUndefined();
-            expect(currentLocation).toBe('/login-path?redirect-url=%2Fangular%2Froute');
+            try {
+                await clientRequestPromise;
+            } catch {
+                expect(currentLocation).toBe('/login-path?redirect-url=%2Fangular%2Froute');
+                return;
+            }
+            expect(false).toBeTrue();
         });
 
         it('makes POST requests correctly', async () => {    
@@ -185,9 +193,13 @@ describe('RequestService', () => {
             const serverRequest = httpTestingController.expectOne('/api/test');
             expect(serverRequest.request.method).toBe('POST');
             serverRequest.flush(null, { status: 401, statusText: 'Unauthorized' });
-            const clientRequest = await clientRequestPromise;
-            expect(clientRequest).toBeUndefined();
-            expect(currentLocation).toBe('/login-path?redirect-url=%2Fangular%2Froute');
+            try {
+                await clientRequestPromise;
+            } catch {
+                expect(currentLocation).toBe('/login-path?redirect-url=%2Fangular%2Froute');
+                return;
+            }
+            expect(false).toBeTrue();
         });
 
         it('makes DELETE requests correctly', async () => {    
@@ -195,9 +207,13 @@ describe('RequestService', () => {
             const serverRequest = httpTestingController.expectOne('/api/test');
             expect(serverRequest.request.method).toBe('DELETE');
             serverRequest.flush(null, { status: 401, statusText: 'Unauthorized' });
-            const clientRequest = await clientRequestPromise;
-            expect(clientRequest).toBeUndefined();
-            expect(currentLocation).toBe('/login-path?redirect-url=%2Fangular%2Froute');
+            try {
+                await clientRequestPromise;
+            } catch {
+                expect(currentLocation).toBe('/login-path?redirect-url=%2Fangular%2Froute');
+                return;
+            }
+            expect(true).toBe(false);
         });
     });
 
@@ -207,7 +223,7 @@ describe('RequestService', () => {
         let httpTestingController: HttpTestingController;
 
         beforeEach(() => {
-            let customHeaderOptions: CustomHeadersOptions = {
+            const customHeaderOptions: CustomHeadersOptions = {
                 headers: {
                     'X-Foo': 'Bar'
                 }

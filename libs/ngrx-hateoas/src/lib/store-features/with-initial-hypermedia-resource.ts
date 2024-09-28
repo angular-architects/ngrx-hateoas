@@ -1,13 +1,18 @@
 import { SignalStoreFeature, signalStoreFeature, withHooks } from "@ngrx/signals";
-import { withHypermediaResource, HypermediaResourceState, HypermediaResourceMethods, generateLoadHypermediaResourceFromUrlMethodName } from "./with-hypermedia-resource";
+import { withHypermediaResource, HypermediaResourceStoreState, HypermediaResourceStoreMethods, generateLoadHypermediaResourceFromUrlMethodName } from "./with-hypermedia-resource";
+import { Signal } from "@angular/core";
 
 export function withInitialHypermediaResource<ResourceName extends string, TResource>(
     resourceName: ResourceName, initialValue: TResource, url: string | (() => string)): SignalStoreFeature<
-        { state: {}; computed: {}; methods: {} },
+        { 
+            state: object; 
+            computed: Record<string, Signal<unknown>>; 
+            methods: Record<string, Function> 
+        },
         {
-            state: HypermediaResourceState<ResourceName, TResource>;
-            computed: {},
-            methods: HypermediaResourceMethods<ResourceName, TResource>;
+            state: HypermediaResourceStoreState<ResourceName, TResource>;
+            computed: Record<string, Signal<unknown>>;
+            methods: HypermediaResourceStoreMethods<ResourceName, TResource>;
         }
     >;
 export function withInitialHypermediaResource<ResourceName extends string, TResource>(resourceName: ResourceName, initialValue: TResource, url: string | (() => string)) {
@@ -17,14 +22,15 @@ export function withInitialHypermediaResource<ResourceName extends string, TReso
     return signalStoreFeature(
         withHypermediaResource<ResourceName, TResource>(resourceName, initialValue),
         withHooks({
-            onInit(store: any) {
+            onInit(store) {
                 let initialUrl;
                 if(typeof url === 'string') {
                     initialUrl = url;
                 } else {
                     initialUrl = url();
                 }
-                store[loadFromUrlMethodName](initialUrl);
+                
+                (store[loadFromUrlMethodName] as (url: string) => void)(initialUrl);
             }
         })
     );

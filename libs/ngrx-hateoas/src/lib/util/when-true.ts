@@ -1,4 +1,4 @@
-import { effect, Signal } from "@angular/core";
+import { Signal } from "@angular/core";
 import { toObservable } from "@angular/core/rxjs-interop";
 import { firstValueFrom, filter } from "rxjs";
 

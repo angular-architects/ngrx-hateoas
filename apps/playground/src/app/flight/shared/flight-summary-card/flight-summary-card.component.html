@@ -10,7 +10,7 @@
     </div>
     <div class="card-footer d-flex justify-content-between align-items-center">
       @if(flight | hasLink:'flightEditVm') {
-        <a class="btn btn-primary" [routerLink]="['/flight/edit', (flight | getLink:'flightEditVm').href]">Edit</a>
+        <a class="btn btn-primary" [routerLink]="['/flight/edit', (flight | getLink:'flightEditVm')?.href]">Edit</a>
       }
     </div>
 </div>

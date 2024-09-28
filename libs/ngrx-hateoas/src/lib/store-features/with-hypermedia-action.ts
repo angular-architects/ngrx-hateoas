@@ -7,26 +7,28 @@ import { isValidHref } from "../util/is-valid-href";
 import { RequestService } from "../services/request.service";
 import { HateoasService } from "../services/hateoas.service";
 
-export type HypermediaActionState<ActionName extends string> = 
+export type HypermediaActionStateProps = { 
+    href: string
+    method: '' | 'PUT' | 'POST' | 'DELETE',
+    isAvailable: boolean
+    isExecuting: boolean 
+    hasExecutedSuccessfully: boolean
+    hasExecutedWithError: boolean
+    hasError: boolean
+    error: unknown
+}
+
+export type HypermediaActionStoreState<ActionName extends string> = 
 { 
-    [K in ActionName]: { 
-        href: string
-        method: string
-        isAvailable: boolean
-        isExecuting: boolean 
-        hasExecutedSuccessfully: boolean
-        hasExecutedWithError: boolean
-        hasError: boolean
-        error: any
-    } 
+    [K in `${ActionName}State`]: HypermediaActionStateProps
 };
 
 export type ExecuteHypermediaActionMethod<ActionName extends string> = { 
-    [K in ActionName as `execute${Capitalize<ActionName>}`]: () => Promise<void>
+    [K in ActionName]: () => Promise<void>
 };
 
 export function generateExecuteHypermediaActionMethodName(actionName: string) {
-    return `execute${actionName.charAt(0).toUpperCase() + actionName.slice(1)}`;
+    return actionName;
 }
 
 export type ConnectHypermediaActionMethod<ActionName extends string> = { 
@@ -41,22 +43,35 @@ export type HypermediaActionMethods<ActionName extends string> =
     ExecuteHypermediaActionMethod<ActionName> & ConnectHypermediaActionMethod<ActionName>
 
 type actionRxInput = {
-    resource: any,
+    resource: unknown,
     action: string
+}
+
+function getState(store: unknown, stateKey: string): HypermediaActionStateProps {
+    return (store as Record<string, Signal<HypermediaActionStateProps>>)[stateKey]()
+}
+
+function updateState(stateKey: string, partialState: Partial<HypermediaActionStateProps>) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (state: any) => ({ [stateKey]: { ...state[stateKey], ...partialState } });
 }
 
 export function withHypermediaAction<ActionName extends string>(
     actionName: ActionName): SignalStoreFeature<
-        { state: {}; computed: {}; methods: {} },
+        { 
+            state: object;
+            computed: Record<string, Signal<unknown>>;
+            methods: Record<string, Function> 
+        },
         {
-            state: HypermediaActionState<ActionName>;
-            computed: {},
+            state: HypermediaActionStoreState<ActionName>;
+            computed: Record<string, Signal<unknown>>;
             methods: HypermediaActionMethods<ActionName>;
         }
     >;
 export function withHypermediaAction<ActionName extends string>(actionName: ActionName) {
 
-    const stateKey = `${actionName}`;
+    const stateKey = `${actionName}State`;
     const executeMethodName = generateExecuteHypermediaActionMethodName(actionName);
     const connectMehtodName = generateConnectHypermediaActionMethodName(actionName);
 
@@ -70,44 +85,48 @@ export function withHypermediaAction<ActionName extends string>(actionName: Acti
             hasExecutedSuccessfully: false,
             hasExecutedWithError: false,
             hasError: false,
-            error: null
+            error: null as unknown
            }
         }),
-        withMethods((store: any, requestService = inject(RequestService)) => {
+        withMethods((store, requestService = inject(RequestService)) => {
 
             const hateoasService = inject(HateoasService);
             let internalResourceLink: Signal<unknown> | null = null;
 
             const rxConnectToResource = rxMethod<actionRxInput>(
                 pipe( 
-                    tap(_ => patchState(store, { [stateKey]: { ...store[stateKey](), href: '', method: '', isAvailable: false } })),
+                    tap(() => patchState(store, updateState(stateKey, { href: '', method: '', isAvailable: false } ))),
                     map(input => hateoasService.getAction(input.resource, input.action)),
                     filter(action => isValidHref(action?.href) && isValidActionVerb(action?.method)),
                     map(action => action!),
-                    tap(action => patchState(store, { [stateKey]: { ...store[stateKey](), href: action.href, method: action.method, isAvailable: true } }))
+                    tap(action => patchState(store, updateState(stateKey, { href: action.href, method: action.method, isAvailable: true } )))
                 )
             );
 
             return {
                 [executeMethodName]: async (): Promise<void> => {
-                    if(store[stateKey].isAvailable() && internalResourceLink !== null) {
-                        const method = store[stateKey].method();
-                        const href = store[stateKey].href();
+                    if(getState(store, stateKey).isAvailable && internalResourceLink !== null) {
+                        const method = getState(store, stateKey).method;
+                        const href = getState(store, stateKey).href;
+
+                        if(!method || !href) throw new Error('Action is not available');
+
                         const body = method !== 'DELETE' ? internalResourceLink() : undefined
 
-                        patchState(store, { [stateKey]: { ...store[stateKey](), 
-                                                          isExecuting: true, 
-                                                          hasExecutedSuccessfully: false,
-                                                          hasExecutedWithError: false,
-                                                          hasError: false,
-                                                           error: null 
-                                                        } });
+                        patchState(store, 
+                            updateState(stateKey, { 
+                                isExecuting: true, 
+                                hasExecutedSuccessfully: false,
+                                hasExecutedWithError: false,
+                                hasError: false,
+                                error: null 
+                            }));
 
                         try {
                             await requestService.request(method, href, body);
-                            patchState(store, { [stateKey]: { ...store[stateKey](), isExecuting: false, hasExecutedSuccessfully: true } });
+                            patchState(store, updateState(stateKey, { isExecuting: false, hasExecutedSuccessfully: true } ));
                         } catch(e) {
-                            patchState(store, { [stateKey]: { ...store[stateKey](), isExecuting: false, hasExecutedWithError: true, hasError: true, error: e } });
+                            patchState(store, updateState(stateKey, { isExecuting: false, hasExecutedWithError: true, hasError: true, error: e } ));
                             throw e;
                         } 
                     }

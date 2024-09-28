@@ -9,7 +9,7 @@ export const CoreState = signalStore(
   withLinkedHypermediaResource('homeVm', initialHomeVm),
   withHooks({
     onInit(store) {
-      store.connectHomeVm(inject(AppState).rootApi.resource, 'homeVm')
+      store.connectHomeVm(inject(AppState).rootApi, 'homeVm')
     }
   })
 );

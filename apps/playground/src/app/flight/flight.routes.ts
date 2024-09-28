@@ -14,7 +14,7 @@ export const FLIHGT_ROUTES: Routes = [{
 }, {
     path: "search",
     component: FlightSearchComponent,
-    canActivate: [() => inject(FlightState).loadFlightSearchVmFromLink(inject(AppState).rootApi.resource(), 'flightSearchVm')]
+    canActivate: [() => inject(FlightState).loadFlightSearchVmFromLink(inject(AppState).rootApi(), 'flightSearchVm')]
 }, {
     path: "search/:url",
     component: FlightSearchComponent,
@@ -26,5 +26,5 @@ export const FLIHGT_ROUTES: Routes = [{
 }, {
     path: "create",
     component: FlightCreateComponent,
-    canActivate: [() => whenTrue(inject(FlightState).flightCreateVm.initiallyLoaded)]
+    canActivate: [() => whenTrue(inject(FlightState).flightCreateVmState.initiallyLoaded)]
 }];

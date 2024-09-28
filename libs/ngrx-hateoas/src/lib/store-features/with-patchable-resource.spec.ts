@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { signalStore, withState } from '@ngrx/signals';
-import { provideHateoas } from '../provide';
-import { HypermediaResourceState } from './with-hypermedia-resource';
+import { HypermediaResourceData } from './with-hypermedia-resource';
 import { withPatchableResource } from './with-patchable-resource';
 
 
@@ -24,7 +23,7 @@ const initialTestModel: TestModel = {
 
 const TestStore = signalStore(
     { providedIn: 'root' },
-    withState<HypermediaResourceState<'model', TestModel>>({ model: { url: '', isLoading: false, isLoaded: false, resource: initialTestModel }}),
+    withState<HypermediaResourceData<'model', TestModel>>({ model: initialTestModel }),
     withPatchableResource('model', initialTestModel)
 );
 
@@ -38,19 +37,19 @@ describe('withPatchableResource', () => {
     });
 
     it('sets correct initial resource state', () => {
-        expect(store.model.resource()).toBe(initialTestModel);
+        expect(store.model()).toBe(initialTestModel);
     });
 
     it('patches a signal inside the signal store', () => {
         const patchableSignal = store.getModelAsPatchable();
 
-        expect(store.model.resource.objProp.stringProp()).toBe('initial string');
-        expect(store.model.resource()).toBe(initialTestModel);
+        expect(store.model.objProp.stringProp()).toBe('initial string');
+        expect(store.model()).toBe(initialTestModel);
 
         patchableSignal.objProp.patch({ stringProp: 'patched' });
 
-        expect(store.model.resource.objProp.stringProp()).toBe('patched');
-        expect(store.model.resource()).not.toBe(initialTestModel);
+        expect(store.model.objProp.stringProp()).toBe('patched');
+        expect(store.model()).not.toBe(initialTestModel);
     });
 
 });
