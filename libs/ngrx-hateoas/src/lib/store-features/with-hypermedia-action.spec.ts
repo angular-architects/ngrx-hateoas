@@ -29,7 +29,7 @@ const TestStore = signalStore(
     withHypermediaAction('doSomething'),
     withHooks({
         onInit(store) {
-            store.connectDoSomething(store.testModel, 'doSomething')
+            store._connectDoSomething(store.testModel, 'doSomething')
         },
     })
 );
@@ -60,7 +60,6 @@ describe('withHypermediaAction', () => {
 
     it('has correct resource methods', () => {
         expect(store.doSomething).toBeDefined();
-        expect(store.connectDoSomething).toBeDefined();
     });
 
     it('does not execute action not available', async () => {
