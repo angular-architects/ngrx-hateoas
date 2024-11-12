@@ -7,7 +7,7 @@ export const AppState = signalStore(
   withLinkedHypermediaResource('userInfo', { name: '', preferred_username: '' }),
   withHooks({
     onInit(store) {
-        store.connectUserInfo(store.rootApi, 'userinfo')
+        store._connectUserInfo(store.rootApi, 'userinfo')
     }
   })
 );
