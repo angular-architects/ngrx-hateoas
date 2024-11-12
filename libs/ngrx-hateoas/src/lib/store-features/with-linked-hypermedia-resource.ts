@@ -27,11 +27,11 @@ export type LinkedHypermediaResourceStoreState<ResourceName extends string, TRes
     & LinkedHypermediaResourceState<ResourceName>;
 
 export type ConnectLinkedHypermediaResourceMethod<ResourceName extends string> = { 
-    [K in ResourceName as `connect${Capitalize<ResourceName>}`]: (linkRoot: Signal<unknown>, linkName: string) => void
+    [K in ResourceName as `_connect${Capitalize<ResourceName>}`]: (linkRoot: Signal<unknown>, linkName: string) => void
 };
 
 export function generateConnectLinkedHypermediaResourceMethodName(resourceName: string) {
-    return `connect${resourceName.charAt(0).toUpperCase() + resourceName.slice(1)}`;
+    return `_connect${resourceName.charAt(0).toUpperCase() + resourceName.slice(1)}`;
 }
 
 export type ReloadLinkedHypermediaResourceMethod<ResourceName extends string> = { 

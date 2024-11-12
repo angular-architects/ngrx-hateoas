@@ -32,11 +32,11 @@ export function generateExecuteHypermediaActionMethodName(actionName: string) {
 }
 
 export type ConnectHypermediaActionMethod<ActionName extends string> = { 
-    [K in ActionName as `connect${Capitalize<ActionName>}`]: (linkRoot: Signal<unknown>, action: string) => void
+    [K in ActionName as `_connect${Capitalize<ActionName>}`]: (linkRoot: Signal<unknown>, action: string) => void
 };
 
 export function generateConnectHypermediaActionMethodName(actionName: string) {
-    return `connect${actionName.charAt(0).toUpperCase() + actionName.slice(1)}`;
+    return `_connect${actionName.charAt(0).toUpperCase() + actionName.slice(1)}`;
 }
 
 export type HypermediaActionMethods<ActionName extends string> = 
