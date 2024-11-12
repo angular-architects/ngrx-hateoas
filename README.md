@@ -12,6 +12,9 @@ To run the playground app clone the repository and run an `npm install`. Then st
 
 Use and review the playground application inside the repository to understand how to use the library. Also you can review the http responses and requests in the browser network tab to get an impression of how hypermedia json can look like. 
 
+## Lib Usage
+The library is available as npm package here: https://www.npmjs.com/package/@angular-architects/ngrx-hateoas
+
 ## Documentation
 Will be done soon - I promise!
 
