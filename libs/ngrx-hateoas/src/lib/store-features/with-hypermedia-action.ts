@@ -88,7 +88,7 @@ export function withHypermediaAction<ActionName extends string>(actionName: Acti
 
     return signalStoreFeature(
         withState({
-           [stateKey]: defaultHypermediaActionStateProps
+           [stateKey]: defaultHypermediaActionState
         }),
         withMethods((store, requestService = inject(RequestService)) => {
 
