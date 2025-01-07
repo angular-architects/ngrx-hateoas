@@ -1,10 +1,11 @@
-import { initialDynamicResource, withHypermediaResource, withHypermediaAction, withLinkedHypermediaResource } from "@angular-architects/ngrx-hateoas";
+import { withHypermediaResource, withHypermediaAction, withLinkedHypermediaResource, withHypermediaCollectionAction } from "@angular-architects/ngrx-hateoas";
 import { signalStore, withHooks } from "@ngrx/signals";
-import { initialFlightCreateVm, initialFlightEditVm } from "./flight.entities";
+import { Flight, initialFlightCreateVm, initialFlightEditVm } from "./flight.entities";
 
 export const FlightState = signalStore(
   { providedIn: 'root' },
-  withHypermediaResource('flightSearchVm', initialDynamicResource),
+  withHypermediaResource('flightSearchVm', { flights: [], from: '', to: '' } as { flights: Flight[], from: string, to: string }),
+  withHypermediaCollectionAction('deleteFlight'),
   withHypermediaResource('flightEditVm', initialFlightEditVm),
   withHypermediaAction('updateFlightConnection'),
   withHypermediaAction('updateFlightTimes'),
@@ -14,6 +15,7 @@ export const FlightState = signalStore(
   withHypermediaAction('createFlight'),
   withHooks({
     onInit(store) {
+        store._connectDeleteFlight(store.flightSearchVm.flights, 'id', 'delete');
         store._connectUpdateFlightConnection(store.flightEditVm.flight.connection, 'update');
         store._connectUpdateFlightTimes(store.flightEditVm.flight.times, 'update');
         store._connectUpdateFlightOperator(store.flightEditVm.flight.operator, 'update');

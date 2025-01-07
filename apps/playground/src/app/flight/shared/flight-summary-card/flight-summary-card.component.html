@@ -10,7 +10,8 @@
     </div>
     <div class="card-footer d-flex justify-content-between align-items-center">
       @if(flight | hasLink:'flightEditVm') {
-        <a class="btn btn-primary" [routerLink]="['/flight/edit', (flight | getLink:'flightEditVm')?.href]">Edit</a>
+        <button class="btn btn-primary" [routerLink]="['/flight/edit', (flight | getLink:'flightEditVm')?.href]">Edit</button>
+        <button class="btn btn-secondary" (click)="delete.emit()">Delete</button>
       }
     </div>
 </div>

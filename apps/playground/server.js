@@ -55,6 +55,7 @@ server.get('/views/flightSearchVm', (req, res) => {
 
   flights.forEach(flight => {
     flight._links = { flightEditVm: { href: 'http://localhost:5100/views/flightEditVm/' + flight.id } };
+    flight._actions = { delete: { method: 'delete', href: 'http://localhost:5100/flights/' + flight.id } };
   });
 
   const result = {
@@ -151,6 +152,13 @@ server.put('/flights/:flightId/price', (req, res) => {
   const flightId = req.params.flightId;
   const flight = db.flights.find(v => v.id == flightId);
   flight.price = req.body;
+  res.sendStatus(204);
+});
+
+server.delete('/flights/:flightId', (req, res) => {
+  const flightId = req.params.flightId;
+  const index = db.flights.findIndex(f => f.id == flightId);
+  db.flights.splice(index, 1);
   res.sendStatus(204);
 });
 

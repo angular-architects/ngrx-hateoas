@@ -47,7 +47,7 @@ export function generateExecuteHypermediaCollectionActionMethodName(actionName: 
 }
 
 export type ConnectHypermediaCollectionActionMethod<ActionName extends string> = { 
-    [K in ActionName as `_connect${Capitalize<ActionName>}`]: (linkRoot: Signal<unknown[]>, action: string) => void
+    [K in ActionName as `_connect${Capitalize<ActionName>}`]: (resourceLink: Signal<unknown[]>, idKeyName: string, action: string) => void
 };
 
 export function generateConnectHypermediaCollectionActionMethodName(actionName: string) {
@@ -81,14 +81,14 @@ function toResourceMap(resources: unknown[], idLookup: (resource: unknown) => Co
 function updateItemState(stateKey: string, id: CollectionKey, itemState: Partial<HypermediaActionStateProps> ) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (state: { [K in any]: HypermediaCollectionActionStateProps}) => ({ [stateKey]: { 
-        href: itemState.href ? { ...state[stateKey].href, [id]: itemState.href } : state[stateKey].href,
-        method: itemState.method ? { ...state[stateKey].method, [id]: itemState.method } : state[stateKey].method,
-        isAvailable: itemState.isAvailable ? { ...state[stateKey].isAvailable, [id]: itemState.isAvailable } : state[stateKey].isAvailable,
-        isExecuting: itemState.isExecuting ? { ...state[stateKey].isExecuting, [id]: itemState.isExecuting } : state[stateKey].isExecuting,
-        hasExecutedSuccessfully: itemState.hasExecutedSuccessfully ? { ...state[stateKey].hasExecutedSuccessfully, [id]: itemState.hasExecutedSuccessfully } : state[stateKey].hasExecutedSuccessfully,
-        hasExecutedWithError: itemState.hasExecutedWithError ? { ...state[stateKey].hasExecutedWithError, [id]: itemState.hasExecutedWithError } : state[stateKey].hasExecutedWithError,
-        hasError: itemState.hasError ? { ...state[stateKey].hasError, [id]: itemState.hasError } : state[stateKey].hasError,
-        error: itemState.error ? { ...state[stateKey].error, [id]: itemState.error } : state[stateKey].error
+        href: itemState.href !== undefined ? { ...state[stateKey].href, [id]: itemState.href } : state[stateKey].href,
+        method: itemState.method !== undefined ? { ...state[stateKey].method, [id]: itemState.method } : state[stateKey].method,
+        isAvailable: itemState.isAvailable !== undefined ? { ...state[stateKey].isAvailable, [id]: itemState.isAvailable } : state[stateKey].isAvailable,
+        isExecuting: itemState.isExecuting !== undefined ? { ...state[stateKey].isExecuting, [id]: itemState.isExecuting } : state[stateKey].isExecuting,
+        hasExecutedSuccessfully: itemState.hasExecutedSuccessfully !== undefined ? { ...state[stateKey].hasExecutedSuccessfully, [id]: itemState.hasExecutedSuccessfully } : state[stateKey].hasExecutedSuccessfully,
+        hasExecutedWithError: itemState.hasExecutedWithError !== undefined ? { ...state[stateKey].hasExecutedWithError, [id]: itemState.hasExecutedWithError } : state[stateKey].hasExecutedWithError,
+        hasError: itemState.hasError !== undefined ? { ...state[stateKey].hasError, [id]: itemState.hasError } : state[stateKey].hasError,
+        error: itemState.error !== undefined ? { ...state[stateKey].error, [id]: itemState.error } : state[stateKey].error
     } satisfies HypermediaCollectionActionStateProps
  });
 }
@@ -132,6 +132,7 @@ export function withHypermediaCollectionAction<ActionName extends string>(action
                                 if(action && isValidHref(action.href) && isValidActionVerb(action.method)) {
                                     actionState.href = action.href;
                                     actionState.method = action.method;
+                                    actionState.isAvailable = true;
                                 }
                                 return [resource, actionState] satisfies [unknown, HypermediaActionStateProps] as [unknown, HypermediaActionStateProps];
                             }),
@@ -168,8 +169,9 @@ export function withHypermediaCollectionAction<ActionName extends string>(action
                         } 
                     }
                 },
-                [connectMehtodName]: (resourceLink: Signal<unknown[]>, idLookup: (resource: unknown) => CollectionKey, action: string) => { 
+                [connectMehtodName]: (resourceLink: Signal<unknown[]>, idKeyName: string, action: string) => { 
                     if(!internalResourceMap) {
+                        const idLookup = (resource: any) => resource[idKeyName];
                         internalResourceMap = computed(() => toResourceMap(resourceLink(), idLookup));
                         const input = computed(() => ({ resource: resourceLink(), idLookup, action }));
                         rxConnectToResource(input);
