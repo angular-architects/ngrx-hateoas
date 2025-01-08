@@ -7,7 +7,7 @@ import { isValidHref } from "../util/is-valid-href";
 import { RequestService } from "../services/request.service";
 import { HateoasService } from "../services/hateoas.service";
 import { defaultHypermediaActionState, HypermediaActionStateProps } from "./with-hypermedia-action";
-import { ResourceAction } from "../models";
+import { Resource, ResourceAction } from "../models";
 
 export type CollectionKey = string | number;
 
@@ -58,8 +58,8 @@ export type HypermediaCollectionActionMethods<ActionName extends string> =
     ExecuteHypermediaCollectionActionMethod<ActionName> & ConnectHypermediaCollectionActionMethod<ActionName>
 
 type ActionRxInput = {
-    resource: unknown[],
-    idLookup: (resource: unknown) => CollectionKey,
+    resource: Resource[],
+    idLookup: (resource: Resource) => CollectionKey,
     action: string
 }
 
@@ -72,8 +72,8 @@ function updateState(stateKey: string, partialState: Partial<HypermediaCollectio
     return (state: any) => ({ [stateKey]: { ...state[stateKey], ...partialState } });
 }
 
-function toResourceMap(resources: unknown[], idLookup: (resource: unknown) => CollectionKey): Record<CollectionKey, unknown> {
-    const result: Record<CollectionKey, unknown> = {};
+function toResourceMap(resources: Resource[], idLookup: (resource: Resource) => CollectionKey): Record<CollectionKey, Resource> {
+    const result: Record<CollectionKey, Resource> = {};
     resources.forEach(resource => result[idLookup(resource)] = resource);
     return result;
 }
@@ -126,7 +126,7 @@ export function withHypermediaCollectionAction<ActionName extends string>(action
                     tap(() => patchState(store, updateState(stateKey, defaultHypermediaCollectionActionState))),
                     mergeMap(input => from(input.resource)
                         .pipe(
-                            map(resource => [resource, hateoasService.getAction(resource, input.action)] satisfies [unknown, ResourceAction | undefined ] as [unknown, ResourceAction | undefined ]),
+                            map(resource => [resource, hateoasService.getAction(resource, input.action)] satisfies [Resource, ResourceAction | undefined ] as [Resource, ResourceAction | undefined ]),
                             map(([resource, action]) => {
                                 const actionState: HypermediaActionStateProps = defaultHypermediaActionState;
                                 if(action && isValidHref(action.href) && isValidActionVerb(action.method)) {
@@ -134,7 +134,7 @@ export function withHypermediaCollectionAction<ActionName extends string>(action
                                     actionState.method = action.method;
                                     actionState.isAvailable = true;
                                 }
-                                return [resource, actionState] satisfies [unknown, HypermediaActionStateProps] as [unknown, HypermediaActionStateProps];
+                                return [resource, actionState] satisfies [Resource, HypermediaActionStateProps] as [Resource, HypermediaActionStateProps];
                             }),
                             tap(([resource, actionState]) => patchState(store, updateItemState(stateKey, input.idLookup(resource), actionState)))
                         ))
@@ -169,9 +169,13 @@ export function withHypermediaCollectionAction<ActionName extends string>(action
                         } 
                     }
                 },
-                [connectMehtodName]: (resourceLink: Signal<unknown[]>, idKeyName: string, action: string) => { 
+                [connectMehtodName]: (resourceLink: Signal<Resource[]>, idKeyName: string, action: string) => { 
                     if(!internalResourceMap) {
-                        const idLookup = (resource: any) => resource[idKeyName];
+                        const idLookup = (resource: Resource) => { 
+                            const id = resource[idKeyName];
+                            if(typeof id === 'string' || typeof id === 'number') return id;
+                            else throw new Error("The specified 'idKeyName' must point to a key with a value of type 'string' or 'number'");
+                        };
                         internalResourceMap = computed(() => toResourceMap(resourceLink(), idLookup));
                         const input = computed(() => ({ resource: resourceLink(), idLookup, action }));
                         rxConnectToResource(input);
