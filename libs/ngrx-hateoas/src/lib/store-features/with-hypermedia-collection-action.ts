@@ -110,7 +110,7 @@ export function withHypermediaCollectionAction<ActionName extends string>(action
 
     const stateKey = `${actionName}State`;
     const executeMethodName = generateExecuteHypermediaCollectionActionMethodName(actionName);
-    const connectMehtodName = generateConnectHypermediaCollectionActionMethodName(actionName);
+    const connectMethodName = generateConnectHypermediaCollectionActionMethodName(actionName);
 
     return signalStoreFeature(
         withState({
@@ -169,7 +169,7 @@ export function withHypermediaCollectionAction<ActionName extends string>(action
                         } 
                     }
                 },
-                [connectMehtodName]: (resourceLink: Signal<Resource[]>, idKeyName: string, action: string) => { 
+                [connectMethodName]: (resourceLink: Signal<Resource[]>, idKeyName: string, action: string) => { 
                     if(!internalResourceMap) {
                         const idLookup = (resource: Resource) => { 
                             const id = resource[idKeyName];

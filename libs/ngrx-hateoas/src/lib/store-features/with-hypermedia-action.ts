@@ -84,7 +84,7 @@ export function withHypermediaAction<ActionName extends string>(actionName: Acti
 
     const stateKey = `${actionName}State`;
     const executeMethodName = generateExecuteHypermediaActionMethodName(actionName);
-    const connectMehtodName = generateConnectHypermediaActionMethodName(actionName);
+    const connectMethodName = generateConnectHypermediaActionMethodName(actionName);
 
     return signalStoreFeature(
         withState({
@@ -133,7 +133,7 @@ export function withHypermediaAction<ActionName extends string>(actionName: Acti
                         } 
                     }
                 },
-                [connectMehtodName]: (resourceLink: Signal<unknown>, action: string) => { 
+                [connectMethodName]: (resourceLink: Signal<unknown>, action: string) => { 
                     if(!internalResourceLink) {
                         internalResourceLink = resourceLink;
                         const input = computed(() => ({ resource: resourceLink(), action }));
