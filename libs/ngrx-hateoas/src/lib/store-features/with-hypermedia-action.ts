@@ -8,14 +8,25 @@ import { RequestService } from "../services/request.service";
 import { HateoasService } from "../services/hateoas.service";
 
 export type HypermediaActionStateProps = { 
+    method: '' | 'PUT' | 'POST' | 'DELETE'
     href: string
-    method: '' | 'PUT' | 'POST' | 'DELETE',
     isAvailable: boolean
     isExecuting: boolean 
     hasExecutedSuccessfully: boolean
     hasExecutedWithError: boolean
     hasError: boolean
     error: unknown
+}
+
+export const defaultHypermediaActionState: HypermediaActionStateProps = {
+    href: '',
+    method: '',
+    isAvailable: false,
+    isExecuting: false,
+    hasExecutedSuccessfully: false,
+    hasExecutedWithError: false,
+    hasError: false,
+    error: null as unknown
 }
 
 export type HypermediaActionStoreState<ActionName extends string> = 
@@ -73,25 +84,16 @@ export function withHypermediaAction<ActionName extends string>(actionName: Acti
 
     const stateKey = `${actionName}State`;
     const executeMethodName = generateExecuteHypermediaActionMethodName(actionName);
-    const connectMehtodName = generateConnectHypermediaActionMethodName(actionName);
+    const connectMethodName = generateConnectHypermediaActionMethodName(actionName);
 
     return signalStoreFeature(
         withState({
-           [stateKey]: {
-            href: '',
-            method: '',
-            isAvailable: false,
-            isExecuting: false,
-            hasExecutedSuccessfully: false,
-            hasExecutedWithError: false,
-            hasError: false,
-            error: null as unknown
-           }
+           [stateKey]: defaultHypermediaActionState
         }),
         withMethods((store, requestService = inject(RequestService)) => {
 
             const hateoasService = inject(HateoasService);
-            let internalResourceLink: Signal<unknown> | null = null;
+            let internalResourceLink: Signal<unknown> | undefined;
 
             const rxConnectToResource = rxMethod<actionRxInput>(
                 pipe( 
@@ -105,7 +107,7 @@ export function withHypermediaAction<ActionName extends string>(actionName: Acti
 
             return {
                 [executeMethodName]: async (): Promise<void> => {
-                    if(getState(store, stateKey).isAvailable && internalResourceLink !== null) {
+                    if(getState(store, stateKey).isAvailable && internalResourceLink) {
                         const method = getState(store, stateKey).method;
                         const href = getState(store, stateKey).href;
 
@@ -131,8 +133,8 @@ export function withHypermediaAction<ActionName extends string>(actionName: Acti
                         } 
                     }
                 },
-                [connectMehtodName]: (resourceLink: Signal<unknown>, action: string) => { 
-                    if(internalResourceLink === null) {
+                [connectMethodName]: (resourceLink: Signal<unknown>, action: string) => { 
+                    if(!internalResourceLink) {
                         internalResourceLink = resourceLink;
                         const input = computed(() => ({ resource: resourceLink(), action }));
                         rxConnectToResource(input);

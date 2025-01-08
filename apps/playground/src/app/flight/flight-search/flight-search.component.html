@@ -36,16 +36,16 @@
     <span class="lead pb-3">Search Results</span>
 </div>
 
-@if(!viewModel()['flights']) {
+@if(!viewModel.flights()) {
     <div class="row">
         <p>Search for flights to show something here!</p>
     </div>
 } @else {
     <div class="row row-cols-1 row-cols-md-2 g-4">
 
-        @for(flight of $any(viewModel())['flights']; track flight.id) {
+        @for(flight of viewModel.flights(); track flight.id) {
             <div class="col">
-                <app-flight-summary-card [flight]="flight">
+                <app-flight-summary-card [flight]="flight" (delete)="onDelete(flight.id)">
                     @if(flight | hasLink:'flightEditVm') {
                         <a class="btn btn-primary" [routerLink]="['/flight/edit', (flight | getLink:'flightEditVm')?.href]">Edit</a>
                       }

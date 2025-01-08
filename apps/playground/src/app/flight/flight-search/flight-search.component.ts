@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { GetLinkPipe, HasLinkPipe, HateoasService } from '@angular-architects/ngrx-hateoas';
@@ -24,5 +24,10 @@ export class FlightSearchComponent {
     let url = this.hateoasService.getLink(this.viewModel(), 'flightSearchVm')?.href;
     url = url + '?from=' + (this.from() ?? '') + '&to=' + (this.to() ?? '');
     this.router.navigate(['/flight/search', url]);
+  }
+
+  async onDelete(flightId: number) {
+    await this.flightState.deleteFlight(flightId);
+    this.flightState.reloadFlightSearchVm();
   }
 }

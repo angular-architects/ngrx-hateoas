@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { GetLinkPipe, HasLinkPipe } from '@angular-architects/ngrx-hateoas';
@@ -12,4 +12,5 @@ import { Flight } from '../../flight.entities';
 })
 export class FlightSummaryCardComponent {
   flight = input<Flight>();
+  delete = output<void>();
 }

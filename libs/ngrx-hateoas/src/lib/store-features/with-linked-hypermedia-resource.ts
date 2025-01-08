@@ -90,7 +90,7 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
 
     const dataKey = `${resourceName}`;
     const stateKey = `${resourceName}State`;
-    const connectMehtodName = generateConnectLinkedHypermediaResourceMethodName(resourceName);
+    const connectMethodName = generateConnectLinkedHypermediaResourceMethodName(resourceName);
     const reloadMethodName = generateReloadLinkedHypermediaResourceMethodName(resourceName);
     const getAsPatchableMethodName = generateGetAsPatchableLinkedHypermediaResourceMethodName(resourceName);
 
@@ -126,7 +126,7 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
             );
 
             return {
-                [connectMehtodName]: (linkRoot: Signal<unknown>, linkName: string) => { 
+                [connectMethodName]: (linkRoot: Signal<unknown>, linkName: string) => { 
                     const input = computed(() => ({ resource: linkRoot(), linkName }));
                     rxConnectToLinkRoot(input);
                 },
