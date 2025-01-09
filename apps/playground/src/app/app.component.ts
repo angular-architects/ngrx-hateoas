@@ -4,10 +4,9 @@ import { AppState } from './app.state';
 
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet, RouterLink],
-  templateUrl: './app.component.html'
+    selector: 'app-root',
+    imports: [RouterOutlet, RouterLink],
+    templateUrl: './app.component.html'
 })
 export class AppComponent {
 

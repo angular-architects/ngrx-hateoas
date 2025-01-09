@@ -7,10 +7,9 @@ import { FlightTimesFormComponent } from '../shared/flight-times-form/flight-tim
 import { FlightState } from '../flight.state';
 
 @Component({
-  selector: 'app-flight-edit',
-  standalone: true,
-  imports: [ActionCardComponent, FlightConnectionFormComponent, FlightOperatorFormComponent, FlightTimesFormComponent, FlightPriceFormComponent],
-  templateUrl: './flight-edit.component.html'
+    selector: 'app-flight-edit',
+    imports: [ActionCardComponent, FlightConnectionFormComponent, FlightOperatorFormComponent, FlightTimesFormComponent, FlightPriceFormComponent],
+    templateUrl: './flight-edit.component.html'
 })
 export class FlightEditComponent {
   flightState = inject(FlightState);

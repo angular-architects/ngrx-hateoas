@@ -3,10 +3,9 @@ import { CommonModule } from '@angular/common';
 import { CoreState } from '../core.state';
 
 @Component({
-  selector: 'app-home', 
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './home.component.html'
+    selector: 'app-home',
+    imports: [CommonModule],
+    templateUrl: './home.component.html'
 })
 export class HomeComponent {
   viewModel = inject(CoreState).homeVm;

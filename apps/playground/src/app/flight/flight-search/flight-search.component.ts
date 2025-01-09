@@ -6,10 +6,9 @@ import { FlightSummaryCardComponent } from '../shared/flight-summary-card/flight
 import { FlightState } from '../flight.state';
 
 @Component({
-  selector: 'app-flight-search',
-  standalone: true,
-  imports: [FormsModule, RouterLink, HasLinkPipe, GetLinkPipe, FlightSummaryCardComponent],
-  templateUrl: './flight-search.component.html'
+    selector: 'app-flight-search',
+    imports: [FormsModule, RouterLink, HasLinkPipe, GetLinkPipe, FlightSummaryCardComponent],
+    templateUrl: './flight-search.component.html'
 })
 export class FlightSearchComponent {
   hateoasService = inject(HateoasService);

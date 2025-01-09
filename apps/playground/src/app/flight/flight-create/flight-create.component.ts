@@ -7,10 +7,9 @@ import { FlightTimesFormComponent } from '../shared/flight-times-form/flight-tim
 import { FlightState } from '../flight.state';
 
 @Component({
-  selector: 'app-flight-create',
-  standalone: true,
-  imports: [ActionCardComponent, FlightConnectionFormComponent, FlightOperatorFormComponent, FlightTimesFormComponent],
-  templateUrl: './flight-create.component.html'
+    selector: 'app-flight-create',
+    imports: [ActionCardComponent, FlightConnectionFormComponent, FlightOperatorFormComponent, FlightTimesFormComponent],
+    templateUrl: './flight-create.component.html'
 })
 export class FlightCreateComponent {
   location = inject(Location);

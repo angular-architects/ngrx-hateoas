@@ -2,10 +2,9 @@ import { Component, effect, input, model, output } from '@angular/core';
 import { timer } from 'rxjs';
 
 @Component({
-  selector: 'app-action-card',
-  standalone: true,
-  imports: [],
-  templateUrl: './action-card.component.html'
+    selector: 'app-action-card',
+    imports: [],
+    templateUrl: './action-card.component.html'
 })
 export class ActionCardComponent {
   

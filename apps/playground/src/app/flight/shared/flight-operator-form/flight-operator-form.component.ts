@@ -4,10 +4,9 @@ import { Aircraft, initialFlightOperator } from '../../flight.entities';
 import { FormUpdateDirective } from '../../../shared/directives/form-update.directive';
 
 @Component({
-  selector: 'app-flight-operator-form',
-  standalone: true,
-  imports: [FormsModule, FormUpdateDirective],
-  templateUrl: './flight-operator-form.component.html'
+    selector: 'app-flight-operator-form',
+    imports: [FormsModule, FormUpdateDirective],
+    templateUrl: './flight-operator-form.component.html'
 })
 export class FlightOperatorFormComponent {
   model = model(initialFlightOperator);
