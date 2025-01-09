@@ -7,12 +7,14 @@ export function withInitialHypermediaResource<ResourceName extends string, TReso
         { 
             state: object; 
             computed: Record<string, Signal<unknown>>; 
-            methods: Record<string, Function> 
+            methods: Record<string, Function>;
+            props: object;
         },
         {
             state: HypermediaResourceStoreState<ResourceName, TResource>;
             computed: Record<string, Signal<unknown>>;
             methods: HypermediaResourceStoreMethods<ResourceName, TResource>;
+            props: object;
         }
     >;
 export function withInitialHypermediaResource<ResourceName extends string, TResource>(resourceName: ResourceName, initialValue: TResource, url: string | (() => string)) {
@@ -29,8 +31,8 @@ export function withInitialHypermediaResource<ResourceName extends string, TReso
                 } else {
                     initialUrl = url();
                 }
-                
-                (store[loadFromUrlMethodName] as (url: string) => void)(initialUrl);
+    
+                ((store as Record<string, unknown>)[loadFromUrlMethodName] as (url: string) => void)(initialUrl);
             }
         })
     );

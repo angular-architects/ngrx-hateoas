@@ -64,7 +64,7 @@ describe('withLinkedHypermediaResource', () => {
         expect(store.getTestModelAsPatchable).toBeDefined();
     });
 
-    it('loads the linked resource after link in root resource is available of has changed', async () => {
+    it('loads the linked resource after link in root resource is available or has changed', async () => {
         const rootModelFromUrl: RootModel = {
             apiName: 'loaded model',
             _links: {
@@ -82,6 +82,7 @@ describe('withLinkedHypermediaResource', () => {
         httpTestingController.verify();
    
         await loadRootModel;
+        await firstValueFrom(timer(0));
 
         expect(store.testModelState.url()).toBe('/api/test-model');
         expect(store.testModelState.initiallyLoaded()).toBeFalse();
@@ -104,6 +105,7 @@ describe('withLinkedHypermediaResource', () => {
         httpTestingController.verify();
 
         await loadRootModel;
+        await firstValueFrom(timer(0));
 
         expect(store.testModelState.url()).toBe('/api/test-model-changed');
         expect(store.testModelState.initiallyLoaded()).toBeTrue();
@@ -132,6 +134,7 @@ describe('withLinkedHypermediaResource', () => {
         httpTestingController.verify();
    
         await loadRootModel;
+        await firstValueFrom(timer(0));
 
         httpTestingController.expectOne('/api/test-model').flush(testModelFromLink);
         httpTestingController.verify();

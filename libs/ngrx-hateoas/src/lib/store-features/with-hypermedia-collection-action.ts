@@ -98,12 +98,14 @@ export function withHypermediaCollectionAction<ActionName extends string>(
         { 
             state: object;
             computed: Record<string, Signal<unknown>>;
-            methods: Record<string, Function> 
+            methods: Record<string, Function>;
+            props: object;
         },
         {
             state: HypermediaCollectionActionStoreState<ActionName>;
             computed: Record<string, Signal<unknown>>;
             methods: HypermediaCollectionActionMethods<ActionName>;
+            props: object;
         }
     >;
 export function withHypermediaCollectionAction<ActionName extends string>(actionName: ActionName) {

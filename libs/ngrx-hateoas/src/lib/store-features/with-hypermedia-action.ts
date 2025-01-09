@@ -72,12 +72,14 @@ export function withHypermediaAction<ActionName extends string>(
         { 
             state: object;
             computed: Record<string, Signal<unknown>>;
-            methods: Record<string, Function> 
+            methods: Record<string, Function>;
+            props: object;
         },
         {
             state: HypermediaActionStoreState<ActionName>;
             computed: Record<string, Signal<unknown>>;
             methods: HypermediaActionMethods<ActionName>;
+            props: object;
         }
     >;
 export function withHypermediaAction<ActionName extends string>(actionName: ActionName) {

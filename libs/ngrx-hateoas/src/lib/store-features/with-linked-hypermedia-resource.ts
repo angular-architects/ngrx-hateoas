@@ -78,12 +78,14 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
         { 
             state: object;
             computed: Record<string, Signal<unknown>>; 
-            methods: Record<string, Function> 
+            methods: Record<string, Function>;
+            props: object;
         },
         {
             state: LinkedHypermediaResourceStoreState<ResourceName, TResource>;
             computed: Record<string, Signal<unknown>>;
             methods: LinkedHypermediaResourceMethods<ResourceName, TResource>;
+            props: object;
         }
     >;
 export function withLinkedHypermediaResource<ResourceName extends string, TResource>(resourceName: ResourceName, initialValue: TResource) {
