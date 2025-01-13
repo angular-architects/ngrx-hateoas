@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
-import { AppState } from './app.state';
-
+import { AppStore } from './app.store';
 
 @Component({
     selector: 'app-root',
@@ -10,8 +9,8 @@ import { AppState } from './app.state';
 })
 export class AppComponent {
 
-  appState = inject(AppState);
-  rootApiLoaded = this.appState.rootApiState.isLoaded;
+  store = inject(AppStore);
+  rootApiLoaded = this.store.rootApiState.isLoaded;
 
   logIn() {
     window.location.href  = './login?redirectUri=' + encodeURIComponent(window.origin);

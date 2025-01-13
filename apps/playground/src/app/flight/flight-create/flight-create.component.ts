@@ -1,10 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActionCardComponent } from '../../shared/ui/action-card/action-card.component';
 import { FlightConnectionFormComponent } from '../shared/flight-connection-form/flight-connection-form.component';
 import { FlightOperatorFormComponent } from '../shared/flight-operator-form/flight-operator-form.component';
 import { FlightTimesFormComponent } from '../shared/flight-times-form/flight-times-form.component';
-import { FlightState } from '../flight.state';
+import { FlightCreateStore } from './flight-create.store';
 
 @Component({
     selector: 'app-flight-create',
@@ -13,11 +13,11 @@ import { FlightState } from '../flight.state';
 })
 export class FlightCreateComponent {
   location = inject(Location);
-  flightState = inject(FlightState);
+  store = inject(FlightCreateStore);
   
-  viewModel = this.flightState.getFlightCreateVmAsPatchable();
+  viewModel = this.store.getFlightCreateVmAsPatchable();
 
-  saveEnabled = this.flightState.createFlightState.isAvailable;
+  saveEnabled = this.store.createFlightState.isAvailable;
 
   aircrafts = this.viewModel.aircrafts;
   
@@ -26,7 +26,7 @@ export class FlightCreateComponent {
   flightOperator = this.viewModel.template.operator;
 
   async onSaveFlight() {
-    await this.flightState.createFlight();
+    await this.store.createFlight();
     this.location.back();
   }
 }

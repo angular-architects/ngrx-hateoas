@@ -2,7 +2,7 @@
 <div class="row">
     <div class="col">
         <span class="lead">Flight Search</span>
-        @if(showCreate()) {
+        @if(viewModel() | hasLink:'flightCreateVm') {
             <button class="btn btn-secondary float-end" [routerLink]="['/flight/create']">Create</button>
         }
     </div>

@@ -6,32 +6,31 @@
 
 <div class="row">
     <div class="col">
-        <app-action-card [disabled]="!flightState.updateFlightConnectionState.isAvailable()" 
-                         [showSuccess]="flightState.updateFlightConnectionState.hasExecutedSuccessfully()"
-                         [showError]="flightState.updateFlightConnectionState.hasExecutedWithError()"
-                         (execute)="flightState.updateFlightConnection()">
+        <app-action-card [disabled]="!store.updateFlightConnectionState.isAvailable()" 
+                         [showSuccess]="store.updateFlightConnectionState.hasExecutedSuccessfully()"
+                         [showError]="store.updateFlightConnectionState.hasExecutedWithError()"
+                         (execute)="store.updateFlightConnection()">
             <app-flight-connection-form [model]="flightConnection()" (modelChange)="flightConnection.set($event)" />
         </app-action-card>
-        <app-action-card [disabled]="!flightState.updateFlightTimesState.isAvailable()" 
-                         [showSuccess]="flightState.updateFlightTimesState.hasExecutedSuccessfully()"
-                         [showError]="flightState.updateFlightTimesState.hasExecutedWithError()"
-                         (execute)="flightState.updateFlightTimes()">
+        <app-action-card [disabled]="!store.updateFlightTimesState.isAvailable()" 
+                         [showSuccess]="store.updateFlightTimesState.hasExecutedSuccessfully()"
+                         [showError]="store.updateFlightTimesState.hasExecutedWithError()"
+                         (execute)="store.updateFlightTimes()">
             <app-flight-times-form [model]="flightTimes()" (modelChange)="flightTimes.set($event)" />
         </app-action-card>
-        <app-action-card [disabled]="!flightState.updateFlightOperatorState.isAvailable()" 
-                         [showSuccess]="flightState.updateFlightOperatorState.hasExecutedSuccessfully()"
-                         [showError]="flightState.updateFlightOperatorState.hasExecutedWithError()"
-                         (execute)="flightState.updateFlightOperator()">
+        <app-action-card [disabled]="!store.updateFlightOperatorState.isAvailable()" 
+                         [showSuccess]="store.updateFlightOperatorState.hasExecutedSuccessfully()"
+                         [showError]="store.updateFlightOperatorState.hasExecutedWithError()"
+                         (execute)="store.updateFlightOperator()">
             <app-flight-operator-form [aircrafts]="viewModel.aircrafts()" [model]="flightOperator()" (modelChange)="flightOperator.set($event)" />
         </app-action-card>
         @if(flightPrice(); as flightPriceValue) {
-            <app-action-card [disabled]="!flightState.updateFlightPriceState.isAvailable()" 
-                             [showSuccess]="flightState.updateFlightPriceState.hasExecutedSuccessfully()"
-                             [showError]="flightState.updateFlightPriceState.hasExecutedWithError()"
-                             (execute)="flightState.updateFlightPrice()">
+            <app-action-card [disabled]="!store.updateFlightPriceState.isAvailable()" 
+                             [showSuccess]="store.updateFlightPriceState.hasExecutedSuccessfully()"
+                             [showError]="store.updateFlightPriceState.hasExecutedWithError()"
+                             (execute)="store.updateFlightPrice()">
                 <app-flight-price-form [model]="flightPriceValue" (modelChange)="flightPrice.set($event)" />
             </app-action-card>
         }
     </div>
 </div>
-
