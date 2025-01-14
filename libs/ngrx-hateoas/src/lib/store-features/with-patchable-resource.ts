@@ -19,12 +19,14 @@ export function withPatchableResource<ResourceName extends string, TResource>(
         { 
             state: HypermediaResourceData<ResourceName, TResource>;
             computed: Record<string, Signal<unknown>>; 
-            methods: Record<string, Function> 
+            methods: Record<string, Function>;
+            props: object;
         },
         {
             state: object,
             computed: Record<string, Signal<unknown>>,
             methods: PatchableResourceMethods<ResourceName, TResource>;
+            props: object;
         }
     >;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

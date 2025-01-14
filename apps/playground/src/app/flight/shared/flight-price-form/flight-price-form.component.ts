@@ -4,10 +4,9 @@ import { initialFlightPrice } from '../../flight.entities';
 import { FormUpdateDirective } from '../../../shared/directives/form-update.directive';
 
 @Component({
-  selector: 'app-flight-price-form',
-  standalone: true,
-  imports: [FormsModule, FormUpdateDirective],
-  templateUrl: './flight-price-form.component.html'
+    selector: 'app-flight-price-form',
+    imports: [FormsModule, FormUpdateDirective],
+    templateUrl: './flight-price-form.component.html'
 })
 export class FlightPriceFormComponent {
   model = model(initialFlightPrice);

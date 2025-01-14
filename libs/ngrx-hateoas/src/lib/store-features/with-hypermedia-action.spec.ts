@@ -62,12 +62,12 @@ describe('withHypermediaAction', () => {
         expect(store.doSomething).toBeDefined();
     });
 
-    it('does not execute action not available', async () => {
+    it('does not execute action if not available', async () => {
         await store.doSomething();
         httpTestingController.verify();
     });
 
-    it('executes a successfull action after it is available', async () => {
+    it('executes an action successfully after it is available', async () => {
 
         const testModel = store.getTestModelAsPatchable();
         testModel.name.patch('foobar');

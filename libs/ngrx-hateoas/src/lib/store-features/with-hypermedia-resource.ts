@@ -82,12 +82,14 @@ export function withHypermediaResource<ResourceName extends string, TResource>(
         { 
             state: object; 
             computed: Record<string, Signal<unknown>>; 
-            methods: Record<string, Function> 
+            methods: Record<string, Function>;
+            props: object;
         },
         {
             state: HypermediaResourceStoreState<ResourceName, TResource>;
             computed: Record<string, Signal<unknown>>;
             methods: HypermediaResourceStoreMethods<ResourceName, TResource>;
+            props: object;
         }
     >;
 export function withHypermediaResource<ResourceName extends string, TResource>(resourceName: ResourceName, initialValue: TResource) {

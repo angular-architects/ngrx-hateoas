@@ -4,17 +4,16 @@ import { FlightConnectionFormComponent } from '../shared/flight-connection-form/
 import { FlightOperatorFormComponent } from '../shared/flight-operator-form/flight-operator-form.component';
 import { FlightPriceFormComponent } from '../shared/flight-price-form/flight-price-form.component';
 import { FlightTimesFormComponent } from '../shared/flight-times-form/flight-times-form.component';
-import { FlightState } from '../flight.state';
+import { FlightEditStore } from './flight-edit.store';
 
 @Component({
-  selector: 'app-flight-edit',
-  standalone: true,
-  imports: [ActionCardComponent, FlightConnectionFormComponent, FlightOperatorFormComponent, FlightTimesFormComponent, FlightPriceFormComponent],
-  templateUrl: './flight-edit.component.html'
+    selector: 'app-flight-edit',
+    imports: [ActionCardComponent, FlightConnectionFormComponent, FlightOperatorFormComponent, FlightTimesFormComponent, FlightPriceFormComponent],
+    templateUrl: './flight-edit.component.html'
 })
 export class FlightEditComponent {
-  flightState = inject(FlightState);
-  viewModel = this.flightState.getFlightEditVmAsPatchable();
+  store = inject(FlightEditStore);
+  viewModel = this.store.getFlightEditVmAsPatchable();
   flightConnection = this.viewModel.flight.connection;
   flightTimes = this.viewModel.flight.times;
   flightOperator = this.viewModel.flight.operator;

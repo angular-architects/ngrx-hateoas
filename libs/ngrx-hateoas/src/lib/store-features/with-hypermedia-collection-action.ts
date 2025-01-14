@@ -98,12 +98,14 @@ export function withHypermediaCollectionAction<ActionName extends string>(
         { 
             state: object;
             computed: Record<string, Signal<unknown>>;
-            methods: Record<string, Function> 
+            methods: Record<string, Function>;
+            props: object;
         },
         {
             state: HypermediaCollectionActionStoreState<ActionName>;
             computed: Record<string, Signal<unknown>>;
             methods: HypermediaCollectionActionMethods<ActionName>;
+            props: object;
         }
     >;
 export function withHypermediaCollectionAction<ActionName extends string>(actionName: ActionName) {
@@ -128,7 +130,7 @@ export function withHypermediaCollectionAction<ActionName extends string>(action
                         .pipe(
                             map(resource => [resource, hateoasService.getAction(resource, input.action)] satisfies [Resource, ResourceAction | undefined ] as [Resource, ResourceAction | undefined ]),
                             map(([resource, action]) => {
-                                const actionState: HypermediaActionStateProps = defaultHypermediaActionState;
+                                const actionState: HypermediaActionStateProps = { ...defaultHypermediaActionState };
                                 if(action && isValidHref(action.href) && isValidActionVerb(action.method)) {
                                     actionState.href = action.href;
                                     actionState.method = action.method;

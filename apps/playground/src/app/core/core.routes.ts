@@ -2,7 +2,7 @@ import { Routes } from "@angular/router";
 import { HomeComponent } from "./home/home.component";
 import { whenTrue } from "@angular-architects/ngrx-hateoas";
 import { inject } from "@angular/core";
-import { CoreState } from "./core.state";
+import { HomeStore } from "./home/home.store";
 
 export const CORE_ROUTES: Routes = [{
     path: '',
@@ -11,5 +11,5 @@ export const CORE_ROUTES: Routes = [{
 }, {
     path: 'home',
     component: HomeComponent,
-    canActivate: [ () => whenTrue(inject(CoreState).homeVmState.initiallyLoaded) ]
+    canActivate: [ () => whenTrue(inject(HomeStore).homeVmState.initiallyLoaded) ]
 }];
