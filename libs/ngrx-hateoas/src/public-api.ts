@@ -8,6 +8,8 @@ export * from './lib/util/when-true';
 export * from './lib/services/hateoas.service';
 export * from './lib/pipes/has-link.pipe';
 export * from './lib/pipes/get-link.pipe';
+export * from './lib/pipes/has-action.pipe';
+export * from './lib/pipes/get-action.pipe';
 export * from './lib/store-features/with-hypermedia-resource';
 export * from './lib/store-features/with-initial-hypermedia-resource';
 export * from './lib/store-features/with-linked-hypermedia-resource';
