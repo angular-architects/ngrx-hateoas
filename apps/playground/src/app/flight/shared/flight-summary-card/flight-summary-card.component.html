@@ -11,6 +11,8 @@
     <div class="card-footer d-flex justify-content-between align-items-center">
       @if(flight | hasLink:'flightEditVm') {
         <button class="btn btn-primary" [routerLink]="['/flight/edit', (flight | getLink:'flightEditVm')?.href]">Edit</button>
+      }
+      @if(flight | hasAction:'delete') {
         <button class="btn btn-secondary" (click)="delete.emit()">Delete</button>
       }
     </div>
