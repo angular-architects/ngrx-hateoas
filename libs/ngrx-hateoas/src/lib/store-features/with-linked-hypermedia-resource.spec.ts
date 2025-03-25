@@ -116,6 +116,38 @@ describe('withLinkedHypermediaResource', () => {
         httpTestingController.verify();
     });
 
+    it('ignores the response if it is null', async () => {
+        const rootModelFromUrl: RootModel = {
+            apiName: 'loaded model',
+            _links: {
+                testModel: { href: '/api/test-model' }
+            }
+        };
+
+        const loadRootModel = store.loadRootModelFromUrl('/api/root-model');
+
+        httpTestingController.expectOne('/api/root-model').flush(rootModelFromUrl);
+        httpTestingController.verify();
+   
+        await loadRootModel;
+        await firstValueFrom(timer(0));
+
+        expect(store.testModelState.url()).toBe('/api/test-model');
+        expect(store.testModelState.initiallyLoaded()).toBeFalse();
+        expect(store.testModelState.isLoading()).toBeTrue();
+        expect(store.testModelState.isAvailable()).toBeTrue();
+
+        httpTestingController.expectOne('/api/test-model').flush(null);
+        httpTestingController.verify();
+
+        await firstValueFrom(timer(0));
+
+        expect(store.testModelState.url()).toBeUndefined();
+        expect(store.testModelState.initiallyLoaded()).toBeFalse();
+        expect(store.testModelState.isLoading()).toBeFalse();
+        expect(store.testModelState.isAvailable()).toBeFalse();
+    });
+
     it('does not load the linked resource after root resource has changed but link is same href', async () => {
         const rootModelFromUrl: RootModel = {
             apiName: 'loaded model',

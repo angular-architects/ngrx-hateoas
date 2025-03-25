@@ -8,6 +8,7 @@ import { RequestService } from "../services/request.service";
 import { HateoasService } from "../services/hateoas.service";
 import { defaultHypermediaActionState, HypermediaActionStateProps } from "./with-hypermedia-action";
 import { Resource, ResourceAction } from "../models";
+import { HttpResponse } from "@angular/common/http";
 
 export type CollectionKey = string | number;
 
@@ -39,7 +40,7 @@ export type HypermediaCollectionActionStoreState<ActionName extends string> =
 };
 
 export type ExecuteHypermediaCollectionActionMethod<ActionName extends string> = { 
-    [K in ActionName]: (id: CollectionKey) => Promise<void>
+    [K in ActionName]: (id: CollectionKey) => Promise<HttpResponse<unknown>>
 };
 
 export function generateExecuteHypermediaCollectionActionMethodName(actionName: string) {
@@ -144,7 +145,7 @@ export function withHypermediaCollectionAction<ActionName extends string>(action
             );
 
             return {
-                [executeMethodName]: async (id: CollectionKey): Promise<void> => {
+                [executeMethodName]: async (id: CollectionKey): Promise<HttpResponse<unknown>> => {
                     if(getState(store, stateKey).isAvailable[id] && internalResourceMap) {
                         const method = getState(store, stateKey).method[id];
                         const href = getState(store, stateKey).href[id];
@@ -163,12 +164,15 @@ export function withHypermediaCollectionAction<ActionName extends string>(action
                             }));
 
                         try {
-                            await requestService.request(method, href, body);
+                            const response = await requestService.request(method, href, body);
                             patchState(store, updateItemState(stateKey, id, { isExecuting: false, hasExecutedSuccessfully: true } ));
+                            return response;
                         } catch(e) {
                             patchState(store, updateItemState(stateKey, id, { isExecuting: false, hasExecutedWithError: true, hasError: true, error: e } ));
                             throw e;
                         } 
+                    } else {
+                        throw new Error('Action is not available');
                     }
                 },
                 [connectMethodName]: (resourceLink: Signal<Resource[]>, idKeyName: string, action: string) => { 

@@ -117,6 +117,40 @@ describe('withHypermediaResource', () => {
         expect(store.testModel.objProp.stringProp()).toBe('from Link');
     });
 
+    it('throws an error if response body is empty when loading from url', async () => {
+        const loadPromise = store.loadTestModelFromUrl('api/test-model');
+
+        expect(store.testModelState.isLoading()).toBeTrue();
+        expect(store.testModelState.isLoaded()).toBeFalse();
+
+        httpTestingController.expectOne('api/test-model').flush(null);
+        httpTestingController.verify();
+
+        await expectAsync(loadPromise).toBeRejectedWithError('Response body is empty for URL: api/test-model');
+
+        expect(store.testModelState.url()).toBe('api/test-model');
+        expect(store.testModelState.isLoading()).toBeFalse();
+        expect(store.testModelState.isLoaded()).toBeFalse();
+        expect(store.testModel.objProp.stringProp()).toBe('initial string');
+    });
+
+    it('throws an error if response body is empty when loading from link', async () => {
+        const loadPromise = store.loadTestModelFromLink(store.rootModel(), 'testModel');
+
+        expect(store.testModelState.isLoading()).toBeTrue();
+        expect(store.testModelState.isLoaded()).toBeFalse();
+
+        httpTestingController.expectOne('api/test-model?origin=fromLink').flush(null);
+        httpTestingController.verify();
+
+        await expectAsync(loadPromise).toBeRejectedWithError('Response body is empty for URL: api/test-model?origin=fromLink');
+
+        expect(store.testModelState.url()).toBe('api/test-model?origin=fromLink');
+        expect(store.testModelState.isLoading()).toBeFalse();
+        expect(store.testModelState.isLoaded()).toBeFalse();
+        expect(store.testModel.objProp.stringProp()).toBe('initial string');
+    });
+
     it('reloads the resource and sets state correctly', async () => {
         const resourceFromUrl: TestModel = {
             numProp: 2,

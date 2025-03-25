@@ -62,8 +62,8 @@ describe('withHypermediaAction', () => {
         expect(store.doSomething).toBeDefined();
     });
 
-    it('does not execute action if not available', async () => {
-        await store.doSomething();
+    it('throws error if action is not available', async () => {
+        await expectAsync(store.doSomething()).toBeRejectedWithError('Action is not available');
         httpTestingController.verify();
     });
 
@@ -101,9 +101,11 @@ describe('withHypermediaAction', () => {
         expect(actionRequest.request.method).toBe('PUT');
         expect(actionRequest.request.body.name).toBe('foobar');
 
-        actionRequest.flush(204);
+        actionRequest.flush(204, { headers: { foo: 'bar' } });
    
-        await doSomethingPromise;
+        const response = await doSomethingPromise;
+
+        expect(response.headers.get('foo')).toBe('bar');
 
         expect(store.doSomethingState.href()).toBe('/api/do-something');
         expect(store.doSomethingState.method()).toBe('PUT');
