@@ -6,7 +6,7 @@ import { isValidActionVerb } from "../util/is-valid-action-verb";
 import { isValidHref } from "../util/is-valid-href";
 import { RequestService } from "../services/request.service";
 import { HateoasService } from "../services/hateoas.service";
-import { HttpHeaders, HttpResponse } from "@angular/common/http";
+import { HttpResponse } from "@angular/common/http";
 
 export type HypermediaActionStateProps = { 
     method: '' | 'PUT' | 'POST' | 'DELETE'
