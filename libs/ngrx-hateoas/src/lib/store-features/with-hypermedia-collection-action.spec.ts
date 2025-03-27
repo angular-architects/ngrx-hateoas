@@ -77,8 +77,8 @@ describe('withHypermediaCollectionAction', () => {
         expect(store.doSomething).toBeDefined();
     });
 
-    it('does not execute action if not available', async () => {
-        await store.doSomething('item1');
+    it('throws error if action is not available', async () => {
+        await expectAsync(store.doSomething('item1')).toBeRejectedWithError('Action is not available');
         httpTestingController.verify();
     });
 

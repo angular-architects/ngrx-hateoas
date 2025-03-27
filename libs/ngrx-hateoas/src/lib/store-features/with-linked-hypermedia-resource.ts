@@ -121,9 +121,11 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                     tap(href => patchState(store, 
                                            updateState(stateKey, { url: href, isLoading: true, isAvailable: true } ))),
                     switchMap(href => requestService.request<TResource>('GET', href)),
-                    tap(resource => patchState(store,
-                                               updateData(dataKey, resource),
-                                               updateState(stateKey, { isLoading: false, initiallyLoaded: true } )))
+                    tap(response => response.body ? patchState(store,
+                                                        updateData(dataKey, response.body),
+                                                        updateState(stateKey, { isLoading: false, initiallyLoaded: true } ))
+                                                  : patchState(store,
+                                                        updateState(stateKey, { isLoading: false, url: undefined, isAvailable: false, initiallyLoaded: false } )))
                 )
             );
 
@@ -138,9 +140,12 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                         patchState(store, updateState(stateKey, { isLoading: true } ));
 
                         try {
-                            const resource = await requestService.request<TResource>('GET', currentUrl);
+                            const response = await requestService.request<TResource>('GET', currentUrl);
+                            if (!response.body) {
+                                throw new Error(`Response body is empty for URL: ${currentUrl}`);
+                            }
                             patchState(store, 
-                                       updateData(dataKey, resource),
+                                       updateData(dataKey, response.body),
                                        updateState(stateKey, { isLoading: false } ));
                         } catch(e) {
                             patchState(store, 

@@ -23,8 +23,11 @@ describe('RequestService', () => {
             const serverRequest = httpTestingController.expectOne('/api/test');
             expect(serverRequest.request.method).toBe('GET');
             serverRequest.flush({});
-            const clientRequest = await clientRequestPromise;
-            expect(clientRequest).toBeDefined();
+            const response = await clientRequestPromise;
+            expect(response).toBeDefined();
+            expect(response.status).toBe(200);
+            expect(response.statusText).toBe('OK');
+            expect(response.body).toEqual({});
         });
 
         it('makes PUT requests correctly', async () => {    
@@ -33,8 +36,10 @@ describe('RequestService', () => {
             expect(serverRequest.request.method).toBe('PUT');
             expect(serverRequest.request.body.strProp).toBe('foo');
             serverRequest.flush(null, { status: 204, statusText: 'No Content' });
-            const clientRequest = await clientRequestPromise;
-            expect(clientRequest).toBeNull();
+            const response = await clientRequestPromise;
+            expect(response).toBeDefined();
+            expect(response.status).toBe(204);
+            expect(response.statusText).toBe('No Content');
         });
 
         it('makes POST requests correctly', async () => {    
@@ -43,8 +48,10 @@ describe('RequestService', () => {
             expect(serverRequest.request.method).toBe('POST');
             expect(serverRequest.request.body.strProp).toBe('foo');
             serverRequest.flush(null, { status: 201, statusText: 'Created' });
-            const clientRequest = await clientRequestPromise;
-            expect(clientRequest).toBeNull();
+            const response = await clientRequestPromise;
+            expect(response).toBeDefined();
+            expect(response.status).toBe(201);
+            expect(response.statusText).toBe('Created');
         });
 
         it('makes DELETE requests correctly', async () => {    
@@ -52,8 +59,10 @@ describe('RequestService', () => {
             const serverRequest = httpTestingController.expectOne('/api/test');
             expect(serverRequest.request.method).toBe('DELETE');
             serverRequest.flush(null, { status: 204, statusText: 'No Content' });
-            const clientRequest = await clientRequestPromise;
-            expect(clientRequest).toBeNull();
+            const response = await clientRequestPromise;
+            expect(response).toBeDefined();
+            expect(response.status).toBe(204);
+            expect(response.statusText).toBe('No Content');
         });
     });
 
@@ -86,8 +95,11 @@ describe('RequestService', () => {
             expect(serverRequest.request.method).toBe('GET');
             expect(serverRequest.request.headers.has('X-XSRF-HEADER_NAME')).toBeFalse();
             serverRequest.flush({});
-            const clientRequest = await clientRequestPromise;
-            expect(clientRequest).toBeDefined();
+            const response = await clientRequestPromise;
+            expect(response).toBeDefined();
+            expect(response.status).toBe(200);
+            expect(response.statusText).toBe('OK');
+            expect(response.body).toEqual({});
         });
 
         it('makes PUT requests correctly', async () => {    
@@ -98,8 +110,10 @@ describe('RequestService', () => {
             expect(serverRequest.request.headers.get('X-XSRF-HEADER_NAME')).toBe('Xsrf-Cookie-Content');
             expect(serverRequest.request.body.strProp).toBe('foo');
             serverRequest.flush(null, { status: 204, statusText: 'No Content' });
-            const clientRequest = await clientRequestPromise;
-            expect(clientRequest).toBeNull();
+            const response = await clientRequestPromise;
+            expect(response).toBeDefined();
+            expect(response.status).toBe(204);
+            expect(response.statusText).toBe('No Content');
         });
 
         it('makes POST requests correctly', async () => {    
@@ -110,8 +124,10 @@ describe('RequestService', () => {
             expect(serverRequest.request.headers.has('X-XSRF-HEADER_NAME')).toBeTrue();
             expect(serverRequest.request.headers.get('X-XSRF-HEADER_NAME')).toBe('Xsrf-Cookie-Content');
             serverRequest.flush(null, { status: 201, statusText: 'Created' });
-            const clientRequest = await clientRequestPromise;
-            expect(clientRequest).toBeNull();
+            const response = await clientRequestPromise;
+            expect(response).toBeDefined();
+            expect(response.status).toBe(201);
+            expect(response.statusText).toBe('Created');
         });
 
         it('makes DELETE requests correctly', async () => {    
@@ -121,8 +137,10 @@ describe('RequestService', () => {
             expect(serverRequest.request.headers.has('X-XSRF-HEADER_NAME')).toBeTrue();
             expect(serverRequest.request.headers.get('X-XSRF-HEADER_NAME')).toBe('Xsrf-Cookie-Content');
             serverRequest.flush(null, { status: 204, statusText: 'No Content' });
-            const clientRequest = await clientRequestPromise;
-            expect(clientRequest).toBeNull();
+            const response = await clientRequestPromise;
+            expect(response).toBeDefined();
+            expect(response.status).toBe(204);
+            expect(response.statusText).toBe('No Content');
         });
     });
 
@@ -246,8 +264,11 @@ describe('RequestService', () => {
             expect(serverRequest.request.headers.has('X-FOO')).toBeTrue();
             expect(serverRequest.request.headers.get('X-FOO')).toBe('Bar');
             serverRequest.flush({});
-            const clientRequest = await clientRequestPromise;
-            expect(clientRequest).toBeDefined();
+            const response = await clientRequestPromise;
+            expect(response).toBeDefined();
+            expect(response.status).toBe(200);
+            expect(response.statusText).toBe('OK');
+            expect(response.body).toEqual({});
         });
 
         it('makes PUT requests correctly', async () => {    
@@ -258,8 +279,10 @@ describe('RequestService', () => {
             expect(serverRequest.request.headers.has('X-FOO')).toBeTrue();
             expect(serverRequest.request.headers.get('X-FOO')).toBe('Bar');
             serverRequest.flush(null, { status: 204, statusText: 'No Content' });
-            const clientRequest = await clientRequestPromise;
-            expect(clientRequest).toBeNull();
+            const response = await clientRequestPromise;
+            expect(response).toBeDefined();
+            expect(response.status).toBe(204);
+            expect(response.statusText).toBe('No Content');
         });
 
         it('makes POST requests correctly', async () => {    
@@ -270,8 +293,10 @@ describe('RequestService', () => {
             expect(serverRequest.request.headers.has('X-FOO')).toBeTrue();
             expect(serverRequest.request.headers.get('X-FOO')).toBe('Bar');
             serverRequest.flush(null, { status: 201, statusText: 'Created' });
-            const clientRequest = await clientRequestPromise;
-            expect(clientRequest).toBeNull();
+            const response = await clientRequestPromise;
+            expect(response).toBeDefined();
+            expect(response.status).toBe(201);
+            expect(response.statusText).toBe('Created');
         });
 
         it('makes DELETE requests correctly', async () => {    
@@ -281,8 +306,10 @@ describe('RequestService', () => {
             expect(serverRequest.request.headers.has('X-FOO')).toBeTrue();
             expect(serverRequest.request.headers.get('X-FOO')).toBe('Bar');
             serverRequest.flush(null, { status: 204, statusText: 'No Content' });
-            const clientRequest = await clientRequestPromise;
-            expect(clientRequest).toBeNull();
+            const response = await clientRequestPromise;
+            expect(response).toBeDefined();
+            expect(response.status).toBe(204);
+            expect(response.statusText).toBe('No Content');
         });
     });
 

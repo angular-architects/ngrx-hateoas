@@ -128,9 +128,12 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
                         patchState(store, updateState(stateKey, { url: '', isLoading: true }));
 
                         try {
-                            const resource = await requestService.request<TResource>('GET', url);
+                            const response = await requestService.request<TResource>('GET', url);
+                            if (!response.body) {
+                                throw new Error(`Response body is empty for URL: ${url}`);
+                            }
                             patchState(store, 
-                                       updateData(dataKey, resource), 
+                                       updateData(dataKey, response.body), 
                                        updateState(stateKey, { url, isLoading: false, isLoaded: true }));
                         } catch(e) {
                             patchState(store,
@@ -156,8 +159,11 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
                     patchState(store, updateState(stateKey, { url, isLoading: true }));
                     
                     try {
-                        const resource = await requestService.request<TResource>('GET', url);
-                        patchState(store, updateData(dataKey, resource), updateState(stateKey, { isLoading: false }));
+                        const response = await requestService.request<TResource>('GET', url);
+                        if (!response.body) {
+                            throw new Error(`Response body is empty for URL: ${url}`);
+                        }
+                        patchState(store, updateData(dataKey, response.body), updateState(stateKey, { isLoading: false }));
                     } catch(e) {
                         patchState(store, updateData(dataKey, initialValue), updateState(stateKey, { isLoading: false }));
                         throw e;
