@@ -31,8 +31,10 @@ export class RequestService {
             }
         }
 
+        const bodyWithoutMetadata = this.removeMetadata(body);
+
         try {
-            return await firstValueFrom(this.httpClient.request<T>(method, url, { body, headers, observe: 'response' }));
+            return await firstValueFrom(this.httpClient.request<T>(method, url, { body: bodyWithoutMetadata, headers, observe: 'response' }));
         } catch(errorResponse) {
             if(typeof errorResponse === 'object' && errorResponse !== null && 'status' in errorResponse && errorResponse.status === 401 && this.loginRedirectOptions) {
                 // Redirect to sign in 
@@ -43,9 +45,32 @@ export class RequestService {
         }
     }
 
+    public removeMetadata<T>(obj: T): T {
+        if (!obj || typeof obj !== 'object') {
+            return obj;
+        }
+
+        const result = {} as T;
+
+        for (const key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                if (key.startsWith('_')) {
+                    continue;
+                }
+                const value = obj[key];
+                if (typeof value === 'object' && value !== null) {
+                    result[key] = this.removeMetadata(value);
+                } else {
+                    result[key] = value;
+                }
+            }
+        }
+
+        return result;
+    }
+
     private getXsrfCookie(cookieName: string) {
         const o=document.cookie.split(";").map(t=>t.trim()).filter(t=>t.startsWith(cookieName+"="));
         return 0===o.length?null:decodeURIComponent(o[0].split("=")[1]);
     }
-
 }
