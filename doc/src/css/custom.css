@@ -1,0 +1,141 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #ce1242;
+  --ifm-color-primary-dark: #b9103b;
+  --ifm-color-primary-darker: #af0f38;
+  --ifm-color-primary-darkest: #900d2e;
+  --ifm-color-primary-light: #e31449;
+  --ifm-color-primary-lighter: #eb174d;
+  --ifm-color-primary-lightest: #ed3665;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  --color-secondary: #f7966e;
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #ce1242;
+  --ifm-color-primary-dark: #b9103b;
+  --ifm-color-primary-darker: #af0f38;
+  --ifm-color-primary-darkest: #900d2e;
+  --ifm-color-primary-light: #e31449;
+  --ifm-color-primary-lighter: #eb174d;
+  --ifm-color-primary-lightest: #ed3665;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+.font-gradient {
+  background-image: linear-gradient(135deg, var(--ifm-color-primary), var(--color-secondary));
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.homeContainer {
+  background-image: linear-gradient(transparent 45%, var(--ifm-color-primary) 200%);
+}
+
+.homeContainer header {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rem;
+}
+
+.homeContainer header h1 {
+  font-size: 3.5rem;
+  font-weight: 600;
+}
+
+.homeContainer header p {
+  font-size: 1.8rem;
+}
+
+.homeContainer header div { 
+  margin: 1rem;
+}
+
+.homeContainer .largeIcon {
+  margin: auto;
+  height: 280px;
+  width: 280px;
+  background-color: green;
+}
+
+.homeContainer .primaryButton {
+  background-image: linear-gradient(135deg, var(--ifm-color-primary), var(--color-secondary));
+  color: white;
+  border: none;
+  font-size: 1.8rem;
+}
+
+.homeContainer .card {
+  margin: 1rem;
+}
+
+@media screen and (max-width: 1024px) {
+  .homeContainer header {
+    gap: 3rem;
+  }
+  .homeContainer header h1 {
+    font-size: 3rem;
+  }
+  .homeContainer header p {
+    font-size: 1.5rem;
+  }
+  .homeContainer .primaryButton {
+    font-size: 1.5rem;
+  }
+  .homeContainer .largeIcon {
+    height: 250px;
+    width: 250px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .homeContainer header {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .homeContainer header h1 {
+    font-size: 2.5rem;
+  }
+  .homeContainer header p {
+    font-size: 1rem;
+  }
+  .homeContainer .primaryButton {
+    font-size: 1rem;
+  }
+  .homeContainer .largeIcon {
+    height: 150px;
+    width: 150px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .mdAndUp {
+    display: none;
+  }
+}
+
+.sm {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  .sm {
+    display: block;
+  }
+}
