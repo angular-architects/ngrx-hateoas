@@ -35,7 +35,7 @@ jobs:
       - name: Restore dependencies for docs
         run: npm install
 
-      - name: Build dock website
+      - name: Build Doc Website
         run: npm run build
 
       - name: Upload Build Artifact
