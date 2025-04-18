@@ -33,7 +33,7 @@ jobs:
           npm install
 
       - name: Restore dependencies for docs
-        run: pnpm install --frozen-lockfile
+        run: npm install
 
       - name: Build dock website
         run: npm run build
