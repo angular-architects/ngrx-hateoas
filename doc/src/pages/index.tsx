@@ -46,7 +46,7 @@ function HomepageHeader() {
             <h3>Transfers state from the backend into the Signal Store, helps to mutate the state and sends it back.</h3>
             <Link
               className="button button--secondary button--lg primaryButton"
-              to="/docs/intro">
+              to="/docs/guide/intro">
               Get Started
             </Link>
           </div>

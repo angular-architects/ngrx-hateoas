@@ -40,7 +40,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/angular-architects/ngrx-hateoas/tree/main/doc',
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -61,7 +61,7 @@ const config: Config = {
       items: [
         {
           type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
+          sidebarId: 'guideSidebar',
           position: 'left',
           label: 'Guide',
         },
@@ -80,7 +80,7 @@ const config: Config = {
           items: [
             {
               label: 'Guide',
-              to: '/docs/intro',
+              to: '/docs/guide/intro',
             },
           ],
         },
