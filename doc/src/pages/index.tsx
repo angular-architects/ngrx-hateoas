@@ -44,11 +44,11 @@ function HomepageHeader() {
             <h1><span className="font-gradient">ngrx-hateoas</span></h1>
             <h2>{siteConfig.tagline}</h2>
             <h3>Transfers state from the backend into the Signal Store, helps to mutate the state and sends it back.</h3>
-            <Link
+            {/* <Link
               className="button button--secondary button--lg primaryButton"
               to="/docs/guide/intro">
               Get Started
-            </Link>
+            </Link> */}
           </div>
           <div className="mdAndUp">
             <HeaderIcon gradientId="gradient-side" />
@@ -85,8 +85,8 @@ export default function Home(): ReactNode {
   const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
-      title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      title={`${siteConfig.title}`}
+      description="Brings Hypermedia to the NgRx Signal Store.">
       <div className="homeContainer">
         <HomepageHeader />
         <main>
