@@ -85,7 +85,7 @@ export default function Home(): ReactNode {
   const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
-      title={`${siteConfig.title}`}
+      title={`Home`}
       description="Brings Hypermedia to the NgRx Signal Store.">
       <div className="homeContainer">
         <HomepageHeader />
