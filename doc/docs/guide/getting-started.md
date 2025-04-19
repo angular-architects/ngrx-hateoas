@@ -48,7 +48,7 @@ To install the **ngrx-hateoas** library run
 npm i @angular-architects/ngrx-hateoas
 ``
 
-Finally you have to add the **ngrx-hateoas** services to your application by using the `provideHateoas` function. Since **ngrx-hateoas** uses the Angular http client to make its requests to the backend you should also add `provideHttpClient`.
+Finally you have to add the **ngrx-hateoas** services to your application by using the `provideHateoas` function. Since **ngrx-hateoas** uses the Angular HTTP client to make its requests to the backend you should also add `provideHttpClient`.
 
 ```ts
 export const appConfig: ApplicationConfig = {
@@ -192,13 +192,13 @@ To mutate the state of the flight within the signal store you have the following
 
 2. Use the deep patchable signal provided by **ngrx-hateoas**
 
-   For each resource you add to the store withe the help of **ngrx-hateoas** the library creates a deep patchable signal for you. This lets you make changes in the hole hierarchy of your state object without the need implement a method for each single state change. This is especially in case of data driven application where a lot of data needs to be transferd to the ui (e.g. into forms) and back the easier way. You can get this patchable signal directly from the store.
+   For each resource you add to the store with the help of **ngrx-hateoas** the library creates a deep patchable signal for you. This lets you make changes in the whole hierarchy of your state object without the need to implement a method for each single state change. This is especially in case of data driven application where a lot of data needs to be transferred to the UI (e.g. into forms) and back the easier way. You can get this patchable signal directly from the store.
 
    ```ts
    // Get the flight as deep patchable signal from the store
    const flight = store.getFlightModelAsPatchable();
 
-   // Update the hole connection object
+   // Update the whole connection object
    const newFlightConnection: FlightConnection = {...}
    flight.connection.set(newFlightConnection);
    
@@ -210,7 +210,7 @@ To mutate the state of the flight within the signal store you have the following
    :::
 
 ## Send changed state Back to the Server
-To be able to send the changed flight connection back to the server we have to inform the signal store to offer an action for this. To do this we use the `withHypermediaAction` feature from **ngrx-hateoas**. The hypermedia action needs to be configured which object in the state to monitor for metadata and the name of the action. If you look into the example json at the beginning you see the required metadata is directly placed into the `connection` key. And the name of the action is `update`. This two information need to be provided to the action. This is done with the help of a connect method within the `onInit` hook.
+To be able to send the changed flight connection back to the server we have to inform the signal store to offer an action for this. To do this we use the `withHypermediaAction` feature from **ngrx-hateoas**. The hypermedia action needs to be configured which object in the state to monitor for metadata and the name of the action. If you look into the example JSON at the beginning you see the required metadata is directly placed into the `connection` key. And the name of the action is `update`. This two information need to be provided to the action. This is done with the help of a connect method within the `onInit` hook.
 
 ```ts
 import { withHypermediaResource, withHypermediaAction } from "@angular-architects/ngrx-hateoas";
@@ -234,12 +234,12 @@ The `withHypermediaAction` adds a method to the store to execute it and a state 
 
 ```ts
 // A signal indicating if the action is available, means the specified 
-// metadata - provided via the connect method - is availalbe in the 
+// metadata - provided via the connect method - is available in the 
 // currently loaded resource.
 const isAvailableSignal = this.store.updateFlightConnectionState.isAvailable;
 // A signal indicating if a request is currently running. Means a request
 // was sent to the backend and the client is waiting for the response. You
-// can use this e.g. for showing a loading spinner or progress bar in your ui.
+// can use this e.g. for showing a loading spinner or progress bar in your UI.
 const isExecuting = this.store.updateFlightConnectionState.isExecuting;
 ```
 :::info
@@ -249,10 +249,10 @@ The shown action state signals are just examples. There are more metainformation
 To execute the call the method on the store with has the same name as the action:
 
 ```ts
-const actionPromis = this.store.updateFlightConnection();
+const actionPromise = this.store.updateFlightConnection();
 ```
 
-This call finally send the connection object back to the server using the http verb specified in the metadata and returns a promis in order to be able to wait the completion of this asynchronous operation.
+This call finally send the connection object back to the server using the HTTP verb specified in the metadata and returns a promise in order to be able to wait the completion of this asynchronous operation.
 
 ## Add more Actions to the Store
 So far we have added only one action. But the example resource from the beginning provides more action. A signal store which supports all possible actions could look like the following final code snippet: 
