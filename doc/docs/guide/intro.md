@@ -56,11 +56,8 @@ An example for a simple resource like a flight could look like the following:
         }
     },
     "times": {
-        "departure": "2023-10-01T10:00:00Z",
-        "arrival": "2023-10-01T14:00:00Z",
-        "origin": "JFK",
-        "destination": "LAX",
-        "status": "scheduled",
+        "takeOff": "2023-10-01T10:00:00Z",
+        "landing": "2023-10-01T14:00:00Z",
         "_actions": {
             "update": { "href": "/api/flights/flight-123/times", "method": "PUT" }
         }

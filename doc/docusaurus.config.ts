@@ -87,7 +87,7 @@ const config: Config = {
           ],
         },
         {
-          title: 'Community',
+          title: 'Supporters',
           items: [
             {
               label: 'Angular Architects',
