@@ -1,0 +1,224 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #ce1242;
+  --ifm-color-primary-dark: #b9103b;
+  --ifm-color-primary-darker: #af0f38;
+  --ifm-color-primary-darkest: #900d2e;
+  --ifm-color-primary-light: #e31449;
+  --ifm-color-primary-lighter: #eb174d;
+  --ifm-color-primary-lightest: #ed3665;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  --color-secondary: #f7966e;
+  --color-secondary-light: #faccb8;
+  --color-secondary-dark: #6e4838;
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #ce1242;
+  --ifm-color-primary-dark: #b9103b;
+  --ifm-color-primary-darker: #af0f38;
+  --ifm-color-primary-darkest: #900d2e;
+  --ifm-color-primary-light: #e31449;
+  --ifm-color-primary-lighter: #eb174d;
+  --ifm-color-primary-lightest: #ed3665;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+.lightOnly {
+  display: none;
+}
+
+.darkOnly {
+  display: none;
+}
+
+[data-theme='light'] .lightOnly {
+  display: block;
+}
+
+[data-theme='dark'] .darkOnly {
+  display: block;
+}
+
+.font-gradient {
+  background-image: linear-gradient(135deg, var(--ifm-color-primary), var(--color-secondary));
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.homeContainer {
+  background-image: linear-gradient(transparent 55%, var(--ifm-color-primary) 200%);
+}
+
+.homeContainer header {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  gap: 5rem;
+}
+
+.homeContainer header h1 {
+  font-size: 56px;
+  font-weight: 600;
+}
+
+.homeContainer header h2 {
+  font-size: 56px;
+  font-weight: 600;
+}
+
+.homeContainer header h3 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.homeContainer header div { 
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+.homeContainer .largeIcon {
+  margin: auto;
+  height: 480px;
+  width: 480px;
+  padding: 70px;
+  background: radial-gradient(var(--color-secondary-dark), transparent 70%);
+}
+
+[data-theme='light'] .homeContainer .largeIcon {
+  background: radial-gradient(var(--color-secondary-light), transparent 70%);
+}
+
+.homeContainer .primaryButton {
+  background-image: linear-gradient(135deg, var(--ifm-color-primary), var(--color-secondary));
+  color: white;
+  border: none;
+  font-size: 1.8rem;
+}
+
+.homeContainer .supporters {
+  margin-left: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.homeContainer .supporters h1 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.homeContainer .supporters div {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+
+.homeContainer .card {
+  margin: 1rem;
+}
+
+@media screen and (max-width: 1500px) {
+  .homeContainer header {
+    gap: 3rem;
+  }
+  .homeContainer header h1 {
+    font-size: 44px;
+    font-weight: 600;
+  }
+  
+  .homeContainer header h2 {
+    font-size: 44px;
+    font-weight: 600;
+  }
+  
+  .homeContainer header h3 {
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .homeContainer .primaryButton {
+    font-size: 1.5rem;
+  }
+  .homeContainer .largeIcon {
+    height: 400px;
+    width: 400px;
+    padding: 60px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .homeContainer header {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  .homeContainer header h1 {
+    font-size: 32px;
+    font-weight: 600;
+  }
+  
+  .homeContainer header h2 {
+    font-size: 32px;
+    font-weight: 600;
+  }
+  
+  .homeContainer header h3 {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .homeContainer .primaryButton {
+    font-size: 1rem;
+  }
+  .homeContainer .largeIcon {
+    height: 250px;
+    width: 250px;
+    padding: 50px;
+  }
+
+  .homeContainer .supporters {
+    margin: auto;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .homeContainer .supporters div {
+    flex-direction: column;
+  }
+}
+
+.mdAndUp {
+  display: block;
+}
+
+@media screen and (max-width: 768px) {
+  .mdAndUp {
+    display: none;
+  }
+}
+
+.sm {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  .sm {
+    display: block;
+  }
+}
