@@ -16,7 +16,7 @@ Use and review the playground application inside the repository to understand ho
 The library is available as npm package here: https://www.npmjs.com/package/@angular-architects/ngrx-hateoas
 
 ## Documentation
-Will be done soon - I promise!
+Find the documentation here: https://angular-architects.github.io/ngrx-hateoas/
 
 ## Real World Sample Application
 There is a sample application [Fancy.ResourceLinker.Sample](https://github.com/fancyDevelopment/Fancy.ResourceLinker.Sample) which demonstrates end to end real world usage of hypermedia in Angular and also some other aspects of a real wold system.
