@@ -89,6 +89,6 @@ HATEOAS (Hypermedia as the Engine of Application State) is an architectural para
 ## Creating Hypermedia Responses in the Backend
 To create hypermedia responses you can use community libraries for the different technologies:
 
-* **Java** For the Java stack the library [Spring HATEOAS](https://spring.io/projects/spring-hateoas)! can be used.
+* **Java** For the Java stack the library [Spring HATEOAS](https://spring.io/projects/spring-hateoas) can be used.
 * **.NET** For the .NET stack the library [Fancy.ResourceLinker.Hateoas](https://www.nuget.org/packages/Fancy.ResourceLinker.Hateoas) can be used.
 * **Dynamic Languages** For languages which support a dynamic type system like **JavaScript, TypeScript or Python** you can simply add the links with small self written util functions.

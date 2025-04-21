@@ -18,6 +18,16 @@ const sidebars: SidebarsConfig = {
   guideSidebar: [
     'guide/intro',
     'guide/getting-started',
+    {
+      type: 'category',
+      label: 'Configuration',
+      items: [
+        'guide/configuration/metadata-provider',
+        'guide/configuration/login-redirect',
+        'guide/configuration/custom-headers',
+        'guide/configuration/anti-forgery'
+      ],
+    }
   ]
 
   // But you can create a sidebar manually
