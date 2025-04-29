@@ -14,8 +14,8 @@ export interface ResourceAction {
 
 /** Contains information to a related socket. */
 export interface ResourceSocket {
-    /** The name of the method the socket sends out. */
-    method: string
+    /** The name of the event the socket sends out. */
+    event: string
     /** The url to the socket. */
     href: string
 }
