@@ -4,7 +4,7 @@ import { GetSocketPipe } from './get-socket.pipe';
 
 const testModel = {
   _sockets: {
-      foo: { href: '/api/foo', method: 'newData' }
+      foo: { href: '/api/foo', event: 'newData' }
   }
 }
 
@@ -20,7 +20,7 @@ describe('GetSocketPipe', () => {
   it('gets a socket from hypermedia json', () => {
     const transformResult = getSocketPipe.transform(testModel, 'foo');
     expect(transformResult?.href).toBe('/api/foo');
-    expect(transformResult?.method).toBe('newData');
+    expect(transformResult?.event).toBe('newData');
   });
 
   it('returns undefined for a non existing socket', () => {

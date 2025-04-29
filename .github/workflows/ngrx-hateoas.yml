@@ -36,3 +36,17 @@ jobs:
       - name: Lint library
         run: |
           npm run lint
+
+      # Restore dependencies
+      - name: Restore dependencies for doc
+        run: |
+          cd doc
+          npm install
+
+      # Build documentation
+      - name: Build documentation
+        run: |
+          cd doc
+          npm run build
+
+
