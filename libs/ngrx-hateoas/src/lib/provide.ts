@@ -74,7 +74,7 @@ function isResourceAction(resourceAction: unknown): resourceAction is ResourceAc
 }
 
 function isResourceSocket(resourceSocket: unknown): resourceSocket is ResourceSocket {
-    return typeof resourceSocket === 'object' && resourceSocket !== null && 'href' in resourceSocket && 'method' in resourceSocket;
+    return typeof resourceSocket === 'object' && resourceSocket !== null && 'href' in resourceSocket && 'event' in resourceSocket;
 }
 
 const defaultMetadataProvider: MetadataProvider = {

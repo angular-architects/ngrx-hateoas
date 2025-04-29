@@ -11,7 +11,7 @@ const dummyHateoasMetadataProvider: MetadataProvider = {
         return { href: (resource as Record<string, Record<string, string>>)['myMeta'][`_action_${actionName}`], method: 'PUT' } satisfies ResourceAction;
     },
     socketLookup(resource, socketName) {
-        return { href: (resource as Record<string, Record<string, string>>)['myMeta'][`_socket_${socketName}`], method: 'update' } satisfies ResourceSocket;
+        return { href: (resource as Record<string, Record<string, string>>)['myMeta'][`_socket_${socketName}`], event: 'update' } satisfies ResourceSocket;
     }
 }
 
@@ -43,7 +43,7 @@ describe('HateoasService', () => {
 
     it('reads sockets correctly', () => {
         expect(hateoasService.getSocket(testObj, 'mySocket')?.href).toBe('/my/socket');
-        expect(hateoasService.getSocket(testObj, 'mySocket')?.method).toBe('update');
+        expect(hateoasService.getSocket(testObj, 'mySocket')?.event).toBe('update');
     });
 
 });

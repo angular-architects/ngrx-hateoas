@@ -4,7 +4,7 @@ import { HasSocketPipe } from './has-socket.pipe';
 
 const testModel = {
   _sockets: {
-      foo: { href: '/api/foo', method: 'newData' }
+      foo: { href: '/api/foo', event: 'newData' }
   }
 }
 
