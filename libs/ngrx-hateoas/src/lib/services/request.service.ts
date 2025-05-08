@@ -1,4 +1,4 @@
-import { HATEOAS_ANTI_FORGERY, HATEOAS_CUSTOM_HEADERS, HATEOAS_LOGIN_REDIRECT } from './../provide';
+import { HATEOAS_ANTI_FORGERY, HATEOAS_CUSTOM_HEADERS, HATEOAS_LOGIN_REDIRECT, HATEOAS_METADATA_PROVIDER } from './../provide';
 import { Injectable, InjectionToken, inject } from "@angular/core";
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -8,6 +8,7 @@ export const WINDOW = new InjectionToken<Window>('Global window object', { facto
 @Injectable()
 export class RequestService {
     private window = inject(WINDOW);
+    private metadataProvider = inject(HATEOAS_METADATA_PROVIDER, { optional: true });
     private antiForgeryOptions = inject(HATEOAS_ANTI_FORGERY, { optional: true });
     private loginRedirectOptions = inject(HATEOAS_LOGIN_REDIRECT, { optional: true });
     private customHeadersOptions = inject(HATEOAS_CUSTOM_HEADERS, { optional: true });
@@ -31,10 +32,10 @@ export class RequestService {
             }
         }
 
-        const bodyWithoutMetadata = this.removeMetadata(body);
-
+        const bodyToSend = this.metadataProvider ? this.removeMetadata(body, this.metadataProvider.isMetadataKey) : body;
+        
         try {
-            return await firstValueFrom(this.httpClient.request<T>(method, url, { body: bodyWithoutMetadata, headers, observe: 'response' }));
+            return await firstValueFrom(this.httpClient.request<T>(method, url, { body: bodyToSend, headers, observe: 'response' }));
         } catch(errorResponse) {
             if(typeof errorResponse === 'object' && errorResponse !== null && 'status' in errorResponse && errorResponse.status === 401 && this.loginRedirectOptions) {
                 // Redirect to sign in 
@@ -45,7 +46,7 @@ export class RequestService {
         }
     }
 
-    public removeMetadata<T>(obj: T): T {
+    public removeMetadata<T>(obj: T, isMetadataFunc: (key: string) => boolean): T {
         if (!obj || typeof obj !== 'object') {
             return obj;
         }
@@ -54,12 +55,12 @@ export class RequestService {
 
         for (const key in obj) {
             if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                if (key.startsWith('_')) {
+                if (isMetadataFunc(key)) {
                     continue;
                 }
                 const value = obj[key];
                 if (typeof value === 'object' && value !== null) {
-                    result[key] = this.removeMetadata(value);
+                    result[key] = this.removeMetadata(value, isMetadataFunc);
                 } else {
                     result[key] = value;
                 }
