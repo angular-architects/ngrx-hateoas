@@ -3,7 +3,6 @@ import { TestBed } from '@angular/core/testing';
 import { RequestService, WINDOW } from './request.service';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { ResourceLink, ResourceAction, ResourceSocket } from '../models';
 
 describe('RequestService', () => {
 
