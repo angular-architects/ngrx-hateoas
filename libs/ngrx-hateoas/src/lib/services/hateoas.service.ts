@@ -6,6 +6,21 @@ import { HATEOAS_METADATA_PROVIDER } from "../provide";
 export class HateoasService {
     private hateoasConfig = inject(HATEOAS_METADATA_PROVIDER);
 
+    getUrl(resource: unknown, linkName: string, params?: Record<string, unknown>) {
+        let href = this.getLink(resource, linkName)?.href;
+        if (!href) {
+            throw new Error(linkName + ' is missing on provided resource');
+        }
+        if (params) {
+            let isFirstParam = true;
+            for (const paramKey in params) {
+                href += `${isFirstParam ? '?' : '&'}${paramKey}=${params[paramKey]}`;
+                isFirstParam = false;
+            }
+        }
+        return href;
+    }
+
     getLink(resource: unknown, linkName: string): ResourceLink | undefined {
         return this.hateoasConfig.linkLookup(resource, linkName);
     }
