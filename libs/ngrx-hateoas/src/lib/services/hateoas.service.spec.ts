@@ -4,6 +4,9 @@ import { ResourceAction, ResourceLink, ResourceSocket } from '../models';
 import { HATEOAS_METADATA_PROVIDER, MetadataProvider } from '../provide';
 
 const dummyHateoasMetadataProvider: MetadataProvider = {
+    isMetadataKey(keyName: string) {
+        return keyName === 'myMeta';
+    },
     linkLookup(resource: Record<string, Record<string, string>>, linkName: string) {
         return resource['myMeta'][`_link_${linkName}`] ? { href: resource['myMeta'][`_link_${linkName}`] } satisfies ResourceLink : undefined;
     },

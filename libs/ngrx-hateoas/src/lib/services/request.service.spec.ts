@@ -1,8 +1,9 @@
-import { AntiForgeryOptions, CustomHeadersOptions, HATEOAS_ANTI_FORGERY, HATEOAS_LOGIN_REDIRECT, LoginRedirectOptions, HATEOAS_CUSTOM_HEADERS } from './../provide';
+import { AntiForgeryOptions, CustomHeadersOptions, HATEOAS_ANTI_FORGERY, HATEOAS_LOGIN_REDIRECT, LoginRedirectOptions, HATEOAS_CUSTOM_HEADERS, HATEOAS_METADATA_PROVIDER, MetadataProvider } from './../provide';
 import { TestBed } from '@angular/core/testing';
 import { RequestService, WINDOW } from './request.service';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { ResourceLink, ResourceAction, ResourceSocket } from '../models';
 
 describe('RequestService', () => {
 
@@ -318,12 +319,25 @@ describe('RequestService', () => {
         let requestService: RequestService;
 
         beforeEach(() => {
+            const customMetadataProvider: MetadataProvider = {
+                isMetadataKey(keyName: string) {
+                    return keyName.startsWith('_');
+                },
+                linkLookup: () => undefined,
+                actionLookup: () => undefined,
+                socketLookup: () => undefined
+            }
             TestBed.resetTestingModule();
-            TestBed.configureTestingModule({ providers: [ RequestService, provideHttpClient(), provideHttpClientTesting() ]});
+            TestBed.configureTestingModule({ providers: [ 
+                RequestService, 
+                { provide: HATEOAS_METADATA_PROVIDER, useValue: customMetadataProvider },
+                provideHttpClient(), 
+                provideHttpClientTesting() 
+            ]});
             requestService = TestBed.inject(RequestService);
         });
 
-        it('removes metadata properties starting with underscore', () => {
+        it('removes metadata properties', () => {
             const input = {
                 id: 1,
                 name: 'test',
@@ -336,7 +350,7 @@ describe('RequestService', () => {
                 }
             };
 
-            const result: unknown = requestService.removeMetadata(input);
+            const result: unknown = requestService.removeMetadata(input, keyName => keyName.startsWith('_'));
 
             expect(result).toEqual({
                 id: 1,
@@ -348,14 +362,14 @@ describe('RequestService', () => {
         });
 
         it('handles null and undefined values', () => {
-            expect(requestService.removeMetadata(null)).toBeNull();
-            expect(requestService.removeMetadata(undefined)).toBeUndefined();
+            expect(requestService.removeMetadata(null, () => false)).toBeNull();
+            expect(requestService.removeMetadata(undefined, () => false)).toBeUndefined();
         });
 
         it('handles primitive values', () => {
-            expect(requestService.removeMetadata('test')).toBe('test');
-            expect(requestService.removeMetadata(123)).toBe(123);
-            expect(requestService.removeMetadata(true)).toBe(true);
+            expect(requestService.removeMetadata('test', () => false)).toBe('test');
+            expect(requestService.removeMetadata(123, () => false)).toBe(123);
+            expect(requestService.removeMetadata(true, () => false)).toBe(true);
         });
 
     });

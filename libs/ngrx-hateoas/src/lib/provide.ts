@@ -44,6 +44,7 @@ const defaultCustomHeaderOptions: CustomHeadersOptions = {
 }
 
 export interface MetadataProvider {
+    isMetadataKey(keyName: string): boolean;
     linkLookup(resource: unknown, linkName: string): ResourceLink | undefined;
     actionLookup(resource: unknown, actionName: string): ResourceAction | undefined;
     socketLookup(resource: unknown, socketName: string): ResourceSocket | undefined;
@@ -78,6 +79,9 @@ function isResourceSocket(resourceSocket: unknown): resourceSocket is ResourceSo
 }
 
 const defaultMetadataProvider: MetadataProvider = {
+    isMetadataKey(keyName: string) {
+        return keyName.startsWith('_');
+    },
     linkLookup(resource: unknown, linkName: string): ResourceLink | undefined {
         if(isResource(resource) && isResourceLinkRecord(resource['_links']) && isResourceLink(resource['_links'][linkName]))
             return resource['_links'][linkName];
