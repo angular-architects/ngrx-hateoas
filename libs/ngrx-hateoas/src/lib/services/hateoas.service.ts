@@ -12,7 +12,7 @@ export class HateoasService {
             throw new Error(linkName + ' is missing on provided resource');
         }
         if (params) {
-            let isFirstParam = true;
+            let isFirstParam = !href.includes('?');
             for (const paramKey in params) {
                 href += `${isFirstParam ? '?' : '&'}${paramKey}=${params[paramKey]}`;
                 isFirstParam = false;
