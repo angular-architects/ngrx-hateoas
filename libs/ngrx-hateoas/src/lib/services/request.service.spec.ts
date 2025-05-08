@@ -313,4 +313,50 @@ describe('RequestService', () => {
         });
     });
 
+    describe('removeMetadata', () => {
+
+        let requestService: RequestService;
+
+        beforeEach(() => {
+            TestBed.resetTestingModule();
+            TestBed.configureTestingModule({ providers: [ RequestService, provideHttpClient(), provideHttpClientTesting() ]});
+            requestService = TestBed.inject(RequestService);
+        });
+
+        it('removes metadata properties starting with underscore', () => {
+            const input = {
+                id: 1,
+                name: 'test',
+                _links: {
+                    self: { href: '/api/test/1' }
+                },
+                nested: {
+                    foo: 'bar',
+                    _action: 'should be removed'
+                }
+            };
+
+            const result: unknown = requestService.removeMetadata(input);
+
+            expect(result).toEqual({
+                id: 1,
+                name: 'test', 
+                nested: {
+                    foo: 'bar'
+                }
+            });
+        });
+
+        it('handles null and undefined values', () => {
+            expect(requestService.removeMetadata(null)).toBeNull();
+            expect(requestService.removeMetadata(undefined)).toBeUndefined();
+        });
+
+        it('handles primitive values', () => {
+            expect(requestService.removeMetadata('test')).toBe('test');
+            expect(requestService.removeMetadata(123)).toBe(123);
+            expect(requestService.removeMetadata(true)).toBe(true);
+        });
+
+    });
 });
