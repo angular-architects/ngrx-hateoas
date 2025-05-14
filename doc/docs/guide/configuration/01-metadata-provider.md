@@ -65,6 +65,7 @@ To use a custom hypermedia JSON format with **ngrx-hateoas** you have to impleme
 
 ```ts
 export interface MetadataProvider {
+    isMetadataKey(keyName: string): boolean;
     linkLookup(resource: unknown, linkName: string): ResourceLink | undefined;
     actionLookup(resource: unknown, actionName: string): ResourceAction | undefined;
     socketLookup(resource: unknown, socketName: string): ResourceSocket | undefined;
@@ -108,6 +109,9 @@ Then the implementation of a custom `MetadataProvider` could look like shown in 
 
 ```ts
 const customMetadataProvider: MetadataProvider = {
+    isMetadataKey(keyName: string): boolean {
+        return keyname === '_metadata';
+    },
     linkLookup(resource: unknown, linkName: string): ResourceLink | undefined {
         return resource['_metadata']?.['_link_' + linkName];
     },
