@@ -67,6 +67,9 @@ describe('provideHateaos', () => {
         it('registers custom metadataprovider in injection context', () => {
 
             const dummyMetadataProvider: MetadataProvider = {
+                isMetadataKey(keyName: string) {
+                    return keyName === 'myMeta';
+                },
                 linkLookup(resource, linkName) {
                     return { href: (resource as Record<string, Record<string, string>>)['myMeta'][`_link_${linkName}`] } satisfies ResourceLink;
                 },
@@ -81,6 +84,7 @@ describe('provideHateaos', () => {
             TestBed.configureTestingModule({ providers: [ provideHateoas(withMetadataProvider(dummyMetadataProvider)) ]});
             const metadataProvider = TestBed.inject(HATEOAS_METADATA_PROVIDER);
 
+            expect(metadataProvider.isMetadataKey).toBe(dummyMetadataProvider.isMetadataKey);
             expect(metadataProvider.linkLookup).toBe(dummyMetadataProvider.linkLookup);
             expect(metadataProvider.actionLookup).toBe(dummyMetadataProvider.actionLookup);
             expect(metadataProvider.socketLookup).toBe(dummyMetadataProvider.socketLookup);

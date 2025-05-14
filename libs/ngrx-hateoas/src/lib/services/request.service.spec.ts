@@ -1,4 +1,4 @@
-import { AntiForgeryOptions, CustomHeadersOptions, HATEOAS_ANTI_FORGERY, HATEOAS_LOGIN_REDIRECT, LoginRedirectOptions, HATEOAS_CUSTOM_HEADERS } from './../provide';
+import { AntiForgeryOptions, CustomHeadersOptions, HATEOAS_ANTI_FORGERY, HATEOAS_LOGIN_REDIRECT, LoginRedirectOptions, HATEOAS_CUSTOM_HEADERS, HATEOAS_METADATA_PROVIDER, MetadataProvider } from './../provide';
 import { TestBed } from '@angular/core/testing';
 import { RequestService, WINDOW } from './request.service';
 import { provideHttpClient } from '@angular/common/http';
@@ -313,4 +313,63 @@ describe('RequestService', () => {
         });
     });
 
+    describe('removeMetadata', () => {
+
+        let requestService: RequestService;
+
+        beforeEach(() => {
+            const customMetadataProvider: MetadataProvider = {
+                isMetadataKey(keyName: string) {
+                    return keyName.startsWith('_');
+                },
+                linkLookup: () => undefined,
+                actionLookup: () => undefined,
+                socketLookup: () => undefined
+            }
+            TestBed.resetTestingModule();
+            TestBed.configureTestingModule({ providers: [ 
+                RequestService, 
+                { provide: HATEOAS_METADATA_PROVIDER, useValue: customMetadataProvider },
+                provideHttpClient(), 
+                provideHttpClientTesting() 
+            ]});
+            requestService = TestBed.inject(RequestService);
+        });
+
+        it('removes metadata properties', () => {
+            const input = {
+                id: 1,
+                name: 'test',
+                _links: {
+                    self: { href: '/api/test/1' }
+                },
+                nested: {
+                    foo: 'bar',
+                    _action: 'should be removed'
+                }
+            };
+
+            const result: unknown = requestService.removeMetadata(input, keyName => keyName.startsWith('_'));
+
+            expect(result).toEqual({
+                id: 1,
+                name: 'test', 
+                nested: {
+                    foo: 'bar'
+                }
+            });
+        });
+
+        it('handles null and undefined values', () => {
+            expect(requestService.removeMetadata(null, () => false)).toBeNull();
+            expect(requestService.removeMetadata(undefined, () => false)).toBeUndefined();
+        });
+
+        it('handles primitive values', () => {
+            expect(requestService.removeMetadata('test', () => false)).toBe('test');
+            expect(requestService.removeMetadata(123, () => false)).toBe(123);
+            expect(requestService.removeMetadata(true, () => false)).toBe(true);
+        });
+
+    });
 });

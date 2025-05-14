@@ -145,10 +145,11 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
                 } 
             };
 
-            const loadFromLinkMethod = async (linkRoot: unknown, linkName: string): Promise<void> => {
+            const loadFromLinkMethod = async (linkRoot: unknown, linkName: string, params?: Record<string, unknown>): Promise<void> => {
                 const link = hateoasService.getLink(linkRoot, linkName);
                 if(link) {
-                    await loadFromUrlMethod(link.href);
+                    const url = hateoasService.getUrl(linkRoot, linkName, params);
+                    await loadFromUrlMethod(url);
                 }
             };
 
