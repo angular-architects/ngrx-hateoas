@@ -63,7 +63,8 @@ An example for a simple resource like a flight could look like the following:
         }
     },
     "_links": {
-        "self": { "href": "/api/flights/123" }
+        "self": { "href": "/api/flights/123" },
+        "nextFlight": { "href": "/api/flights/124" }
     },
     "_actions": {
         "delete": { "href": "/api/flights/123", "method": "DELETE" }
@@ -76,6 +77,7 @@ In the above example, you see a JSON object representing a flight. But additiona
 1. To update the connection of the flight, modify the object in the ``connection`` key and send it to the URL ``/api/flights/123/connection`` using the ```PUT``` verb.
 2. To update the times of the flight, modify the object in the ``times`` key and send it to the URL ``/api/flights/123/times`` using the ```PUT``` verb.
 3. To get the current state of the whole object, make a GET request to the URL ``/api/flights/123``.
+4. To get next flight (e.g. in a workflow, or kind of a quick navigation item), make a GET request to ``/api/flights/124``.
 4. To delete the flight, make a request to the URL ``/api/flights/123`` and use the ``DELETE`` verb.
 
 :::info
@@ -86,7 +88,7 @@ You don't need to follow the exact same layout as in the example to embed metada
 
 HATEOAS (Hypermedia as the Engine of Application State) is an architectural paradigm that allows clients to dynamically navigate resources through hyperlinks provided in responses. Possible state changes are provided via actions. Hyperlinks and actions are metadata sent next to the actual payload. Instead of hardcoding API endpoints, clients rely on these links to discover available actions and related resources. For example, if a user is not allowed to navigate to a linked resource or execute an action, the server would not send this metainformation to the client within its response. Finally, the client has the full state of the resource available, the actual payload, and information to related data and possible actions (or state changes). This approach decouples the client from the server, keeps domain logic away from the client and enables more flexible and evolvable APIs.
 
-## Creating Hypermedia Responses in the Backend
+## Hypermedia at the Backend
 To create hypermedia responses you can use community libraries for the different technologies:
 
 * **Java** For the Java stack the library [Spring HATEOAS](https://spring.io/projects/spring-hateoas) can be used.

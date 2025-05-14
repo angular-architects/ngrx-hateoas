@@ -27,7 +27,8 @@ const sidebars: SidebarsConfig = {
         'guide/configuration/custom-headers',
         'guide/configuration/anti-forgery'
       ],
-    }
+    },
+    'guide/pipes'
   ]
 
   // But you can create a sidebar manually
