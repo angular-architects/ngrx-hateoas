@@ -110,7 +110,7 @@ Then the implementation of a custom `MetadataProvider` could look like shown in 
 ```ts
 const customMetadataProvider: MetadataProvider = {
     isMetadataKey(keyName: string): boolean {
-        return keyname === '_metadata';
+        return keyName === '_metadata';
     },
     linkLookup(resource: unknown, linkName: string): ResourceLink | undefined {
         return resource['_metadata']?.['_link_' + linkName];
