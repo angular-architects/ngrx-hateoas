@@ -57,23 +57,27 @@ function HomepageHeader() {
         <div className='supporters'>
           <h1>Supported by</h1>
           <div>
+            <a target="_blank" href="http://angulararchitects.io">
             <img
               src={angularArchitectsLogoUrl}
               alt="Angular Architects Logo"
               style={{ width: '180px', height: 'auto' }}
             />
-            <img 
-              className="darkOnly"
-              src={fancyDevelopmentLogoUrl}
-              alt="Angular Architects Logo"
-              style={{ width: '180px', height: 'auto' }}
-            />
-            <img
-              className="lightOnly"
-              src={fancyDevelopmentLogoDarkUrl}
-              alt="Angular Architects Logo"
-              style={{ width: '180px', height: 'auto' }}
-            />
+            </a>
+            <a target="_blank" href="http://fancy-development.net">
+              <img 
+                className="darkOnly"
+                src={fancyDevelopmentLogoUrl}
+                alt="Angular Architects Logo"
+                style={{ width: '180px', height: 'auto' }}
+              />
+              <img
+                className="lightOnly"
+                src={fancyDevelopmentLogoDarkUrl}
+                alt="Angular Architects Logo"
+                style={{ width: '180px', height: 'auto' }}
+              />
+            </a>
           </div>
         </div>
       </div>
