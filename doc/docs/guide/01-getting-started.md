@@ -28,7 +28,8 @@ This getting started guide helps you to understand the basic usage of this libra
         }
     },
     "_links": {
-        "self": { "href": "/api/flights/123" }
+        "self": { "href": "/api/flights/123" },
+        "nextFlight": { "href": "/api/flights/124" }
     },
     "_actions": {
         "delete": { "href": "/api/flights/123", "method": "DELETE" }
