@@ -1,5 +1,5 @@
 import { Signal, computed, inject } from "@angular/core";
-import { SignalStoreFeature, patchState, signalStoreFeature, withMethods, withState } from "@ngrx/signals";
+import { SignalStoreFeature, SignalStoreFeatureResult, StateSignals, patchState, signalStoreFeature, withHooks, withMethods, withState } from "@ngrx/signals";
 import { filter, map, pipe, switchMap, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { isValidHref } from "../util/is-valid-href";
@@ -114,7 +114,10 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
 
             const rxConnectToLinkRoot = rxMethod<linkedRxInput>(
                 pipe( 
-                    map(input => hateoasService.getLink(input.resource, input.linkName)?.href),
+                    map(input => {
+                        console.log('Linking to ', input);
+                        return hateoasService.getLink(input.resource, input.linkName)?.href;
+                    }),
                     filter(href => isValidHref(href)),
                     map(href => href!),
                     filter(href => getState(store, stateKey).url !== href),
@@ -159,6 +162,130 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                     return patchableSignal;
                 }
             };
+        })
+    );
+}
+
+type StoreForLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']>;// & Input['props'] & Input['methods'];
+
+export function linkedHypermediaResource<ResourceName extends string, TResource, Input extends SignalStoreFeatureResult>(
+    resourceName: ResourceName, initialValue: TResource, linkRootFn: (store: StoreForLinkRoot<Input>) => Signal<unknown>, linkName: string): SignalStoreFeature<
+        Input,
+        Input & {
+            state: LinkedHypermediaResourceStoreState<ResourceName, TResource>;
+            methods: LinkedHypermediaResourceMethods<ResourceName, TResource>;
+        }
+    >;
+export function linkedHypermediaResource<ResourceName extends string, TResource, Input extends SignalStoreFeatureResult>(resourceName: ResourceName, initialValue: TResource, linkRootFn: (store: StoreForLinkRoot<Input>) => Signal<unknown>, linkName: string) {
+
+    //const linkRootWithLinkName = computed(() => ({ resource: linkRoot(), linkName }));
+    
+    const dataKey = `${resourceName}`;
+    const stateKey = `${resourceName}State`;
+    const connectMethodName = generateConnectLinkedHypermediaResourceMethodName(resourceName);
+    const reloadMethodName = generateReloadLinkedHypermediaResourceMethodName(resourceName);
+    const getAsPatchableMethodName = generateGetAsPatchableLinkedHypermediaResourceMethodName(resourceName);
+
+    return signalStoreFeature(
+        withState({
+           [stateKey]: {
+            url: '',
+            isLoading: false,
+            isAvailable: false,
+            initiallyLoaded: false
+           },
+           [dataKey]: initialValue 
+        }),
+        withMethods((store, requestService = inject(RequestService)) => {
+
+            const hateoasService = inject(HateoasService);
+
+            const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [dataKey]: newVal }), (store as Record<string, Signal<TResource>>)[dataKey]);
+
+            const rxConnectToLinkRoot = rxMethod<linkedRxInput>(
+                pipe( 
+                    map(input => { 
+                        console.log('Linking to ', input);
+                        return hateoasService.getLink(input.resource, input.linkName)?.href;
+                    }),
+                    filter(href => isValidHref(href)),
+                    map(href => href!),
+                    filter(href => getState(store, stateKey).url !== href),
+                    tap(href => patchState(store, 
+                                           updateState(stateKey, { url: href, isLoading: true, isAvailable: true } ))),
+                    switchMap(href => requestService.request<TResource>('GET', href)),
+                    tap(response => response.body ? patchState(store,
+                                                        updateData(dataKey, response.body),
+                                                        updateState(stateKey, { isLoading: false, initiallyLoaded: true } ))
+                                                  : patchState(store,
+                                                        updateState(stateKey, { isLoading: false, url: undefined, isAvailable: false, initiallyLoaded: false } )))
+                )
+            );
+
+            return {
+                [connectMethodName]: (linkRoot: Signal<unknown>, linkName: string) => { 
+                    const input = computed(() => ({ resource: linkRoot(), linkName }));
+                    rxConnectToLinkRoot(input);
+                },
+                [reloadMethodName]: async (): Promise<void> => {
+                    const currentUrl = getState(store, stateKey).url;
+                    if(currentUrl) {
+                        patchState(store, updateState(stateKey, { isLoading: true } ));
+
+                        try {
+                            const response = await requestService.request<TResource>('GET', currentUrl);
+                            if (!response.body) {
+                                throw new Error(`Response body is empty for URL: ${currentUrl}`);
+                            }
+                            patchState(store, 
+                                       updateData(dataKey, response.body),
+                                       updateState(stateKey, { isLoading: false } ));
+                        } catch(e) {
+                            patchState(store, 
+                                       updateData(dataKey, initialValue),
+                                       updateState(stateKey, { isLoading: false } ));
+                            throw e;
+                        }
+                    }
+                },
+                [getAsPatchableMethodName]: (): DeepPatchableSignal<TResource> => {
+                    return patchableSignal;
+                }
+            };
+        }),
+        withHooks({
+            onInit(store) {
+                // const hateoasService = inject(HateoasService);
+                // const requestService = inject(RequestService); 
+
+                // const rxConnectToLinkRoot = rxMethod<linkedRxInput>($ => 
+                // $.pipe( 
+                //     map(input => {
+                //         const result = hateoasService.getLink(input.resource, input.linkName)?.href;
+                //         return result;
+                //     }),
+                //     filter(href => isValidHref(href)),
+                //     map(href => href!),
+                //     filter(href => getState(store, stateKey).url !== href),
+                //     tap(href => patchState(store, 
+                //                            updateState(stateKey, { url: href, isLoading: true, isAvailable: true } ))),
+                //     switchMap(href => requestService.request<TResource>('GET', href)),
+                //     tap(response => response.body ? patchState(store,
+                //                                         updateData(dataKey, response.body),
+                //                                         updateState(stateKey, { isLoading: false, initiallyLoaded: true } ))
+                //                                   : patchState(store,
+                //                                         updateState(stateKey, { isLoading: false, url: undefined, isAvailable: false, initiallyLoaded: false } )))
+                // ));
+    
+                // rxConnectToLinkRoot({ resource: {}, linkName: 'foo' });
+                const storeForLinkRoot = {
+                    ...store['stateSignals'],
+                    ...store['props'],
+                    ...store['methods'],
+                    } as StoreForLinkRoot<Input>;
+                const linkRoot = linkRootFn(store as unknown as StoreForLinkRoot<Input>);
+                store[connectMethodName](linkRoot, linkName);
+            },
         })
     );
 }
