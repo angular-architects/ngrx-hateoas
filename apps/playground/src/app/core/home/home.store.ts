@@ -1,6 +1,6 @@
-import { linkedHypermediaResource, withLinkedHypermediaResource } from "@angular-architects/ngrx-hateoas";
+import { withLinkedHypermediaResource } from "@angular-architects/ngrx-hateoas";
 import { inject } from "@angular/core";
-import { signalStore, withHooks } from "@ngrx/signals";
+import { signalStore } from "@ngrx/signals";
 import { FlightManagementSummary, FlightShoppingSummary } from "../core.entities";
 import { AppStore } from "../../app.store";
 
@@ -24,11 +24,5 @@ export const initialHomeVm: HomeVm = {
 
 export const HomeStore = signalStore(
   { providedIn: 'root' },
-  linkedHypermediaResource('homeVm', initialHomeVm, () => inject(AppStore).rootApi, 'homeVm')
-  // withLinkedHypermediaResource('homeVm', initialHomeVm),
-  // withHooks({
-  //   onInit(store) {
-  //     store._connectHomeVm(inject(AppStore).rootApi, 'homeVm')
-  //   }
-  // })
+  withLinkedHypermediaResource('homeVm', initialHomeVm, () => inject(AppStore).rootApi, 'homeVm')
 );
