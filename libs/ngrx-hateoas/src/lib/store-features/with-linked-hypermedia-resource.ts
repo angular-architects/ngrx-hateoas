@@ -50,13 +50,13 @@ export type LinkedHypermediaResourceMethods<ResourceName extends string, TResour
     ReloadLinkedHypermediaResourceMethod<ResourceName>
     & GetAsPatchableLinkedHypermediaResourceMethod<ResourceName, TResource>;
 
-type StoreForLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']>;// & Input['props'] & Input['methods'];
+type StoreForResourceLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']>;
 
-type LinkRootFn<T extends SignalStoreFeatureResult> = (store: StoreForLinkRoot<T>) => Signal<unknown>
+type ResourceLinkRootFn<T extends SignalStoreFeatureResult> = (store: StoreForResourceLinkRoot<T>) => Signal<unknown>
 
-type linkedRxInput = {
+type LinkedResourceRxInput = {
     resource: unknown,
-    linkName: string
+    linkMetaName: string
 }
 
 function getState(store: unknown, stateKey: string): LinkedHypermediaResourceStateProps {
@@ -75,8 +75,8 @@ function updateState(stateKey: string, partialState: Partial<LinkedHypermediaRes
 export function withLinkedHypermediaResource<ResourceName extends string, TResource, Input extends SignalStoreFeatureResult>(
     resourceName: ResourceName, 
     initialValue: TResource,
-    linkRootFn: LinkRootFn<Input>, 
-    linkName: string): SignalStoreFeature<
+    linkRootFn: ResourceLinkRootFn<Input>, 
+    linkMetaName: string): SignalStoreFeature<
         Input,
         Input & {
             state: LinkedHypermediaResourceStoreState<ResourceName, TResource>;
@@ -86,8 +86,8 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
 export function withLinkedHypermediaResource<ResourceName extends string, TResource, Input extends SignalStoreFeatureResult>(
     resourceName: ResourceName, 
     initialValue: TResource,
-    linkRootFn: LinkRootFn<Input>,
-    linkName: string) {
+    linkRootFn: ResourceLinkRootFn<Input>,
+    linkMetaName: string) {
 
     const dataKey = `${resourceName}`;
     const stateKey = `${resourceName}State`;
@@ -104,9 +104,7 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
            },
            [dataKey]: initialValue 
         }),
-        withMethods(store => {
-            const requestService = inject(RequestService);
-            
+        withMethods((store, requestService = inject(RequestService)) => {
             const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [dataKey]: newVal }), (store as Record<string, Signal<TResource>>)[dataKey]);
 
             const reloadMethod = async (): Promise<void> => {
@@ -141,15 +139,13 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
             };
         }),
         withHooks({
-            onInit(store) {
-                const requestService = inject(RequestService);
-                const hateoasService = inject(HateoasService);
-                const linkRoot = linkRootFn(store as unknown as StoreForLinkRoot<Input>);
-                const linkedRxInput = computed(() => ({ resource: linkRoot(), linkName }));
+            onInit(store, requestService = inject(RequestService), hateoasService = inject(HateoasService)) {
+                const resolvedLinkRoot = linkRootFn(store as unknown as StoreForResourceLinkRoot<Input>);
+                const linkedResourceRxInput = computed(() => ({ resource: resolvedLinkRoot(), linkMetaName }));
 
-                const rxConnectToLinkRootMethod = rxMethod<linkedRxInput>(
+                const rxConnectToLinkRootMethod = rxMethod<LinkedResourceRxInput>(
                     pipe( 
-                        map(input => hateoasService.getLink(input.resource, input.linkName)?.href),
+                        map(input => hateoasService.getLink(input.resource, input.linkMetaName)?.href),
                         filter(href => isValidHref(href)),
                         map(href => href!),
                         filter(href => getState(store, stateKey).url !== href),
@@ -164,7 +160,7 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                     )
                 );
 
-                rxConnectToLinkRootMethod(linkedRxInput);
+                rxConnectToLinkRootMethod(linkedResourceRxInput);
             },
         })
     );

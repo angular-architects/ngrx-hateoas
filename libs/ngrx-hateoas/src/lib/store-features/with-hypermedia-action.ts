@@ -1,5 +1,5 @@
 import { Signal, computed, inject } from "@angular/core";
-import { SignalStoreFeature, patchState, signalStoreFeature, withMethods, withState } from "@ngrx/signals";
+import { SignalStoreFeature, SignalStoreFeatureResult, StateSignals, patchState, signalStoreFeature, withHooks, withMethods, withState } from "@ngrx/signals";
 import { filter, map, pipe, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { isValidActionVerb } from "../util/is-valid-action-verb";
@@ -43,20 +43,20 @@ export function generateExecuteHypermediaActionMethodName(actionName: string) {
     return actionName;
 }
 
-export type ConnectHypermediaActionMethod<ActionName extends string> = { 
-    [K in ActionName as `_connect${Capitalize<ActionName>}`]: (linkRoot: Signal<unknown>, action: string) => void
-};
-
 export function generateConnectHypermediaActionMethodName(actionName: string) {
     return `_connect${actionName.charAt(0).toUpperCase() + actionName.slice(1)}`;
 }
 
 export type HypermediaActionMethods<ActionName extends string> = 
-    ExecuteHypermediaActionMethod<ActionName> & ConnectHypermediaActionMethod<ActionName>
+    ExecuteHypermediaActionMethod<ActionName>
 
-type actionRxInput = {
+type StoreForActionLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']>;
+    
+type ActionLinkRootFn<T extends SignalStoreFeatureResult> = (store: StoreForActionLinkRoot<T>) => Signal<unknown>
+    
+type LinkedActionRxInput = {
     resource: unknown,
-    action: string
+    actionMetaName: string
 }
 
 function getState(store: unknown, stateKey: string): HypermediaActionStateProps {
@@ -68,26 +68,24 @@ function updateState(stateKey: string, partialState: Partial<HypermediaActionSta
     return (state: any) => ({ [stateKey]: { ...state[stateKey], ...partialState } });
 }
 
-export function withHypermediaAction<ActionName extends string>(
-    actionName: ActionName): SignalStoreFeature<
-        { 
-            state: object;
-            computed: Record<string, Signal<unknown>>;
-            methods: Record<string, Function>;
-            props: object;
-        },
-        {
+export function withHypermediaAction<ActionName extends string, Input extends SignalStoreFeatureResult>(
+    actionName: ActionName,
+    linkRootFn: ActionLinkRootFn<Input>, 
+    actionMetaName: string): SignalStoreFeature<
+        Input,
+        Input & {
             state: HypermediaActionStoreState<ActionName>;
-            computed: Record<string, Signal<unknown>>;
             methods: HypermediaActionMethods<ActionName>;
-            props: object;
         }
     >;
-export function withHypermediaAction<ActionName extends string>(actionName: ActionName) {
+export function withHypermediaAction<ActionName extends string, Input extends SignalStoreFeatureResult>(
+    actionName: ActionName,
+    linkRootFn: ActionLinkRootFn<Input>, 
+    actionMetaName: string) {
 
     const stateKey = `${actionName}State`;
     const executeMethodName = generateExecuteHypermediaActionMethodName(actionName);
-    const connectMethodName = generateConnectHypermediaActionMethodName(actionName);
+    let linkRoot: Signal<unknown> | undefined;
 
     return signalStoreFeature(
         withState({
@@ -95,58 +93,59 @@ export function withHypermediaAction<ActionName extends string>(actionName: Acti
         }),
         withMethods((store, requestService = inject(RequestService)) => {
 
-            const hateoasService = inject(HateoasService);
-            let internalResourceLink: Signal<unknown> | undefined;
+            const executeMethod = async (): Promise<HttpResponse<unknown>> => {
+                if(getState(store, stateKey).isAvailable && linkRoot) {
+                    const method = getState(store, stateKey).method;
+                    const href = getState(store, stateKey).href;
 
-            const rxConnectToResource = rxMethod<actionRxInput>(
-                pipe( 
-                    tap(() => patchState(store, updateState(stateKey, { href: '', method: '', isAvailable: false } ))),
-                    map(input => hateoasService.getAction(input.resource, input.action)),
-                    filter(action => isValidHref(action?.href) && isValidActionVerb(action?.method)),
-                    map(action => action!),
-                    tap(action => patchState(store, updateState(stateKey, { href: action.href, method: action.method, isAvailable: true } )))
-                )
-            );
+                    if(!method || !href) throw new Error('Action is not available');
 
-            return {
-                [executeMethodName]: async (): Promise<HttpResponse<unknown>> => {
-                    if(getState(store, stateKey).isAvailable && internalResourceLink) {
-                        const method = getState(store, stateKey).method;
-                        const href = getState(store, stateKey).href;
+                    const body = method !== 'DELETE' ? linkRoot() : undefined
 
-                        if(!method || !href) throw new Error('Action is not available');
+                    patchState(store, 
+                        updateState(stateKey, { 
+                            isExecuting: true, 
+                            hasExecutedSuccessfully: false,
+                            hasExecutedWithError: false,
+                            hasError: false,
+                            error: null 
+                        }));
 
-                        const body = method !== 'DELETE' ? internalResourceLink() : undefined
-
-                        patchState(store, 
-                            updateState(stateKey, { 
-                                isExecuting: true, 
-                                hasExecutedSuccessfully: false,
-                                hasExecutedWithError: false,
-                                hasError: false,
-                                error: null 
-                            }));
-
-                        try {
-                            const response = await requestService.request(method, href, body);
-                            patchState(store, updateState(stateKey, { isExecuting: false, hasExecutedSuccessfully: true } ));
-                            return response;
-                        } catch(e) {
-                            patchState(store, updateState(stateKey, { isExecuting: false, hasExecutedWithError: true, hasError: true, error: e } ));
-                            throw e;
-                        } 
-                    } else {
-                        throw new Error('Action is not available');
-                    }
-                },
-                [connectMethodName]: (resourceLink: Signal<unknown>, action: string) => { 
-                    if(!internalResourceLink) {
-                        internalResourceLink = resourceLink;
-                        const input = computed(() => ({ resource: resourceLink(), action }));
-                        rxConnectToResource(input);
-                    }
+                    try {
+                        const response = await requestService.request(method, href, body);
+                        patchState(store, updateState(stateKey, { isExecuting: false, hasExecutedSuccessfully: true } ));
+                        return response;
+                    } catch(e) {
+                        patchState(store, updateState(stateKey, { isExecuting: false, hasExecutedWithError: true, hasError: true, error: e } ));
+                        throw e;
+                    } 
+                } else {
+                    throw new Error('Action is not available');
                 }
             };
+
+            return {
+                [executeMethodName]: executeMethod
+            };
+        }),
+        withHooks({
+            onInit(store, hateoasService = inject(HateoasService)) {
+                const resolvedLinkRoot = linkRootFn(store as unknown as StoreForActionLinkRoot<Input>);
+                const linkedActionRxInput = computed(() => ({ resource: resolvedLinkRoot(), actionMetaName }));
+                linkRoot = resolvedLinkRoot;
+                
+                const rxConnectToResourceMethod = rxMethod<LinkedActionRxInput>(
+                    pipe( 
+                        tap(() => patchState(store, updateState(stateKey, { href: '', method: '', isAvailable: false } ))),
+                        map(input => hateoasService.getAction(input.resource, input.actionMetaName)),
+                        filter(action => isValidHref(action?.href) && isValidActionVerb(action?.method)),
+                        map(action => action!),
+                        tap(action => patchState(store, updateState(stateKey, { href: action.href, method: action.method, isAvailable: true } )))
+                    )
+                );
+
+                rxConnectToResourceMethod(linkedActionRxInput);
+            }
         })
     );
 }
