@@ -340,13 +340,14 @@ describe('RequestService', () => {
             const input = {
                 id: 1,
                 name: 'test',
-                _links: {
-                    self: { href: '/api/test/1' }
-                },
                 nested: {
                     foo: 'bar',
                     _action: 'should be removed'
-                }
+                },
+                arr: ['val1', 'val2'],
+                _links: {
+                    self: { href: '/api/test/1' }
+                },
             };
 
             const result: unknown = requestService.removeMetadata(input, keyName => keyName.startsWith('_'));
@@ -356,7 +357,8 @@ describe('RequestService', () => {
                 name: 'test', 
                 nested: {
                     foo: 'bar'
-                }
+                },
+                arr: ['val1', 'val2']
             });
         });
 
@@ -369,6 +371,10 @@ describe('RequestService', () => {
             expect(requestService.removeMetadata('test', () => false)).toBe('test');
             expect(requestService.removeMetadata(123, () => false)).toBe(123);
             expect(requestService.removeMetadata(true, () => false)).toBe(true);
+        });
+
+        it('handles arrays', () => {
+            expect(requestService.removeMetadata(['val1', 'val2'], () => false)).toEqual(['val1', 'val2']);
         });
 
     });
