@@ -47,7 +47,7 @@ export class RequestService {
     }
 
     public removeMetadata<T>(obj: T, isMetadataFunc: (key: string) => boolean): T {
-        if (!obj || typeof obj !== 'object') {
+        if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
             return obj;
         }
 
@@ -59,7 +59,7 @@ export class RequestService {
                     continue;
                 }
                 const value = obj[key];
-                if (typeof value === 'object' && value !== null) {
+                if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
                     result[key] = this.removeMetadata(value, isMetadataFunc);
                 } else {
                     result[key] = value;
