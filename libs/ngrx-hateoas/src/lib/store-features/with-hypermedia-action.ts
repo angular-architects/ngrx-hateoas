@@ -1,5 +1,5 @@
 import { Signal, computed, inject } from "@angular/core";
-import { SignalStoreFeature, SignalStoreFeatureResult, StateSignals, patchState, signalStoreFeature, withHooks, withMethods, withState } from "@ngrx/signals";
+import { SignalStoreFeature, SignalStoreFeatureResult, StateSignals, patchState, signalStoreFeature, withComputed, withHooks, withMethods, withState } from "@ngrx/signals";
 import { filter, map, pipe, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { isValidActionVerb } from "../util/is-valid-action-verb";
@@ -43,10 +43,6 @@ export function generateExecuteHypermediaActionMethodName(actionName: string) {
     return actionName;
 }
 
-export function generateConnectHypermediaActionMethodName(actionName: string) {
-    return `_connect${actionName.charAt(0).toUpperCase() + actionName.slice(1)}`;
-}
-
 export type HypermediaActionMethods<ActionName extends string> = 
     ExecuteHypermediaActionMethod<ActionName>
 
@@ -85,22 +81,30 @@ export function withHypermediaAction<ActionName extends string, Input extends Si
 
     const stateKey = `${actionName}State`;
     const executeMethodName = generateExecuteHypermediaActionMethodName(actionName);
-    let linkRoot: Signal<unknown> | undefined;
 
     return signalStoreFeature(
         withState({
            [stateKey]: defaultHypermediaActionState
         }),
-        withMethods((store, requestService = inject(RequestService)) => {
+        withComputed(store => {
+            const linkRoot = linkRootFn(store as unknown as StoreForActionLinkRoot<Input>);
+            return {
+                _linkRoot: linkRoot,
+                _linkedActionRxInput: computed(() => ({ resource: linkRoot(), actionMetaName }))
+            }
+        }),
+        withMethods(store => {
+            const requestService = inject(RequestService);
+            const hateoasService = inject(HateoasService);
 
             const executeMethod = async (): Promise<HttpResponse<unknown>> => {
-                if(getState(store, stateKey).isAvailable && linkRoot) {
+                if(getState(store, stateKey).isAvailable) {
                     const method = getState(store, stateKey).method;
                     const href = getState(store, stateKey).href;
 
                     if(!method || !href) throw new Error('Action is not available');
 
-                    const body = method !== 'DELETE' ? linkRoot() : undefined
+                    const body = method !== 'DELETE' ? store._linkRoot() : undefined
 
                     patchState(store, 
                         updateState(stateKey, { 
@@ -124,17 +128,7 @@ export function withHypermediaAction<ActionName extends string, Input extends Si
                 }
             };
 
-            return {
-                [executeMethodName]: executeMethod
-            };
-        }),
-        withHooks({
-            onInit(store, hateoasService = inject(HateoasService)) {
-                const resolvedLinkRoot = linkRootFn(store as unknown as StoreForActionLinkRoot<Input>);
-                const linkedActionRxInput = computed(() => ({ resource: resolvedLinkRoot(), actionMetaName }));
-                linkRoot = resolvedLinkRoot;
-                
-                const rxConnectToResourceMethod = rxMethod<LinkedActionRxInput>(
+            const rxConnectToResourceMethod = rxMethod<LinkedActionRxInput>(
                     pipe( 
                         tap(() => patchState(store, updateState(stateKey, { href: '', method: '', isAvailable: false } ))),
                         map(input => hateoasService.getAction(input.resource, input.actionMetaName)),
@@ -144,7 +138,14 @@ export function withHypermediaAction<ActionName extends string, Input extends Si
                     )
                 );
 
-                rxConnectToResourceMethod(linkedActionRxInput);
+            return {
+                [executeMethodName]: executeMethod,
+                _rxConnectToResource: rxConnectToResourceMethod
+            };
+        }),
+        withHooks({
+            onInit(store) {
+                store._rxConnectToResource(store._linkedActionRxInput);
             }
         })
     );

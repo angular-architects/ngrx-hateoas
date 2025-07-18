@@ -1,5 +1,5 @@
 import { Signal, computed, inject } from "@angular/core";
-import { SignalStoreFeature, patchState, signalStoreFeature, withMethods, withState } from "@ngrx/signals";
+import { SignalStoreFeature, SignalStoreFeatureResult, StateSignals, patchState, signalStoreFeature, withComputed, withHooks, withMethods, withState } from "@ngrx/signals";
 import { from, map, mergeMap, pipe, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { isValidActionVerb } from "../util/is-valid-action-verb";
@@ -58,10 +58,14 @@ export function generateConnectHypermediaCollectionActionMethodName(actionName: 
 export type HypermediaCollectionActionMethods<ActionName extends string> = 
     ExecuteHypermediaCollectionActionMethod<ActionName> & ConnectHypermediaCollectionActionMethod<ActionName>
 
-type ActionRxInput = {
+type StoreForCollectionActionLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']>;
+        
+type CollectionActionLinkRootFn<T extends SignalStoreFeatureResult> = (store: StoreForCollectionActionLinkRoot<T>) => Signal<Resource[]>
+
+type LinkedCollectionActionRxInput = {
     resource: Resource[],
     idLookup: (resource: Resource) => CollectionKey,
-    action: string
+    actionName: string
 }
 
 function getState(store: unknown, stateKey: string): HypermediaCollectionActionStateProps {
@@ -94,42 +98,67 @@ function updateItemState(stateKey: string, id: CollectionKey, itemState: Partial
  });
 }
 
-export function withHypermediaCollectionAction<ActionName extends string>(
-    actionName: ActionName): SignalStoreFeature<
-        { 
-            state: object;
-            computed: Record<string, Signal<unknown>>;
-            methods: Record<string, Function>;
-            props: object;
-        },
-        {
+function createIdLookupFunction(idKeyName: string) {
+    return (resource: Resource) => { 
+        const id = resource[idKeyName];
+        if(typeof id === 'string' || typeof id === 'number') return id;
+        else throw new Error("The specified 'idKeyName' must point to a key with a value of type 'string' or 'number'");
+    };
+}
+
+export function withHypermediaCollectionAction<ActionName extends string, Input extends SignalStoreFeatureResult>(
+    actionName: ActionName,
+    linkRootFn: CollectionActionLinkRootFn<Input>,
+    actionMetaName: string,
+    idKeyName: string): SignalStoreFeature<
+        Input,
+        Input & {
             state: HypermediaCollectionActionStoreState<ActionName>;
-            computed: Record<string, Signal<unknown>>;
             methods: HypermediaCollectionActionMethods<ActionName>;
-            props: object;
         }
     >;
-export function withHypermediaCollectionAction<ActionName extends string>(actionName: ActionName) {
+export function withHypermediaCollectionAction<ActionName extends string, Input extends SignalStoreFeatureResult>(
+    actionName: ActionName,
+    linkRootFn: CollectionActionLinkRootFn<Input>,
+    actionMetaName: string): SignalStoreFeature<
+        Input,
+        Input & {
+            state: HypermediaCollectionActionStoreState<ActionName>;
+            methods: HypermediaCollectionActionMethods<ActionName>;
+        }
+    >;
+export function withHypermediaCollectionAction<ActionName extends string, Input extends SignalStoreFeatureResult>(
+    actionName: ActionName,
+    linkRootFn: CollectionActionLinkRootFn<Input>,
+    actionMetaName: string,
+    idKeyName =  'id') {
 
     const stateKey = `${actionName}State`;
     const executeMethodName = generateExecuteHypermediaCollectionActionMethodName(actionName);
-    const connectMethodName = generateConnectHypermediaCollectionActionMethodName(actionName);
+    const idLookup = createIdLookupFunction(idKeyName);
 
     return signalStoreFeature(
         withState({
            [stateKey]: defaultHypermediaCollectionActionState 
         }),
-        withMethods((store, requestService = inject(RequestService)) => {
-
+        withComputed(store => {
+            const linkRoot = linkRootFn(store as unknown as StoreForCollectionActionLinkRoot<Input>);
+            return {
+                _linkRoot: linkRoot,
+                _internalResourceMap: computed(() => toResourceMap(linkRoot(), idLookup)),
+                _linkedCollectionActionRxInput: computed(() => ({ resource: linkRoot(), idLookup, actionName: actionMetaName}))
+            }
+        }),
+        withMethods(store => {
+            const requestService = inject(RequestService);
             const hateoasService = inject(HateoasService);
-            let internalResourceMap: Signal<Record<CollectionKey, unknown>> | undefined;
-
-            const rxConnectToResource = rxMethod<ActionRxInput>(
+            
+            const rxConnectToResourceMethod = rxMethod<LinkedCollectionActionRxInput>(
                 pipe( 
                     tap(() => patchState(store, updateState(stateKey, defaultHypermediaCollectionActionState))),
                     mergeMap(input => from(input.resource)
                         .pipe(
-                            map(resource => [resource, hateoasService.getAction(resource, input.action)] satisfies [Resource, ResourceAction | undefined ] as [Resource, ResourceAction | undefined ]),
+                            map(resource => [resource, hateoasService.getAction(resource, input.actionName)] satisfies [Resource, ResourceAction | undefined ] as [Resource, ResourceAction | undefined ]),
                             map(([resource, action]) => {
                                 const actionState: HypermediaActionStateProps = { ...defaultHypermediaActionState };
                                 if(action && isValidHref(action.href) && isValidActionVerb(action.method)) {
@@ -144,50 +173,46 @@ export function withHypermediaCollectionAction<ActionName extends string>(action
                 )
             );
 
-            return {
-                [executeMethodName]: async (id: CollectionKey): Promise<HttpResponse<unknown>> => {
-                    if(getState(store, stateKey).isAvailable[id] && internalResourceMap) {
-                        const method = getState(store, stateKey).method[id];
-                        const href = getState(store, stateKey).href[id];
+            const executeMethod = async (id: CollectionKey): Promise<HttpResponse<unknown>> => {
+                if(getState(store, stateKey).isAvailable[id]) {
+                    const method = getState(store, stateKey).method[id];
+                    const href = getState(store, stateKey).href[id];
 
-                        if(!method || !href) throw new Error('Action is not available');
+                    if(!method || !href) throw new Error('Action is not available');
 
-                        const body = method !== 'DELETE' ? internalResourceMap()[id] : undefined
+                    const body = method !== 'DELETE' ? store._internalResourceMap()[id] : undefined
 
-                        patchState(store, 
-                            updateItemState(stateKey, id, { 
-                                isExecuting: true, 
-                                hasExecutedSuccessfully: false,
-                                hasExecutedWithError: false,
-                                hasError: false,
-                                error: null 
-                            }));
+                    patchState(store, 
+                        updateItemState(stateKey, id, { 
+                            isExecuting: true, 
+                            hasExecutedSuccessfully: false,
+                            hasExecutedWithError: false,
+                            hasError: false,
+                            error: null 
+                        }));
 
-                        try {
-                            const response = await requestService.request(method, href, body);
-                            patchState(store, updateItemState(stateKey, id, { isExecuting: false, hasExecutedSuccessfully: true } ));
-                            return response;
-                        } catch(e) {
-                            patchState(store, updateItemState(stateKey, id, { isExecuting: false, hasExecutedWithError: true, hasError: true, error: e } ));
-                            throw e;
-                        } 
-                    } else {
-                        throw new Error('Action is not available');
-                    }
-                },
-                [connectMethodName]: (resourceLink: Signal<Resource[]>, idKeyName: string, action: string) => { 
-                    if(!internalResourceMap) {
-                        const idLookup = (resource: Resource) => { 
-                            const id = resource[idKeyName];
-                            if(typeof id === 'string' || typeof id === 'number') return id;
-                            else throw new Error("The specified 'idKeyName' must point to a key with a value of type 'string' or 'number'");
-                        };
-                        internalResourceMap = computed(() => toResourceMap(resourceLink(), idLookup));
-                        const input = computed(() => ({ resource: resourceLink(), idLookup, action }));
-                        rxConnectToResource(input);
-                    }
+                    try {
+                        const response = await requestService.request(method, href, body);
+                        patchState(store, updateItemState(stateKey, id, { isExecuting: false, hasExecutedSuccessfully: true } ));
+                        return response;
+                    } catch(e) {
+                        patchState(store, updateItemState(stateKey, id, { isExecuting: false, hasExecutedWithError: true, hasError: true, error: e } ));
+                        throw e;
+                    } 
+                } else {
+                    throw new Error('Action is not available');
                 }
+            }
+
+            return {
+                [executeMethodName]: executeMethod,
+                _rxConnectToResource: rxConnectToResourceMethod
             };
+        }),
+        withHooks({
+            onInit(store) {
+                store._rxConnectToResource(store._linkedCollectionActionRxInput);
+            }
         })
     );
 }

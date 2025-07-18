@@ -19,11 +19,10 @@ const initialFlightSearchVm: FlightSearchVm = {
 export const FlightSearchStore = signalStore(
   { providedIn: 'root' },
   withHypermediaResource('flightSearchVm', initialFlightSearchVm),
-  withHypermediaCollectionAction('deleteFlight'),
+  withHypermediaCollectionAction('deleteFlight', store => store.flightSearchVm.flights, 'delete'),
   withHooks({
     onInit(store) {
       store.loadFlightSearchVmFromLink(inject(AppStore).rootApi(), 'flightSearchVm');
-      store._connectDeleteFlight(store.flightSearchVm.flights, 'id', 'delete');
     }
   })
 );
