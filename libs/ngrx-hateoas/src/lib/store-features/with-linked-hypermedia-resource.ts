@@ -1,11 +1,12 @@
 import { Signal, computed, inject } from "@angular/core";
-import { SignalStoreFeature, SignalStoreFeatureResult, StateSignals, patchState, signalStoreFeature, withHooks, withMethods, withState } from "@ngrx/signals";
+import { SignalStoreFeature, SignalStoreFeatureResult, StateSignals, patchState, signalStoreFeature, withComputed, withHooks, withMethods, withState } from "@ngrx/signals";
 import { filter, map, pipe, switchMap, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { isValidHref } from "../util/is-valid-href";
 import { DeepPatchableSignal, toDeepPatchableSignal } from "../util/deep-patchable-signal";
 import { RequestService } from "../services/request.service";
 import { HateoasService } from "../services/hateoas.service";
+import { Resource } from "../models";
 
 export type LinkedHypermediaResourceStateProps = { 
     url: string, 
@@ -25,10 +26,6 @@ export type LinkedHypermediaResourceState<ResourceName extends string> = {
 export type LinkedHypermediaResourceStoreState<ResourceName extends string, TResource> = 
     LinkedHypermediaResourceData<ResourceName, TResource>
     & LinkedHypermediaResourceState<ResourceName>;
-
-export function generateConnectLinkedHypermediaResourceMethodName(resourceName: string) {
-    return `_connect${resourceName.charAt(0).toUpperCase() + resourceName.slice(1)}`;
-}
 
 export type ReloadLinkedHypermediaResourceMethod<ResourceName extends string> = { 
     [K in ResourceName as `reload${Capitalize<ResourceName>}`]: () => Promise<void>
@@ -52,10 +49,10 @@ export type LinkedHypermediaResourceMethods<ResourceName extends string, TResour
 
 type StoreForResourceLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']>;
 
-type ResourceLinkRootFn<T extends SignalStoreFeatureResult> = (store: StoreForResourceLinkRoot<T>) => Signal<unknown>
+type ResourceLinkRootFn<T extends SignalStoreFeatureResult> = (store: StoreForResourceLinkRoot<T>) => Signal<Resource>
 
 type LinkedResourceRxInput = {
-    resource: unknown,
+    resource: Resource,
     linkMetaName: string
 }
 
@@ -104,8 +101,17 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
            },
            [dataKey]: initialValue 
         }),
-        withMethods((store, requestService = inject(RequestService)) => {
-            const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [dataKey]: newVal }), (store as Record<string, Signal<TResource>>)[dataKey]);
+        withComputed(store => {
+            const linkRoot = linkRootFn(store as unknown as StoreForResourceLinkRoot<Input>);
+            return {
+                _linkRoot: linkRoot,
+                _linkedResourceRxInput: computed(() => ({ resource: linkRoot(), linkMetaName }))
+            }
+        }),
+        withMethods(store => {
+            const requestService = inject(RequestService);
+            const hateoasService = inject(HateoasService);
+            const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [dataKey]: newVal }), (store as unknown as Record<string, Signal<TResource>>)[dataKey]);
 
             const reloadMethod = async (): Promise<void> => {
                 const currentUrl = getState(store, stateKey).url;
@@ -133,34 +139,31 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                 return patchableSignal;
             }
 
-            return {
-                [reloadMethodName]: reloadMethod,
-                [getAsPatchableMethodName]: getAsPatchableMethod
-            };
-        }),
-        withHooks({
-            onInit(store, requestService = inject(RequestService), hateoasService = inject(HateoasService)) {
-                const resolvedLinkRoot = linkRootFn(store as unknown as StoreForResourceLinkRoot<Input>);
-                const linkedResourceRxInput = computed(() => ({ resource: resolvedLinkRoot(), linkMetaName }));
-
-                const rxConnectToLinkRootMethod = rxMethod<LinkedResourceRxInput>(
+            const rxConnectToLinkRootMethod = rxMethod<LinkedResourceRxInput>(
                     pipe( 
                         map(input => hateoasService.getLink(input.resource, input.linkMetaName)?.href),
                         filter(href => isValidHref(href)),
                         map(href => href!),
                         filter(href => getState(store, stateKey).url !== href),
-                        tap(href => patchState(store, 
-                                            updateState(stateKey, { url: href, isLoading: true, isAvailable: true } ))),
+                        tap(href => patchState(store, updateState(stateKey, { url: href, isLoading: true, isAvailable: true } ))),
                         switchMap(href => requestService.request<TResource>('GET', href)),
                         tap(response => response.body ? patchState(store,
                                                             updateData(dataKey, response.body),
                                                             updateState(stateKey, { isLoading: false, initiallyLoaded: true } ))
-                                                    : patchState(store,
+                                                      : patchState(store,
                                                             updateState(stateKey, { isLoading: false, url: undefined, isAvailable: false, initiallyLoaded: false } )))
                     )
                 );
 
-                rxConnectToLinkRootMethod(linkedResourceRxInput);
+            return {
+                [reloadMethodName]: reloadMethod,
+                [getAsPatchableMethodName]: getAsPatchableMethod,
+                _rxConnectToLinkRoot: rxConnectToLinkRootMethod
+            };
+        }),
+        withHooks({
+            onInit(store) {
+                store._rxConnectToLinkRoot(store._linkedResourceRxInput);
             },
         })
     );

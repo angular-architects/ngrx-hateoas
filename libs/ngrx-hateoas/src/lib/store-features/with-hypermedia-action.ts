@@ -7,6 +7,7 @@ import { isValidHref } from "../util/is-valid-href";
 import { RequestService } from "../services/request.service";
 import { HateoasService } from "../services/hateoas.service";
 import { HttpResponse } from "@angular/common/http";
+import { Resource } from "../models";
 
 export type HypermediaActionStateProps = { 
     method: '' | 'PUT' | 'POST' | 'DELETE'
@@ -48,10 +49,10 @@ export type HypermediaActionMethods<ActionName extends string> =
 
 type StoreForActionLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']>;
     
-type ActionLinkRootFn<T extends SignalStoreFeatureResult> = (store: StoreForActionLinkRoot<T>) => Signal<unknown>
+type ActionLinkRootFn<T extends SignalStoreFeatureResult> = (store: StoreForActionLinkRoot<T>) => Signal<Resource>
     
 type LinkedActionRxInput = {
-    resource: unknown,
+    resource: Resource,
     actionMetaName: string
 }
 
