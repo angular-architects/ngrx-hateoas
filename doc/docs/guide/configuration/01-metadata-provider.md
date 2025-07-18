@@ -116,14 +116,14 @@ const customMetadataProvider: MetadataProvider = {
         return resource['_metadata']?.['_link_' + linkName];
     },
     actionLookup(resource: unknown, actionName: string): ResourceAction | undefined {
-        const actionMetadata = resource['_metadata']?.['_action_' + linkName];
+        const actionMetadata = resource['_metadata']?.['_action_' + actionName];
         // ResourceAction has the two keys href and method, 
         // therefore we have to bring the metadata into the correct format
         if(actionMetadata) return { href: actionMetadata.href, method: actionMetadata.verb };
         else return undefined;
     },
     socketLookup(resource: unknown, socketName: string): ResourceSocket | undefined {
-        return resource['_metadata']?.['_socket_' + linkName];
+        return resource['_metadata']?.['_socket_' + socketName];
     }
 }
 ```
