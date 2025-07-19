@@ -1,5 +1,5 @@
 import { Signal, computed, inject } from "@angular/core";
-import { SignalStoreFeature, SignalStoreFeatureResult, StateSignals, patchState, signalStoreFeature, withComputed, withHooks, withMethods, withState } from "@ngrx/signals";
+import { SignalStoreFeature, SignalStoreFeatureResult, StateSignals, patchState, signalStoreFeature, withHooks, withMethods, withState } from "@ngrx/signals";
 import { from, map, mergeMap, pipe, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { isValidActionVerb } from "../util/is-valid-action-verb";
@@ -135,19 +135,12 @@ export function withHypermediaCollectionAction<ActionName extends string, Input 
 
     const stateKey = `${actionName}State`;
     const executeMethodName = generateExecuteHypermediaCollectionActionMethodName(actionName);
-    const idLookup = createIdLookupFunction(idKeyName);
+    let linkRoot: Signal<Resource[]> | undefined = undefined;
+    let internalResourceMap: Signal<Record<CollectionKey, Resource>> | undefined = undefined;
 
     return signalStoreFeature(
         withState({
            [stateKey]: defaultHypermediaCollectionActionState 
-        }),
-        withComputed(store => {
-            const linkRoot = linkRootFn(store as unknown as StoreForCollectionActionLinkRoot<Input>);
-            return {
-                _linkRoot: linkRoot,
-                _internalResourceMap: computed(() => toResourceMap(linkRoot(), idLookup)),
-                _linkedCollectionActionRxInput: computed(() => ({ resource: linkRoot(), idLookup, actionName: actionMetaName}))
-            }
         }),
         withMethods(store => {
             const requestService = inject(RequestService);
@@ -174,13 +167,13 @@ export function withHypermediaCollectionAction<ActionName extends string, Input 
             );
 
             const executeMethod = async (id: CollectionKey): Promise<HttpResponse<unknown>> => {
-                if(getState(store, stateKey).isAvailable[id]) {
+                if(getState(store, stateKey).isAvailable[id] && internalResourceMap) {
                     const method = getState(store, stateKey).method[id];
                     const href = getState(store, stateKey).href[id];
 
                     if(!method || !href) throw new Error('Action is not available');
 
-                    const body = method !== 'DELETE' ? store._internalResourceMap()[id] : undefined
+                    const body = method !== 'DELETE' ? internalResourceMap()[id] : undefined
 
                     patchState(store, 
                         updateItemState(stateKey, id, { 
@@ -210,8 +203,31 @@ export function withHypermediaCollectionAction<ActionName extends string, Input 
             };
         }),
         withHooks({
-            onInit(store) {
-                store._rxConnectToResource(store._linkedCollectionActionRxInput);
+            onInit(store, hateoasService = inject(HateoasService)) {
+                const idLookup = createIdLookupFunction(idKeyName);
+                linkRoot = linkRootFn(store as unknown as StoreForCollectionActionLinkRoot<Input>);
+                internalResourceMap = computed(() => toResourceMap(linkRoot!(), idLookup));
+                const linkedCollectionActionRxInput = computed(() => ({ resource: linkRoot!(), idLookup, actionName: actionMetaName}))
+                // Wire up linked object with state
+                rxMethod<LinkedCollectionActionRxInput>(
+                pipe( 
+                    tap(() => patchState(store, updateState(stateKey, defaultHypermediaCollectionActionState))),
+                    mergeMap(input => from(input.resource)
+                        .pipe(
+                            map(resource => [resource, hateoasService.getAction(resource, input.actionName)] satisfies [Resource, ResourceAction | undefined ] as [Resource, ResourceAction | undefined ]),
+                            map(([resource, action]) => {
+                                const actionState: HypermediaActionStateProps = { ...defaultHypermediaActionState };
+                                if(action && isValidHref(action.href) && isValidActionVerb(action.method)) {
+                                    actionState.href = action.href;
+                                    actionState.method = action.method;
+                                    actionState.isAvailable = true;
+                                }
+                                return [resource, actionState] satisfies [Resource, HypermediaActionStateProps] as [Resource, HypermediaActionStateProps];
+                            }),
+                            tap(([resource, actionState]) => patchState(store, updateItemState(stateKey, input.idLookup(resource), actionState)))
+                        ))
+                    )
+                )(linkedCollectionActionRxInput);
             }
         })
     );
