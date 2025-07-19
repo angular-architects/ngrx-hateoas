@@ -1,5 +1,5 @@
 import { Signal, computed, inject } from "@angular/core";
-import { SignalStoreFeature, SignalStoreFeatureResult, StateSignals, patchState, signalStoreFeature, withComputed, withHooks, withMethods, withState } from "@ngrx/signals";
+import { SignalStoreFeature, SignalStoreFeatureResult, StateSignals, patchState, signalStoreFeature, withHooks, withMethods, withState } from "@ngrx/signals";
 import { filter, map, pipe, switchMap, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { isValidHref } from "../util/is-valid-href";
@@ -49,10 +49,10 @@ export type LinkedHypermediaResourceMethods<ResourceName extends string, TResour
 
 type StoreForResourceLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']>;
 
-type ResourceLinkRootFn<T extends SignalStoreFeatureResult> = (store: StoreForResourceLinkRoot<T>) => Signal<Resource>
+type ResourceLinkRootFn<T extends SignalStoreFeatureResult> = (store: StoreForResourceLinkRoot<T>) => Signal<Resource | undefined>
 
 type LinkedResourceRxInput = {
-    resource: Resource,
+    resource: Resource | undefined,
     linkMetaName: string
 }
 
@@ -90,6 +90,7 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
     const stateKey = `${resourceName}State`;
     const reloadMethodName = generateReloadLinkedHypermediaResourceMethodName(resourceName);
     const getAsPatchableMethodName = generateGetAsPatchableLinkedHypermediaResourceMethodName(resourceName);
+    let linkRoot: Signal<Resource | undefined> | undefined = undefined;
 
     return signalStoreFeature(
         withState({
@@ -101,16 +102,7 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
            },
            [dataKey]: initialValue 
         }),
-        withComputed(store => {
-            const linkRoot = linkRootFn(store as unknown as StoreForResourceLinkRoot<Input>);
-            return {
-                _linkRoot: linkRoot,
-                _linkedResourceRxInput: computed(() => ({ resource: linkRoot(), linkMetaName }))
-            }
-        }),
-        withMethods(store => {
-            const requestService = inject(RequestService);
-            const hateoasService = inject(HateoasService);
+        withMethods((store, requestService = inject(RequestService)) => {
             const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [dataKey]: newVal }), (store as unknown as Record<string, Signal<TResource>>)[dataKey]);
 
             const reloadMethod = async (): Promise<void> => {
@@ -139,7 +131,17 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                 return patchableSignal;
             }
 
-            const rxConnectToLinkRootMethod = rxMethod<LinkedResourceRxInput>(
+            return {
+                [reloadMethodName]: reloadMethod,
+                [getAsPatchableMethodName]: getAsPatchableMethod
+            };
+        }),
+        withHooks({
+            onInit(store, hateoasService = inject(HateoasService), requestService = inject(RequestService)) {
+                linkRoot = linkRootFn(store as unknown as StoreForResourceLinkRoot<Input>);
+                const linkedResourceRxInput = computed(() => ({ resource: linkRoot!(), linkMetaName }));
+                // Wire up linked object with state
+                rxMethod<LinkedResourceRxInput>(
                     pipe( 
                         map(input => hateoasService.getLink(input.resource, input.linkMetaName)?.href),
                         filter(href => isValidHref(href)),
@@ -153,17 +155,7 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                                                       : patchState(store,
                                                             updateState(stateKey, { isLoading: false, url: undefined, isAvailable: false, initiallyLoaded: false } )))
                     )
-                );
-
-            return {
-                [reloadMethodName]: reloadMethod,
-                [getAsPatchableMethodName]: getAsPatchableMethod,
-                _rxConnectToLinkRoot: rxConnectToLinkRootMethod
-            };
-        }),
-        withHooks({
-            onInit(store) {
-                store._rxConnectToLinkRoot(store._linkedResourceRxInput);
+                )(linkedResourceRxInput);
             },
         })
     );
