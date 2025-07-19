@@ -1,4 +1,4 @@
-import { Component, effect, input, model, output } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { timer } from 'rxjs';
 
 @Component({
@@ -9,27 +9,22 @@ import { timer } from 'rxjs';
 export class ActionCardComponent {
   
   disabled = input(false);
+  save = output<void>();
 
-  showSuccess = model(false);
-  showError = model(false);
+  _showSuccess = signal(false);
+  _showError = signal(false);
 
-  execute = output<void>();
-
-  constructor() {
-    effect(() => {
-
-      if(this.showSuccess()) {
-        timer(3000).subscribe(() => this.showSuccess.set(false));
-      }
-
-      if(this.showError()) {
-        timer(3000).subscribe(() => this.showError.set(false));
-      }
-
-    });
+  onSave() {
+    this.save.emit();
   }
 
-  onExecute() {
-    this.execute.emit();
+  showSuccess() {
+    this._showSuccess.set(true);
+    timer(3000).subscribe(() => this._showSuccess.set(false));
+  }
+
+  showError() {
+    this._showError.set(true);
+    timer(3000).subscribe(() => this._showError.set(false));
   }
 }

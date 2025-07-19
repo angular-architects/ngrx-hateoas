@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, viewChild } from '@angular/core';
 import { ActionCardComponent } from '../../shared/ui/action-card/action-card.component';
 import { FlightConnectionFormComponent } from '../shared/flight-connection-form/flight-connection-form.component';
 import { FlightOperatorFormComponent } from '../shared/flight-operator-form/flight-operator-form.component';
@@ -18,4 +18,45 @@ export class FlightEditComponent {
   flightTimes = this.viewModel.flight.times;
   flightOperator = this.viewModel.flight.operator;
   flightPrice = this.viewModel.flight.price;
+
+  _connectionCard = viewChild.required<ActionCardComponent>('connection');
+  _timesCard = viewChild.required<ActionCardComponent>('times');
+  _operatorCard = viewChild.required<ActionCardComponent>('operator');
+  _priceCard = viewChild<ActionCardComponent>('price');
+
+  async onUpdateConnection() {
+    try {
+      await this.store.updateFlightConnection();
+      this._connectionCard().showSuccess();
+    } catch {
+      this._connectionCard().showError();
+    }
+  }
+
+  onUpdateTimes() {
+    try {
+      this.store.updateFlightConnection();
+      this._timesCard().showSuccess();
+    } catch {
+      this._timesCard().showError();
+    }
+  }
+
+  onUpdateOperator() {
+    try {
+      this.store.updateFlightConnection();
+      this._operatorCard().showSuccess();
+    } catch {
+      this._operatorCard().showError();
+    }
+  }
+
+  onUpdatePrice() {
+    try {
+      this.store.updateFlightConnection();
+      this._priceCard()?.showSuccess();
+    } catch {
+      this._priceCard()?.showError();
+    }
+  }
 }

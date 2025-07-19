@@ -14,8 +14,6 @@ export type HypermediaActionStateProps = {
     href: string
     isAvailable: boolean
     isExecuting: boolean 
-    hasExecutedSuccessfully: boolean
-    hasExecutedWithError: boolean
     hasError: boolean
     error: unknown
 }
@@ -25,8 +23,6 @@ export const defaultHypermediaActionState: HypermediaActionStateProps = {
     method: '',
     isAvailable: false,
     isExecuting: false,
-    hasExecutedSuccessfully: false,
-    hasExecutedWithError: false,
     hasError: false,
     error: null as unknown
 }
@@ -101,18 +97,16 @@ export function withHypermediaAction<ActionName extends string, Input extends Si
                     patchState(store, 
                         updateState(stateKey, { 
                             isExecuting: true, 
-                            hasExecutedSuccessfully: false,
-                            hasExecutedWithError: false,
                             hasError: false,
                             error: null 
                         }));
 
                     try {
                         const response = await requestService.request(method, href, body);
-                        patchState(store, updateState(stateKey, { isExecuting: false, hasExecutedSuccessfully: true } ));
+                        patchState(store, updateState(stateKey, { isExecuting: false } ));
                         return response;
                     } catch(e) {
-                        patchState(store, updateState(stateKey, { isExecuting: false, hasExecutedWithError: true, hasError: true, error: e } ));
+                        patchState(store, updateState(stateKey, { isExecuting: false, hasError: true, error: e } ));
                         throw e;
                     } 
                 } else {
@@ -121,7 +115,7 @@ export function withHypermediaAction<ActionName extends string, Input extends Si
             };
 
             return {
-                [executeMethodName]: executeMethod,
+                [executeMethodName]: executeMethod
             };
         }),
         withHooks({
