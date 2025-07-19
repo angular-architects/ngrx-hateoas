@@ -1,11 +1,11 @@
-import { Injector, runInInjectionContext, signal } from "@angular/core";
+import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { whenTrue } from "./when-true";
 
 describe('whenTrue', () => {
 
     beforeEach(() => {
-        TestBed.configureTestingModule({});
+        TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()]});
     });
 
   it('resolves promise to true when signal sends true', async () => {

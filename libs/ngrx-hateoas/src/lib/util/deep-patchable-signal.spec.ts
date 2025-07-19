@@ -1,7 +1,7 @@
 import { TestBed } from "@angular/core/testing";
 import { patchState, signalStore, withMethods, withState } from "@ngrx/signals";
 import { toDeepPatchableSignal } from "./deep-patchable-signal";
-import { signal } from "@angular/core";
+import { provideZonelessChangeDetection, signal } from "@angular/core";
 
 type TestModel = {
     numProp: number,
@@ -32,7 +32,7 @@ describe('deepPatchableSignal', () => {
 
     it('patches a signal via signal store patchState on the right position', () => {
 
-        TestBed.configureTestingModule({});
+        TestBed.configureTestingModule({providers: [provideZonelessChangeDetection()]});
         const store = TestBed.inject(TestStore);
 
         const patchableSignal = store.getModelAsPatchable();

@@ -6,6 +6,7 @@ import { withHypermediaResource } from './with-hypermedia-resource';
 import { provideHateoas } from '../provide';
 import { firstValueFrom, timer } from 'rxjs';
 import { withHypermediaCollectionAction } from './with-hypermedia-collection-action';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 type TestModel = {
     items: {
@@ -50,7 +51,7 @@ describe('withHypermediaCollectionAction', () => {
 
     beforeEach(async () => {
         TestBed.configureTestingModule({
-            providers: [provideHttpClient(), provideHttpClientTesting(), provideHateoas()]
+            providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting(), provideHateoas()]
         });
         store = TestBed.inject(TestStore);
         await firstValueFrom(timer(0));
@@ -62,8 +63,6 @@ describe('withHypermediaCollectionAction', () => {
         expect(store.doSomethingState.method()).toEqual({ item1: '', item2: 'PUT', item3: 'DELETE'});
         expect(store.doSomethingState.isAvailable()).toEqual({ item1: false, item2: true, item3: true});
         expect(store.doSomethingState.isExecuting()).toEqual({ item1: false, item2: false, item3: false});
-        expect(store.doSomethingState.hasExecutedSuccessfully()).toEqual({ item1: false, item2: false, item3: false});
-        expect(store.doSomethingState.hasExecutedWithError()).toEqual({ item1: false, item2: false, item3: false});
         expect(store.doSomethingState.hasError()).toEqual({ item1: false, item2: false, item3: false});
         expect(store.doSomethingState.error()).toEqual({ item1: null, item2: null, item3: null});
     });
@@ -85,8 +84,6 @@ describe('withHypermediaCollectionAction', () => {
         expect(store.doSomethingState.method()).toEqual({ item1: '', item2: 'PUT', item3: 'DELETE'});
         expect(store.doSomethingState.isAvailable()).toEqual({ item1: false, item2: true, item3: true});
         expect(store.doSomethingState.isExecuting()).toEqual({ item1: false, item2: true, item3: false});
-        expect(store.doSomethingState.hasExecutedSuccessfully()).toEqual({ item1: false, item2: false, item3: false});
-        expect(store.doSomethingState.hasExecutedWithError()).toEqual({ item1: false, item2: false, item3: false});
         expect(store.doSomethingState.hasError()).toEqual({ item1: false, item2: false, item3: false});
         expect(store.doSomethingState.error()).toEqual({ item1: null, item2: null, item3: null});
 
@@ -104,8 +101,6 @@ describe('withHypermediaCollectionAction', () => {
         expect(store.doSomethingState.method()).toEqual({ item1: '', item2: 'PUT', item3: 'DELETE'});
         expect(store.doSomethingState.isAvailable()).toEqual({ item1: false, item2: true, item3: true});
         expect(store.doSomethingState.isExecuting()).toEqual({ item1: false, item2: false, item3: false});
-        expect(store.doSomethingState.hasExecutedSuccessfully()).toEqual({ item1: false, item2: true, item3: false});
-        expect(store.doSomethingState.hasExecutedWithError()).toEqual({ item1: false, item2: false, item3: false});
         expect(store.doSomethingState.hasError()).toEqual({ item1: false, item2: false, item3: false});
         expect(store.doSomethingState.error()).toEqual({ item1: null, item2: null, item3: null});
 
@@ -115,8 +110,6 @@ describe('withHypermediaCollectionAction', () => {
         expect(store.doSomethingState.method()).toEqual({ item1: '', item2: 'PUT', item3: 'DELETE'});
         expect(store.doSomethingState.isAvailable()).toEqual({ item1: false, item2: true, item3: true});
         expect(store.doSomethingState.isExecuting()).toEqual({ item1: false, item2: false, item3: true});
-        expect(store.doSomethingState.hasExecutedSuccessfully()).toEqual({ item1: false, item2: true, item3: false});
-        expect(store.doSomethingState.hasExecutedWithError()).toEqual({ item1: false, item2: false, item3: false});
         expect(store.doSomethingState.hasError()).toEqual({ item1: false, item2: false, item3: false});
         expect(store.doSomethingState.error()).toEqual({ item1: null, item2: null, item3: null});
 
@@ -134,8 +127,6 @@ describe('withHypermediaCollectionAction', () => {
         expect(store.doSomethingState.method()).toEqual({ item1: '', item2: 'PUT', item3: 'DELETE'});
         expect(store.doSomethingState.isAvailable()).toEqual({ item1: false, item2: true, item3: true});
         expect(store.doSomethingState.isExecuting()).toEqual({ item1: false, item2: false, item3: false});
-        expect(store.doSomethingState.hasExecutedSuccessfully()).toEqual({ item1: false, item2: true, item3: true});
-        expect(store.doSomethingState.hasExecutedWithError()).toEqual({ item1: false, item2: false, item3: false});
         expect(store.doSomethingState.hasError()).toEqual({ item1: false, item2: false, item3: false});
         expect(store.doSomethingState.error()).toEqual({ item1: null, item2: null, item3: null});
     });

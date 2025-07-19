@@ -6,6 +6,7 @@ import { withHypermediaResource } from './with-hypermedia-resource';
 import { withLinkedHypermediaResource } from './with-linked-hypermedia-resource';
 import { provideHateoas } from '../provide';
 import { firstValueFrom, timer } from 'rxjs';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 type RootModel = {
     apiName: string
@@ -40,7 +41,7 @@ describe('withLinkedHypermediaResource', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [ provideHttpClient(), provideHttpClientTesting(), provideHateoas() ]
+            providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting(), provideHateoas()]
         });
         store = TestBed.inject(TestStore);
         httpTestingController = TestBed.inject(HttpTestingController);

@@ -6,6 +6,7 @@ import { withHypermediaResource } from './with-hypermedia-resource';
 import { provideHateoas } from '../provide';
 import { firstValueFrom, timer } from 'rxjs';
 import { withHypermediaAction } from './with-hypermedia-action';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 type TestModel = {
     name: string,
@@ -36,7 +37,7 @@ describe('withHypermediaAction', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [ provideHttpClient(), provideHttpClientTesting(), provideHateoas() ]
+            providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting(), provideHateoas()]
         });
         store = TestBed.inject(TestStore);
         httpTestingController = TestBed.inject(HttpTestingController);
@@ -47,8 +48,6 @@ describe('withHypermediaAction', () => {
         expect(store.doSomethingState.method()).toBe('');
         expect(store.doSomethingState.isAvailable()).toBeFalse();
         expect(store.doSomethingState.isExecuting()).toBeFalse();
-        expect(store.doSomethingState.hasExecutedSuccessfully()).toBeFalse();
-        expect(store.doSomethingState.hasExecutedWithError()).toBeFalse();
         expect(store.doSomethingState.hasError()).toBeFalse();
         expect(store.doSomethingState.error()).toBeNull();
     });
@@ -74,8 +73,6 @@ describe('withHypermediaAction', () => {
         expect(store.doSomethingState.method()).toBe('PUT');
         expect(store.doSomethingState.isAvailable()).toBeTrue();
         expect(store.doSomethingState.isExecuting()).toBeFalse();
-        expect(store.doSomethingState.hasExecutedSuccessfully()).toBeFalse();
-        expect(store.doSomethingState.hasExecutedWithError()).toBeFalse();
         expect(store.doSomethingState.hasError()).toBeFalse();
         expect(store.doSomethingState.error()).toBeNull();
 
@@ -85,8 +82,6 @@ describe('withHypermediaAction', () => {
         expect(store.doSomethingState.method()).toBe('PUT');
         expect(store.doSomethingState.isAvailable()).toBeTrue();
         expect(store.doSomethingState.isExecuting()).toBeTrue();
-        expect(store.doSomethingState.hasExecutedSuccessfully()).toBeFalse();
-        expect(store.doSomethingState.hasExecutedWithError()).toBeFalse();
         expect(store.doSomethingState.hasError()).toBeFalse();
         expect(store.doSomethingState.error()).toBeNull();
 
@@ -106,8 +101,6 @@ describe('withHypermediaAction', () => {
         expect(store.doSomethingState.method()).toBe('PUT');
         expect(store.doSomethingState.isAvailable()).toBeTrue();
         expect(store.doSomethingState.isExecuting()).toBeFalse();
-        expect(store.doSomethingState.hasExecutedSuccessfully()).toBeTrue();
-        expect(store.doSomethingState.hasExecutedWithError()).toBeFalse();
         expect(store.doSomethingState.hasError()).toBeFalse();
         expect(store.doSomethingState.error()).toBeNull();
     });
