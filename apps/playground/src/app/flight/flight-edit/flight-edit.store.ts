@@ -1,5 +1,5 @@
 import { withHypermediaResource, withHypermediaAction } from "@angular-architects/ngrx-hateoas";
-import { signalStore, withHooks } from "@ngrx/signals";
+import { signalStore } from "@ngrx/signals";
 import { Aircraft, Flight, initialFlight } from "../flight.entities";
 
 export type FlightEditVm = {
@@ -15,16 +15,8 @@ export const initialFlightEditVm: FlightEditVm = {
 export const FlightEditStore = signalStore(
   { providedIn: 'root' },
   withHypermediaResource('flightEditVm', initialFlightEditVm),
-  withHypermediaAction('updateFlightConnection'),
-  withHypermediaAction('updateFlightTimes'),
-  withHypermediaAction('updateFlightOperator'),
-  withHypermediaAction('updateFlightPrice'),
-  withHooks({
-    onInit(store) {
-      store._connectUpdateFlightConnection(store.flightEditVm.flight.connection, 'update');
-      store._connectUpdateFlightTimes(store.flightEditVm.flight.times, 'update');
-      store._connectUpdateFlightOperator(store.flightEditVm.flight.operator, 'update');
-      store._connectUpdateFlightPrice(store.flightEditVm.flight.price, 'update');
-    }
-  })
+  withHypermediaAction('updateFlightConnection', store => store.flightEditVm.flight.connection, 'update'),
+  withHypermediaAction('updateFlightTimes', store => store.flightEditVm.flight.times, 'update'),
+  withHypermediaAction('updateFlightOperator', store => store.flightEditVm.flight.operator, 'update'),
+  withHypermediaAction('updateFlightPrice', store => store.flightEditVm.flight.price, 'update')
 );

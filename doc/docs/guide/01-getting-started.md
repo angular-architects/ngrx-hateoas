@@ -213,7 +213,7 @@ To mutate the state of the flight within the signal store you have the following
    :::
 
 ## Send changed state Back to the Server
-To be able to send the changed flight connection back to the server we have to configure the signal store to offer an action for this. To do this we use the `withHypermediaAction` feature from **ngrx-hateoas**. The hypermedia action needs to be configured with an object in the state and an action name to monitor. If you look into the example JSON at the beginning you see the required metadata is directly placed into the `connection` key. And the name of the action is `update`. This two information needs to be provided to the action. This is done with the help of a connect method within the `onInit` hook.
+To be able to send the changed flight connection back to the server we have to configure the signal store to offer an action for this. To do this we use the `withHypermediaAction` feature from **ngrx-hateoas**. The hypermedia action needs to be configured with an object in the state and an action name to monitor. If you look into the example JSON at the beginning you see the required metadata is directly placed into the `connection` key. And the name of the action is `update`. This two information needs to be provided to the action feature.
 
 ```ts
 import { signalStore, withHooks } from '@ngrx/signals';
@@ -223,13 +223,7 @@ export const FlightEditStore = signalStore(
     { providedIn: 'root' },
     withHypermediaResource('flightModel', initialFlight),
     // Add this feature
-    withHypermediaAction('updateFlightConnection'),
-    // Connect the action with the metadata
-    withHooks({
-        onInit(store) {
-            store._connectUpdateFlightConnection(store.flightModel.connection, 'update');
-        }
-    })
+    withHypermediaAction('updateFlightConnection', store => store.flightModel.connection, 'update')
 );
 ```
 
@@ -267,16 +261,9 @@ import { withHypermediaResource, withHypermediaAction } from '@angular-architect
 export const FlightEditStore = signalStore(
     { providedIn: 'root' },
     withHypermediaResource('flightModel', initialFlight),
-    withHypermediaAction('updateFlightConnection'),
-    withHypermediaAction('updateFlightTimes'),
-    withHypermediaAction('deleteFlight'),
-    withHooks({
-        onInit(store) {
-            store._connectUpdateFlightConnection(store.flightModel.connection, 'update');
-            store._connectUpdateFlightTimes(store.flightModel.times, 'update');
-            store._connectDeleteFlight(store.flightModel, 'delete');
-        }
-    })
+    withHypermediaAction('updateFlightConnection', store => store.flightModel.connection, 'update'),
+    withHypermediaAction('updateFlightTimes', store => store.flightModel.times, 'update'),
+    withHypermediaAction('deleteFlight', store => store.flightModel, 'delete')
 );
 ```
 
