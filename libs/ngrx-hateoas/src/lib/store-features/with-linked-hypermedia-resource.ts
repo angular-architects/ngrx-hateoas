@@ -1,4 +1,4 @@
-import { Signal, computed, inject } from "@angular/core";
+import { Signal, inject } from "@angular/core";
 import { SignalStoreFeature, SignalStoreFeatureResult, StateSignals, patchState, signalStoreFeature, withHooks, withMethods, withState } from "@ngrx/signals";
 import { filter, map, pipe, switchMap, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
@@ -50,11 +50,6 @@ export type LinkedHypermediaResourceMethods<ResourceName extends string, TResour
 type StoreForResourceLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']>;
 
 type ResourceLinkRootFn<T extends SignalStoreFeatureResult> = (store: StoreForResourceLinkRoot<T>) => Signal<Resource | undefined>
-
-type LinkedResourceRxInput = {
-    resource: Resource | undefined,
-    linkMetaName: string
-}
 
 function getState(store: unknown, stateKey: string): LinkedHypermediaResourceStateProps {
     return (store as Record<string, Signal<LinkedHypermediaResourceStateProps>>)[stateKey]()
@@ -139,11 +134,11 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
         withHooks({
             onInit(store, hateoasService = inject(HateoasService), requestService = inject(RequestService)) {
                 linkRoot = linkRootFn(store as unknown as StoreForResourceLinkRoot<Input>);
-                const linkedResourceRxInput = computed(() => ({ resource: linkRoot!(), linkMetaName }));
                 // Wire up linked object with state
-                rxMethod<LinkedResourceRxInput>(
+                rxMethod<Resource | undefined>(
                     pipe( 
-                        map(input => hateoasService.getLink(input.resource, input.linkMetaName)?.href),
+                        filter(resource => resource !== undefined),
+                        map(resource => hateoasService.getLink(resource, linkMetaName)?.href),
                         filter(href => isValidHref(href)),
                         map(href => href!),
                         filter(href => getState(store, stateKey).url !== href),
@@ -155,7 +150,7 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                                                       : patchState(store,
                                                             updateState(stateKey, { isLoading: false, url: undefined, isAvailable: false, initiallyLoaded: false } )))
                     )
-                )(linkedResourceRxInput);
+                )(linkRoot);
             },
         })
     );

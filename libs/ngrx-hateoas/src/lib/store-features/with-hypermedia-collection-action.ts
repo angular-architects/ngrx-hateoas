@@ -43,16 +43,11 @@ export function generateExecuteHypermediaCollectionActionMethodName(actionName: 
     return actionName;
 }
 
-export type ConnectHypermediaCollectionActionMethod<ActionName extends string> = { 
-    [K in ActionName as `_connect${Capitalize<ActionName>}`]: (resourceLink: Signal<unknown[]>, idKeyName: string, action: string) => void
-};
-
 export function generateConnectHypermediaCollectionActionMethodName(actionName: string) {
     return `_connect${actionName.charAt(0).toUpperCase() + actionName.slice(1)}`;
 }
 
-export type HypermediaCollectionActionMethods<ActionName extends string> = 
-    ExecuteHypermediaCollectionActionMethod<ActionName> & ConnectHypermediaCollectionActionMethod<ActionName>
+export type HypermediaCollectionActionMethods<ActionName extends string> = ExecuteHypermediaCollectionActionMethod<ActionName>
 
 type StoreForCollectionActionLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']>;
         
