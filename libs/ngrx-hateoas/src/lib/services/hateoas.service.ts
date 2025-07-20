@@ -22,14 +22,14 @@ export class HateoasService {
     }
 
     getLink(resource: unknown, linkName: string): ResourceLink | undefined {
-        return this.hateoasConfig.linkLookup(resource, linkName);
+        return this.hateoasConfig.getLinks(resource).find(l => l.rel == linkName);
     }
 
     getAction(resource: unknown, actionName: string): ResourceAction | undefined {
-        return this.hateoasConfig.actionLookup(resource, actionName);
+        return this.hateoasConfig.getActions(resource).find(a => a.rel == actionName);
     }
 
     getSocket(resource: unknown, socketName: string): ResourceSocket | undefined {
-        return this.hateoasConfig.socketLookup(resource, socketName);
+        return this.hateoasConfig.getSockets(resource).find(s => s.rel == socketName);
     }
 }

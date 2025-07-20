@@ -326,9 +326,9 @@ describe('RequestService', () => {
                 isMetadataKey(keyName: string) {
                     return keyName.startsWith('_');
                 },
-                linkLookup: () => undefined,
-                actionLookup: () => undefined,
-                socketLookup: () => undefined
+                getLinks: () => [],
+                getActions: () => [],
+                getSockets: () => []
             }
             TestBed.resetTestingModule();
             TestBed.configureTestingModule({ providers: [ 

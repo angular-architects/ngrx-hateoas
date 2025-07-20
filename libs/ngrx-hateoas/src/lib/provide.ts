@@ -45,9 +45,9 @@ const defaultCustomHeaderOptions: CustomHeadersOptions = {
 
 export interface MetadataProvider {
     isMetadataKey(keyName: string): boolean;
-    linkLookup(resource: unknown, linkName: string): ResourceLink | undefined;
-    actionLookup(resource: unknown, actionName: string): ResourceAction | undefined;
-    socketLookup(resource: unknown, socketName: string): ResourceSocket | undefined;
+    getLinks(resource: unknown): ResourceLink[];
+    getActions(resource: unknown): ResourceAction[];
+    getSockets(resource: unknown): ResourceSocket[];
 }
 
 function isResource(resource: unknown): resource is Resource {
@@ -82,23 +82,32 @@ const defaultMetadataProvider: MetadataProvider = {
     isMetadataKey(keyName: string) {
         return keyName.startsWith('_');
     },
-    linkLookup(resource: unknown, linkName: string): ResourceLink | undefined {
-        if(isResource(resource) && isResourceLinkRecord(resource['_links']) && isResourceLink(resource['_links'][linkName]))
-            return resource['_links'][linkName];
-        else
-            return undefined;
+    getLinks: function (resource: unknown): ResourceLink[] {
+        const result: ResourceLink[] = [];
+        if(isResource(resource) && isResourceLinkRecord(resource['_links']) ) {
+            for(const key in resource['_links']) {
+                if(isResourceLink(resource['_links'][key])) result.push({rel: key, href: resource['_links'][key].href});
+            }
+        }
+        return result;
     },
-    actionLookup(resource: unknown, actionName: string): ResourceAction | undefined {
-        if(isResource(resource) && isResourceActionRecord(resource['_actions']) && isResourceAction(resource['_actions'][actionName]))
-            return resource['_actions'][actionName];
-        else
-            return undefined;
+    getActions: function (resource: unknown): ResourceAction[] {
+        const result: ResourceAction[] = [];
+        if(isResource(resource) && isResourceActionRecord(resource['_actions']) ) {
+            for(const key in resource['_actions']) {
+                if(isResourceAction(resource['_actions'][key])) result.push({rel: key, href: resource['_actions'][key].href, method: resource['_actions'][key].method});
+            }
+        }
+        return result;
     },
-    socketLookup(resource: unknown, socketName: string): ResourceSocket | undefined {
-        if(isResource(resource) && isResourceSocketRecord(resource['_sockets']) && isResourceSocket(resource['_sockets'][socketName]))
-            return resource['_sockets'][socketName];
-        else
-            return undefined;
+    getSockets: function (resource: unknown): ResourceSocket[] {
+        const result: ResourceSocket[] = [];
+        if(isResource(resource) && isResourceSocketRecord(resource['_sockets']) ) {
+            for(const key in resource['_sockets']) {
+                if(isResourceSocket(resource['_sockets'][key])) result.push({rel: key, href: resource['_sockets'][key].href, event: resource['_sockets'][key].event});
+            }
+        }
+        return result;
     }
 }
 

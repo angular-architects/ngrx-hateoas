@@ -71,14 +71,14 @@ describe('provideHateaos', () => {
                 isMetadataKey(keyName: string) {
                     return keyName === 'myMeta';
                 },
-                linkLookup(resource, linkName) {
-                    return { href: (resource as Record<string, Record<string, string>>)['myMeta'][`_link_${linkName}`] } satisfies ResourceLink;
+                getLinks(): ResourceLink[] {
+                    return [];
                 },
-                actionLookup(resource, actionName) {
-                    return { href: (resource as Record<string, Record<string, string>>)['myMeta'][`_action_${actionName}`], method: 'PUT' } satisfies ResourceAction;
+                getActions(): ResourceAction[] {
+                    return [];
                 },
-                socketLookup(resource, socketName) {
-                    return { href: (resource as Record<string, Record<string, string>>)['myMeta'][`_socket_${socketName}`], event: 'update' } satisfies ResourceSocket;
+                getSockets(): ResourceSocket[] {
+                    return [];
                 }
             }
 
@@ -86,9 +86,9 @@ describe('provideHateaos', () => {
             const metadataProvider = TestBed.inject(HATEOAS_METADATA_PROVIDER);
 
             expect(metadataProvider.isMetadataKey).toBe(dummyMetadataProvider.isMetadataKey);
-            expect(metadataProvider.linkLookup).toBe(dummyMetadataProvider.linkLookup);
-            expect(metadataProvider.actionLookup).toBe(dummyMetadataProvider.actionLookup);
-            expect(metadataProvider.socketLookup).toBe(dummyMetadataProvider.socketLookup);
+            expect(metadataProvider.getLinks).toBe(dummyMetadataProvider.getLinks);
+            expect(metadataProvider.getActions).toBe(dummyMetadataProvider.getActions);
+            expect(metadataProvider.getSockets).toBe(dummyMetadataProvider.getSockets);
         });
 
     });
