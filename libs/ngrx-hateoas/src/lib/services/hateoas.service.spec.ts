@@ -94,4 +94,19 @@ describe('HateoasService', () => {
         expect(() => hateoasService.getUrl(testObj, 'missingLink')).toThrowError('missingLink is missing on provided resource');
     });
 
+    it('reads all links', () => {
+        const result = hateoasService.getLinks(testObj)
+        expect(result).toEqual([{ rel: 'myLink', href: '/my/link' }, { rel: 'myLinkWithQuery', href: '/my/link?myQuery=true' }]);
+    });
+
+    it('reads all actions', () => {
+        const result = hateoasService.getActions(testObj)
+        expect(result).toEqual([{ rel: 'myAction', href: '/my/action', method: 'PUT' }]);
+    });
+
+    it('reads all sockets', () => {
+        const result = hateoasService.getSockets(testObj)
+        expect(result).toEqual([{ rel: 'mySocket', href: '/my/socket', event: 'update' }]);
+    });
+
 });
