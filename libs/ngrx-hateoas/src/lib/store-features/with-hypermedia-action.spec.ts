@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { signalStore, withHooks } from '@ngrx/signals';
+import { signalStore } from '@ngrx/signals';
 import { withHypermediaResource } from './with-hypermedia-resource';
 import { provideHateoas } from '../provide';
 import { firstValueFrom, timer } from 'rxjs';
@@ -26,12 +26,7 @@ const initialTestModel: TestModel = {
 const TestStore = signalStore(
     { providedIn: 'root' },
     withHypermediaResource('testModel', initialTestModel),
-    withHypermediaAction('doSomething'),
-    withHooks({
-        onInit(store) {
-            store._connectDoSomething(store.testModel, 'doSomething')
-        },
-    })
+    withHypermediaAction('doSomething', store => store.testModel, 'doSomething')
 );
 
 describe('withHypermediaAction', () => {

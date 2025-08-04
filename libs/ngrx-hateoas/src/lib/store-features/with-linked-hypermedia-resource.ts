@@ -1,11 +1,12 @@
 import { Signal, computed, inject } from "@angular/core";
-import { SignalStoreFeature, patchState, signalStoreFeature, withMethods, withState } from "@ngrx/signals";
+import { SignalStoreFeature, SignalStoreFeatureResult, StateSignals, patchState, signalStoreFeature, withHooks, withMethods, withState } from "@ngrx/signals";
 import { filter, map, pipe, switchMap, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { isValidHref } from "../util/is-valid-href";
 import { DeepPatchableSignal, toDeepPatchableSignal } from "../util/deep-patchable-signal";
 import { RequestService } from "../services/request.service";
 import { HateoasService } from "../services/hateoas.service";
+import { Resource } from "../models";
 
 export type LinkedHypermediaResourceStateProps = { 
     url: string, 
@@ -26,14 +27,6 @@ export type LinkedHypermediaResourceStoreState<ResourceName extends string, TRes
     LinkedHypermediaResourceData<ResourceName, TResource>
     & LinkedHypermediaResourceState<ResourceName>;
 
-export type ConnectLinkedHypermediaResourceMethod<ResourceName extends string> = { 
-    [K in ResourceName as `_connect${Capitalize<ResourceName>}`]: (linkRoot: Signal<unknown>, linkName: string) => void
-};
-
-export function generateConnectLinkedHypermediaResourceMethodName(resourceName: string) {
-    return `_connect${resourceName.charAt(0).toUpperCase() + resourceName.slice(1)}`;
-}
-
 export type ReloadLinkedHypermediaResourceMethod<ResourceName extends string> = { 
     [K in ResourceName as `reload${Capitalize<ResourceName>}`]: () => Promise<void>
 };
@@ -51,13 +44,16 @@ export function generateGetAsPatchableLinkedHypermediaResourceMethodName(resourc
 }
 
 export type LinkedHypermediaResourceMethods<ResourceName extends string, TResource> = 
-    ConnectLinkedHypermediaResourceMethod<ResourceName> 
-    & ReloadLinkedHypermediaResourceMethod<ResourceName>
+    ReloadLinkedHypermediaResourceMethod<ResourceName>
     & GetAsPatchableLinkedHypermediaResourceMethod<ResourceName, TResource>;
 
-type linkedRxInput = {
-    resource: unknown,
-    linkName: string
+type StoreForResourceLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']>;
+
+type ResourceLinkRootFn<T extends SignalStoreFeatureResult> = (store: StoreForResourceLinkRoot<T>) => Signal<Resource | undefined>
+
+type LinkedResourceRxInput = {
+    resource: Resource | undefined,
+    linkMetaName: string
 }
 
 function getState(store: unknown, stateKey: string): LinkedHypermediaResourceStateProps {
@@ -73,28 +69,28 @@ function updateState(stateKey: string, partialState: Partial<LinkedHypermediaRes
     return (state: any) => ({ [stateKey]: { ...state[stateKey], ...partialState } });
 }
 
-export function withLinkedHypermediaResource<ResourceName extends string, TResource>(
-    resourceName: ResourceName, initialValue: TResource): SignalStoreFeature<
-        { 
-            state: object;
-            computed: Record<string, Signal<unknown>>; 
-            methods: Record<string, Function>;
-            props: object;
-        },
-        {
+export function withLinkedHypermediaResource<ResourceName extends string, TResource, Input extends SignalStoreFeatureResult>(
+    resourceName: ResourceName, 
+    initialValue: TResource,
+    linkRootFn: ResourceLinkRootFn<Input>, 
+    linkMetaName: string): SignalStoreFeature<
+        Input,
+        Input & {
             state: LinkedHypermediaResourceStoreState<ResourceName, TResource>;
-            computed: Record<string, Signal<unknown>>;
             methods: LinkedHypermediaResourceMethods<ResourceName, TResource>;
-            props: object;
         }
     >;
-export function withLinkedHypermediaResource<ResourceName extends string, TResource>(resourceName: ResourceName, initialValue: TResource) {
+export function withLinkedHypermediaResource<ResourceName extends string, TResource, Input extends SignalStoreFeatureResult>(
+    resourceName: ResourceName, 
+    initialValue: TResource,
+    linkRootFn: ResourceLinkRootFn<Input>,
+    linkMetaName: string) {
 
     const dataKey = `${resourceName}`;
     const stateKey = `${resourceName}State`;
-    const connectMethodName = generateConnectLinkedHypermediaResourceMethodName(resourceName);
     const reloadMethodName = generateReloadLinkedHypermediaResourceMethodName(resourceName);
     const getAsPatchableMethodName = generateGetAsPatchableLinkedHypermediaResourceMethodName(resourceName);
+    let linkRoot: Signal<Resource | undefined> | undefined = undefined;
 
     return signalStoreFeature(
         withState({
@@ -107,58 +103,60 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
            [dataKey]: initialValue 
         }),
         withMethods((store, requestService = inject(RequestService)) => {
+            const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [dataKey]: newVal }), (store as unknown as Record<string, Signal<TResource>>)[dataKey]);
 
-            const hateoasService = inject(HateoasService);
+            const reloadMethod = async (): Promise<void> => {
+                const currentUrl = getState(store, stateKey).url;
+                if(currentUrl) {
+                    patchState(store, updateState(stateKey, { isLoading: true } ));
 
-            const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [dataKey]: newVal }), (store as Record<string, Signal<TResource>>)[dataKey]);
-
-            const rxConnectToLinkRoot = rxMethod<linkedRxInput>(
-                pipe( 
-                    map(input => hateoasService.getLink(input.resource, input.linkName)?.href),
-                    filter(href => isValidHref(href)),
-                    map(href => href!),
-                    filter(href => getState(store, stateKey).url !== href),
-                    tap(href => patchState(store, 
-                                           updateState(stateKey, { url: href, isLoading: true, isAvailable: true } ))),
-                    switchMap(href => requestService.request<TResource>('GET', href)),
-                    tap(response => response.body ? patchState(store,
-                                                        updateData(dataKey, response.body),
-                                                        updateState(stateKey, { isLoading: false, initiallyLoaded: true } ))
-                                                  : patchState(store,
-                                                        updateState(stateKey, { isLoading: false, url: undefined, isAvailable: false, initiallyLoaded: false } )))
-                )
-            );
-
-            return {
-                [connectMethodName]: (linkRoot: Signal<unknown>, linkName: string) => { 
-                    const input = computed(() => ({ resource: linkRoot(), linkName }));
-                    rxConnectToLinkRoot(input);
-                },
-                [reloadMethodName]: async (): Promise<void> => {
-                    const currentUrl = getState(store, stateKey).url;
-                    if(currentUrl) {
-                        patchState(store, updateState(stateKey, { isLoading: true } ));
-
-                        try {
-                            const response = await requestService.request<TResource>('GET', currentUrl);
-                            if (!response.body) {
-                                throw new Error(`Response body is empty for URL: ${currentUrl}`);
-                            }
-                            patchState(store, 
-                                       updateData(dataKey, response.body),
-                                       updateState(stateKey, { isLoading: false } ));
-                        } catch(e) {
-                            patchState(store, 
-                                       updateData(dataKey, initialValue),
-                                       updateState(stateKey, { isLoading: false } ));
-                            throw e;
+                    try {
+                        const response = await requestService.request<TResource>('GET', currentUrl);
+                        if (!response.body) {
+                            throw new Error(`Response body is empty for URL: ${currentUrl}`);
                         }
+                        patchState(store, 
+                                    updateData(dataKey, response.body),
+                                    updateState(stateKey, { isLoading: false } ));
+                    } catch(e) {
+                        patchState(store, 
+                                    updateData(dataKey, initialValue),
+                                    updateState(stateKey, { isLoading: false } ));
+                        throw e;
                     }
-                },
-                [getAsPatchableMethodName]: (): DeepPatchableSignal<TResource> => {
-                    return patchableSignal;
                 }
             };
+
+            const getAsPatchableMethod = (): DeepPatchableSignal<TResource> => {
+                return patchableSignal;
+            }
+
+            return {
+                [reloadMethodName]: reloadMethod,
+                [getAsPatchableMethodName]: getAsPatchableMethod
+            };
+        }),
+        withHooks({
+            onInit(store, hateoasService = inject(HateoasService), requestService = inject(RequestService)) {
+                linkRoot = linkRootFn(store as unknown as StoreForResourceLinkRoot<Input>);
+                const linkedResourceRxInput = computed(() => ({ resource: linkRoot!(), linkMetaName }));
+                // Wire up linked object with state
+                rxMethod<LinkedResourceRxInput>(
+                    pipe( 
+                        map(input => hateoasService.getLink(input.resource, input.linkMetaName)?.href),
+                        filter(href => isValidHref(href)),
+                        map(href => href!),
+                        filter(href => getState(store, stateKey).url !== href),
+                        tap(href => patchState(store, updateState(stateKey, { url: href, isLoading: true, isAvailable: true } ))),
+                        switchMap(href => requestService.request<TResource>('GET', href)),
+                        tap(response => response.body ? patchState(store,
+                                                            updateData(dataKey, response.body),
+                                                            updateState(stateKey, { isLoading: false, initiallyLoaded: true } ))
+                                                      : patchState(store,
+                                                            updateState(stateKey, { isLoading: false, url: undefined, isAvailable: false, initiallyLoaded: false } )))
+                    )
+                )(linkedResourceRxInput);
+            },
         })
     );
 }
