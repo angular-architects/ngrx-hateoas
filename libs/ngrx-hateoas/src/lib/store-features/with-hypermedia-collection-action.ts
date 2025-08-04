@@ -1,6 +1,6 @@
 import { Signal, computed, inject } from "@angular/core";
 import { SignalStoreFeature, SignalStoreFeatureResult, StateSignals, patchState, signalStoreFeature, withHooks, withMethods, withState } from "@ngrx/signals";
-import { from, map, mergeMap, pipe, tap } from "rxjs";
+import { concatMap, map, pipe, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { isValidActionVerb } from "../util/is-valid-action-verb";
 import { isValidHref } from "../util/is-valid-href";
@@ -43,25 +43,27 @@ export function generateExecuteHypermediaCollectionActionMethodName(actionName: 
     return actionName;
 }
 
-export type ConnectHypermediaCollectionActionMethod<ActionName extends string> = { 
-    [K in ActionName as `_connect${Capitalize<ActionName>}`]: (resourceLink: Signal<unknown[]>, idKeyName: string, action: string) => void
-};
-
 export function generateConnectHypermediaCollectionActionMethodName(actionName: string) {
     return `_connect${actionName.charAt(0).toUpperCase() + actionName.slice(1)}`;
 }
 
-export type HypermediaCollectionActionMethods<ActionName extends string> = 
-    ExecuteHypermediaCollectionActionMethod<ActionName> & ConnectHypermediaCollectionActionMethod<ActionName>
+export type HypermediaCollectionActionMethods<ActionName extends string> = ExecuteHypermediaCollectionActionMethod<ActionName>
 
 type StoreForCollectionActionLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']>;
         
-type CollectionActionLinkRootFn<T extends SignalStoreFeatureResult> = (store: StoreForCollectionActionLinkRoot<T>) => Signal<Resource[]>
+type CollectionActionLinkRootFn<Store extends SignalStoreFeatureResult, ArrayResource extends Resource> = (store: StoreForCollectionActionLinkRoot<Store>) => Signal<ArrayResource[]>
 
-type LinkedCollectionActionRxInput = {
-    resource: Resource[],
-    idLookup: (resource: Resource) => CollectionKey,
-    actionName: string
+type CollectionActionOptions<ArrayResource extends Resource> = {
+    idLookup: (arrayResource: ArrayResource) => CollectionKey;
+    resourceLookup: (arrayResource: ArrayResource) => Resource;
+}
+
+const defaultCollectionActionOptions: CollectionActionOptions<Resource> = {
+    idLookup: arrayResource => {
+        if('id' in arrayResource && ((typeof arrayResource['id'] === 'string' || typeof arrayResource['id'] === 'number'))) return arrayResource['id'];
+        else throw new Error("The resources in the array needs to have a key 'id' with a string or number as type or specify an 'idLookup' in the options of the signal store feature");
+    },
+    resourceLookup: arrayResource => arrayResource
 }
 
 function getState(store: unknown, stateKey: string): HypermediaCollectionActionStateProps {
@@ -73,9 +75,9 @@ function updateState(stateKey: string, partialState: Partial<HypermediaCollectio
     return (state: any) => ({ [stateKey]: { ...state[stateKey], ...partialState } });
 }
 
-function toResourceMap(resources: Resource[], idLookup: (resource: Resource) => CollectionKey): Record<CollectionKey, Resource> {
+function toResourceMap<ArrayResource extends Resource>(resources: ArrayResource[], options: CollectionActionOptions<ArrayResource>): Record<CollectionKey, Resource> {
     const result: Record<CollectionKey, Resource> = {};
-    resources.forEach(resource => result[idLookup(resource)] = resource);
+    resources.forEach(resource => result[options.idLookup(resource)] = options.resourceLookup(resource));
     return result;
 }
 
@@ -92,28 +94,20 @@ function updateItemState(stateKey: string, id: CollectionKey, itemState: Partial
  });
 }
 
-function createIdLookupFunction(idKeyName: string) {
-    return (resource: Resource) => { 
-        const id = resource[idKeyName];
-        if(typeof id === 'string' || typeof id === 'number') return id;
-        else throw new Error("The specified 'idKeyName' must point to a key with a value of type 'string' or 'number'");
-    };
-}
-
-export function withHypermediaCollectionAction<ActionName extends string, Input extends SignalStoreFeatureResult>(
+export function withHypermediaCollectionAction<ActionName extends string, Input extends SignalStoreFeatureResult, ArrayResource extends Resource>(
     actionName: ActionName,
-    linkRootFn: CollectionActionLinkRootFn<Input>,
+    linkRootFn: CollectionActionLinkRootFn<Input, ArrayResource>,
     actionMetaName: string,
-    idKeyName: string): SignalStoreFeature<
+    options: Partial<CollectionActionOptions<ArrayResource>>): SignalStoreFeature<
         Input,
         Input & {
             state: HypermediaCollectionActionStoreState<ActionName>;
             methods: HypermediaCollectionActionMethods<ActionName>;
         }
     >;
-export function withHypermediaCollectionAction<ActionName extends string, Input extends SignalStoreFeatureResult>(
+export function withHypermediaCollectionAction<ActionName extends string, Input extends SignalStoreFeatureResult, ArrayResource extends Resource>(
     actionName: ActionName,
-    linkRootFn: CollectionActionLinkRootFn<Input>,
+    linkRootFn: CollectionActionLinkRootFn<Input, ArrayResource>,
     actionMetaName: string): SignalStoreFeature<
         Input,
         Input & {
@@ -121,15 +115,16 @@ export function withHypermediaCollectionAction<ActionName extends string, Input 
             methods: HypermediaCollectionActionMethods<ActionName>;
         }
     >;
-export function withHypermediaCollectionAction<ActionName extends string, Input extends SignalStoreFeatureResult>(
+export function withHypermediaCollectionAction<ActionName extends string, Input extends SignalStoreFeatureResult, ArrayResource extends Resource>(
     actionName: ActionName,
-    linkRootFn: CollectionActionLinkRootFn<Input>,
+    linkRootFn: CollectionActionLinkRootFn<Input, ArrayResource>,
     actionMetaName: string,
-    idKeyName =  'id') {
+    options: Partial<CollectionActionOptions<ArrayResource>> = {}) {
 
+    const fullOptions = { ...defaultCollectionActionOptions, ...options };
     const stateKey = `${actionName}State`;
     const executeMethodName = generateExecuteHypermediaCollectionActionMethodName(actionName);
-    let linkRoot: Signal<Resource[]> | undefined = undefined;
+    let linkRoot: Signal<ArrayResource[]> | undefined = undefined;
     let internalResourceMap: Signal<Record<CollectionKey, Resource>> | undefined = undefined;
 
     return signalStoreFeature(
@@ -138,27 +133,6 @@ export function withHypermediaCollectionAction<ActionName extends string, Input 
         }),
         withMethods(store => {
             const requestService = inject(RequestService);
-            const hateoasService = inject(HateoasService);
-            
-            const rxConnectToResourceMethod = rxMethod<LinkedCollectionActionRxInput>(
-                pipe( 
-                    tap(() => patchState(store, updateState(stateKey, defaultHypermediaCollectionActionState))),
-                    mergeMap(input => from(input.resource)
-                        .pipe(
-                            map(resource => [resource, hateoasService.getAction(resource, input.actionName)] satisfies [Resource, ResourceAction | undefined ] as [Resource, ResourceAction | undefined ]),
-                            map(([resource, action]) => {
-                                const actionState: HypermediaActionStateProps = { ...defaultHypermediaActionState };
-                                if(action && isValidHref(action.href) && isValidActionVerb(action.method)) {
-                                    actionState.href = action.href;
-                                    actionState.method = action.method;
-                                    actionState.isAvailable = true;
-                                }
-                                return [resource, actionState] satisfies [Resource, HypermediaActionStateProps] as [Resource, HypermediaActionStateProps];
-                            }),
-                            tap(([resource, actionState]) => patchState(store, updateItemState(stateKey, input.idLookup(resource), actionState)))
-                        ))
-                )
-            );
 
             const executeMethod = async (id: CollectionKey): Promise<HttpResponse<unknown>> => {
                 if(getState(store, stateKey).isAvailable[id] && internalResourceMap) {
@@ -190,36 +164,30 @@ export function withHypermediaCollectionAction<ActionName extends string, Input 
             }
 
             return {
-                [executeMethodName]: executeMethod,
-                _rxConnectToResource: rxConnectToResourceMethod
+                [executeMethodName]: executeMethod
             };
         }),
         withHooks({
             onInit(store, hateoasService = inject(HateoasService)) {
-                const idLookup = createIdLookupFunction(idKeyName);
                 linkRoot = linkRootFn(store as unknown as StoreForCollectionActionLinkRoot<Input>);
-                internalResourceMap = computed(() => toResourceMap(linkRoot!(), idLookup));
-                const linkedCollectionActionRxInput = computed(() => ({ resource: linkRoot!(), idLookup, actionName: actionMetaName}))
+                internalResourceMap = computed(() => toResourceMap(linkRoot!(), fullOptions));
                 // Wire up linked object with state
-                rxMethod<LinkedCollectionActionRxInput>(
-                pipe( 
+                rxMethod<ArrayResource[]>(pipe( 
                     tap(() => patchState(store, updateState(stateKey, defaultHypermediaCollectionActionState))),
-                    mergeMap(input => from(input.resource)
-                        .pipe(
-                            map(resource => [resource, hateoasService.getAction(resource, input.actionName)] satisfies [Resource, ResourceAction | undefined ] as [Resource, ResourceAction | undefined ]),
-                            map(([resource, action]) => {
-                                const actionState: HypermediaActionStateProps = { ...defaultHypermediaActionState };
-                                if(action && isValidHref(action.href) && isValidActionVerb(action.method)) {
-                                    actionState.href = action.href;
-                                    actionState.method = action.method;
-                                    actionState.isAvailable = true;
-                                }
-                                return [resource, actionState] satisfies [Resource, HypermediaActionStateProps] as [Resource, HypermediaActionStateProps];
-                            }),
-                            tap(([resource, actionState]) => patchState(store, updateItemState(stateKey, input.idLookup(resource), actionState)))
-                        ))
-                    )
-                )(linkedCollectionActionRxInput);
+                    concatMap(arrayResources => arrayResources),
+                    map(arrayResource => [fullOptions.idLookup(arrayResource), fullOptions.resourceLookup(arrayResource)] satisfies [CollectionKey, Resource] as [CollectionKey, Resource]),
+                    map(([id, resource]) => [id, hateoasService.getAction(resource, actionMetaName)] satisfies [CollectionKey, ResourceAction | undefined ] as [CollectionKey, ResourceAction | undefined ]),
+                    map(([id, action]) => {
+                        const actionState: HypermediaActionStateProps = { ...defaultHypermediaActionState };
+                        if(action && isValidHref(action.href) && isValidActionVerb(action.method)) {
+                            actionState.href = action.href;
+                            actionState.method = action.method;
+                            actionState.isAvailable = true;
+                        }
+                        return [id, actionState] satisfies [CollectionKey, HypermediaActionStateProps] as [CollectionKey, HypermediaActionStateProps];
+                    }),
+                    tap(([id, actionState]) => patchState(store, updateItemState(stateKey, id, actionState)))
+                ))(linkRoot);
             }
         })
     );

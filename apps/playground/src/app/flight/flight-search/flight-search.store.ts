@@ -20,6 +20,7 @@ export const FlightSearchStore = signalStore(
   { providedIn: 'root' },
   withHypermediaResource('flightSearchVm', initialFlightSearchVm),
   withHypermediaCollectionAction('deleteFlight', store => store.flightSearchVm.flights, 'delete'),
+  withHypermediaCollectionAction('updateConnection', store => store.flightSearchVm.flights, 'update', { idLookup: flight => flight.id, resourceLookup: flight => flight.connection }),
   withHooks({
     onInit(store) {
       store.loadFlightSearchVmFromLink(inject(AppStore).rootApi(), 'flightSearchVm');
