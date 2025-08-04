@@ -1,5 +1,5 @@
 import { withHypermediaResource, withHypermediaAction } from "@angular-architects/ngrx-hateoas";
-import { signalStore, withHooks } from "@ngrx/signals";
+import { signalStore } from "@ngrx/signals";
 import { Aircraft, Flight, initialFlight } from "../flight.entities";
 import { effect } from "@angular/core";
 
