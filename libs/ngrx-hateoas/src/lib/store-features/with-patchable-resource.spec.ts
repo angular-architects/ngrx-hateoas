@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { signalStore, withState } from '@ngrx/signals';
 import { HypermediaResourceData } from './with-hypermedia-resource';
 import { withPatchableResource } from './with-patchable-resource';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 
 type TestModel = {
@@ -32,7 +33,7 @@ describe('withPatchableResource', () => {
     let store: InstanceType<typeof TestStore>;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({});
+        TestBed.configureTestingModule({providers: [provideZonelessChangeDetection()]});
         store = TestBed.inject(TestStore);
     });
 

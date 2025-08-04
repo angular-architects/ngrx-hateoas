@@ -3,13 +3,13 @@
         <ng-content />
     </div>
     <div class="card-footer">
-        <button [disabled]="disabled()" class="btn btn-primary mb-3" (click)="onExecute()">Save</button>
-        @if(showSuccess()) {
+        <button [disabled]="disabled()" class="btn btn-primary mb-3" (click)="onSave()">Save</button>
+        @if(_showSuccess()) {
             <div class="alert alert-success">
                 Successfully Saved!
             </div>
         }
-        @if(showError()) {
+        @if(_showError()) {
             <div class="alert alert-danger">
                 Error on saving!
             </div>

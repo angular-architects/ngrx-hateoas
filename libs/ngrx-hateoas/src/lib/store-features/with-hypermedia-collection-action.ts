@@ -17,8 +17,6 @@ export type HypermediaCollectionActionStateProps = {
     href: Record<CollectionKey, string>
     isAvailable: Record<CollectionKey, boolean>
     isExecuting: Record<CollectionKey, boolean> 
-    hasExecutedSuccessfully: Record<CollectionKey, boolean>
-    hasExecutedWithError: Record<CollectionKey, boolean>
     hasError: Record<CollectionKey, boolean>
     error: Record<CollectionKey, unknown>
 }
@@ -28,8 +26,6 @@ const defaultHypermediaCollectionActionState: HypermediaCollectionActionStatePro
     href: {},
     isAvailable: {},
     isExecuting: {},
-    hasExecutedSuccessfully: {},
-    hasExecutedWithError: {},
     hasError: {},
     error: {}
 }
@@ -90,8 +86,6 @@ function updateItemState(stateKey: string, id: CollectionKey, itemState: Partial
         method: itemState.method !== undefined ? { ...state[stateKey].method, [id]: itemState.method } : state[stateKey].method,
         isAvailable: itemState.isAvailable !== undefined ? { ...state[stateKey].isAvailable, [id]: itemState.isAvailable } : state[stateKey].isAvailable,
         isExecuting: itemState.isExecuting !== undefined ? { ...state[stateKey].isExecuting, [id]: itemState.isExecuting } : state[stateKey].isExecuting,
-        hasExecutedSuccessfully: itemState.hasExecutedSuccessfully !== undefined ? { ...state[stateKey].hasExecutedSuccessfully, [id]: itemState.hasExecutedSuccessfully } : state[stateKey].hasExecutedSuccessfully,
-        hasExecutedWithError: itemState.hasExecutedWithError !== undefined ? { ...state[stateKey].hasExecutedWithError, [id]: itemState.hasExecutedWithError } : state[stateKey].hasExecutedWithError,
         hasError: itemState.hasError !== undefined ? { ...state[stateKey].hasError, [id]: itemState.hasError } : state[stateKey].hasError,
         error: itemState.error !== undefined ? { ...state[stateKey].error, [id]: itemState.error } : state[stateKey].error
     } satisfies HypermediaCollectionActionStateProps
@@ -178,18 +172,16 @@ export function withHypermediaCollectionAction<ActionName extends string, Input 
                     patchState(store, 
                         updateItemState(stateKey, id, { 
                             isExecuting: true, 
-                            hasExecutedSuccessfully: false,
-                            hasExecutedWithError: false,
                             hasError: false,
                             error: null 
                         }));
 
                     try {
                         const response = await requestService.request(method, href, body);
-                        patchState(store, updateItemState(stateKey, id, { isExecuting: false, hasExecutedSuccessfully: true } ));
+                        patchState(store, updateItemState(stateKey, id, { isExecuting: false } ));
                         return response;
                     } catch(e) {
-                        patchState(store, updateItemState(stateKey, id, { isExecuting: false, hasExecutedWithError: true, hasError: true, error: e } ));
+                        patchState(store, updateItemState(stateKey, id, { isExecuting: false, hasError: true, error: e } ));
                         throw e;
                     } 
                 } else {

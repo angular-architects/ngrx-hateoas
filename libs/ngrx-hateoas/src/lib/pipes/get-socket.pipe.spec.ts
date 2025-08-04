@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HateoasService } from '../services/hateoas.service';
 import { GetSocketPipe } from './get-socket.pipe';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 const testModel = {
   _sockets: {
@@ -13,7 +14,7 @@ describe('GetSocketPipe', () => {
   let getSocketPipe: GetSocketPipe;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [ GetSocketPipe, HateoasService ]});
+    TestBed.configureTestingModule({ providers: [GetSocketPipe, HateoasService, provideZonelessChangeDetection()]});
     getSocketPipe = TestBed.inject(GetSocketPipe);
   });
     

@@ -1,6 +1,7 @@
 import { TestBed } from "@angular/core/testing";
 import { AntiForgeryOptions, CustomHeadersOptions, HATEOAS_ANTI_FORGERY, HATEOAS_CUSTOM_HEADERS, HATEOAS_LOGIN_REDIRECT, HATEOAS_METADATA_PROVIDER, LoginRedirectOptions, MetadataProvider, provideHateoas, withAntiForgery, withCustomHeaders, withLoginRedirect, withMetadataProvider } from "./provide";
 import { ResourceAction, ResourceLink, ResourceSocket } from "./models";
+import { provideZonelessChangeDetection } from "@angular/core";
 
 describe('provideHateaos', () => {
 
@@ -17,7 +18,7 @@ describe('provideHateaos', () => {
                 headerName: 'bar'
             };
 
-            TestBed.configureTestingModule({ providers: [ provideHateoas(withAntiForgery(dummyAntiForgeryOptions)) ]});
+            TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection(),  provideHateoas(withAntiForgery(dummyAntiForgeryOptions))]});
             const antiForgeryOptions = TestBed.inject(HATEOAS_ANTI_FORGERY);
 
             expect(antiForgeryOptions.cookieName).toBe(dummyAntiForgeryOptions.cookieName);
@@ -35,7 +36,7 @@ describe('provideHateaos', () => {
                 redirectUrlParamName: 'bar'
             };
 
-            TestBed.configureTestingModule({ providers: [ provideHateoas(withLoginRedirect(dummyLoginRedirectOptions)) ]});
+            TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection(),  provideHateoas(withLoginRedirect(dummyLoginRedirectOptions))]});
             const loginRedirectOptoins = TestBed.inject(HATEOAS_LOGIN_REDIRECT);
 
             expect(loginRedirectOptoins.loginUrl).toBe(dummyLoginRedirectOptions.loginUrl);
@@ -54,7 +55,7 @@ describe('provideHateaos', () => {
                 } 
             };
 
-            TestBed.configureTestingModule({ providers: [ provideHateoas(withCustomHeaders(dummyCustomHeaderOptions)) ]});
+            TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection(),  provideHateoas(withCustomHeaders(dummyCustomHeaderOptions))]});
             const customHeaderOptions = TestBed.inject(HATEOAS_CUSTOM_HEADERS);
 
             expect(customHeaderOptions.headers).toBe(dummyCustomHeaderOptions.headers);
@@ -81,7 +82,7 @@ describe('provideHateaos', () => {
                 }
             }
 
-            TestBed.configureTestingModule({ providers: [ provideHateoas(withMetadataProvider(dummyMetadataProvider)) ]});
+            TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection(), provideHateoas(withMetadataProvider(dummyMetadataProvider))]});
             const metadataProvider = TestBed.inject(HATEOAS_METADATA_PROVIDER);
 
             expect(metadataProvider.isMetadataKey).toBe(dummyMetadataProvider.isMetadataKey);

@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HateoasService } from './hateoas.service';
 import { ResourceAction, ResourceLink, ResourceSocket } from '../models';
 import { HATEOAS_METADATA_PROVIDER, MetadataProvider } from '../provide';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 const dummyHateoasMetadataProvider: MetadataProvider = {
     isMetadataKey(keyName: string) {
@@ -32,7 +33,7 @@ describe('HateoasService', () => {
     let hateoasService: HateoasService;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({ providers: [ { provide: HATEOAS_METADATA_PROVIDER, useValue: dummyHateoasMetadataProvider  }, HateoasService ]});
+        TestBed.configureTestingModule({ providers: [{ provide: HATEOAS_METADATA_PROVIDER, useValue: dummyHateoasMetadataProvider  }, HateoasService, provideZonelessChangeDetection()]});
         hateoasService = TestBed.inject(HateoasService);
     });
 
