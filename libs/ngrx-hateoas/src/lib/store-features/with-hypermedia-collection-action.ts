@@ -49,8 +49,6 @@ export function generateConnectHypermediaCollectionActionMethodName(actionName: 
 
 export type HypermediaCollectionActionMethods<ActionName extends string> = ExecuteHypermediaCollectionActionMethod<ActionName>
 
-type Prettify<T> = { [K in keyof T]: T[K] } & {};
-
 type StoreForCollectionActionLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']> & Input['props'];
         
 type CollectionActionLinkRootFn<Store extends SignalStoreFeatureResult, ArrayResource extends Resource> = (store: StoreForCollectionActionLinkRoot<Store>) => Signal<ArrayResource[]>
