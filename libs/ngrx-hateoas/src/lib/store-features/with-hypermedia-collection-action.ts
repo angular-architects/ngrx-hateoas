@@ -49,7 +49,7 @@ export function generateConnectHypermediaCollectionActionMethodName(actionName: 
 
 export type HypermediaCollectionActionMethods<ActionName extends string> = ExecuteHypermediaCollectionActionMethod<ActionName>
 
-type StoreForCollectionActionLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']>;
+type StoreForCollectionActionLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']> & Input['props'];
         
 type CollectionActionLinkRootFn<Store extends SignalStoreFeatureResult, ArrayResource extends Resource> = (store: StoreForCollectionActionLinkRoot<Store>) => Signal<ArrayResource[]>
 
