@@ -42,7 +42,7 @@ export function generateExecuteHypermediaActionMethodName(actionName: string) {
 
 export type HypermediaActionMethods<ActionName extends string> = ExecuteHypermediaActionMethod<ActionName>
 
-type StoreForActionLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state'] & Input['props']>;
+type StoreForActionLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']> & Input['props'];
     
 type ActionLinkRootFn<T extends SignalStoreFeatureResult> = (store: StoreForActionLinkRoot<T>) => Signal<Resource | undefined>
 
