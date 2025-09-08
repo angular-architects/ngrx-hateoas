@@ -8,21 +8,30 @@ const dummyHateoasMetadataProvider: MetadataProvider = {
     isMetadataKey(keyName: string) {
         return keyName === 'myMeta';
     },
-    getLinks: function (resource: Record<string, Record<string, string>>): ResourceLink[] {
+    linkLookup(resource: Record<string, Record<string, string>>, linkName: string) {
+        return resource['myMeta'][`_link_${linkName}`] ? { rel: linkName, href: resource['myMeta'][`_link_${linkName}`] } satisfies ResourceLink : undefined;
+    },
+    getAllLinks: function (resource: Record<string, Record<string, string>>): ResourceLink[] {
         const result: ResourceLink[] = [];
         for(const key in resource['myMeta']) {
             if(key.startsWith('_link_')) result.push({rel: key.substring('_link_'.length), href: resource['myMeta'][key]})
         }
         return result;
     },
-    getActions: function (resource: Record<string, Record<string, string>>): ResourceAction[] {
+    actionLookup(resource: Record<string, Record<string, string>>, actionName: string) {
+        return resource['myMeta'][`_action_${actionName}`] ? { rel: actionName, href: resource['myMeta'][`_action_${actionName}`], method: 'PUT' } satisfies ResourceAction : undefined;
+    },
+    getAllActions: function (resource: Record<string, Record<string, string>>): ResourceAction[] {
         const result: ResourceAction[] = [];
         for(const key in resource['myMeta']) {
             if(key.startsWith('_action_')) result.push({rel: key.substring('_action_'.length), href: resource['myMeta'][key], method: 'PUT'})
         }
         return result;
     },
-    getSockets: function (resource: Record<string, Record<string, string>>): ResourceSocket[] {
+    socketLookup(resource: Record<string, Record<string, string>>, socketName: string) {
+        return resource['myMeta'][`_socket_${socketName}`] ?  { rel: socketName, href: resource['myMeta'][`_socket_${socketName}`], event: 'update' } satisfies ResourceSocket : undefined;
+    },
+    getAllSockets: function (resource: Record<string, Record<string, string>>): ResourceSocket[] {
         const result: ResourceSocket[] = [];
         for(const key in resource['myMeta']) {
             if(key.startsWith('_socket_')) result.push({rel: key.substring('_socket_'.length), href: resource['myMeta'][key], event: 'update'})

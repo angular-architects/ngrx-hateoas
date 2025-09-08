@@ -22,26 +22,26 @@ export class HateoasService {
     }
 
     getLink(resource: unknown, linkName: string): ResourceLink | undefined {
-        return this.hateoasConfig.getLinks(resource).find(l => l.rel == linkName);
+        return this.hateoasConfig.linkLookup(resource, linkName);
     }
 
     getAction(resource: unknown, actionName: string): ResourceAction | undefined {
-        return this.hateoasConfig.getActions(resource).find(a => a.rel == actionName);
+        return this.hateoasConfig.actionLookup(resource, actionName);
     }
 
     getSocket(resource: unknown, socketName: string): ResourceSocket | undefined {
-        return this.hateoasConfig.getSockets(resource).find(s => s.rel == socketName);
+        return this.hateoasConfig.socketLookup(resource, socketName);
     }
 
     getLinks(resource: unknown): ResourceLink[] {
-        return this.hateoasConfig.getLinks(resource);
+        return this.hateoasConfig.getAllLinks(resource);
     }
 
     getActions(resource: unknown): ResourceAction[] {
-        return this.hateoasConfig.getActions(resource);
+        return this.hateoasConfig.getAllActions(resource);
     }
 
     getSockets(resource: unknown): ResourceSocket[] {
-        return this.hateoasConfig.getSockets(resource);
+        return this.hateoasConfig.getAllSockets(resource);
     }
 }

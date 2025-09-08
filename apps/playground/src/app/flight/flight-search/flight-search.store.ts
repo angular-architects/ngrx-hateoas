@@ -20,10 +20,7 @@ const initialFlightSearchVm: FlightSearchVm = {
 export const FlightSearchStore = signalStore(
   { providedIn: 'root' },
   withHypermediaResource('flightSearchVm', initialFlightSearchVm),
-  withComputed(store => ({
-    flights: computed(() => store.flightSearchVm.flights()),
-  })),
-  withHypermediaCollectionAction('deleteFlight', store => store.flights, 'delete'),
+  withHypermediaCollectionAction('deleteFlight', store => store.flightSearchVm.flights, 'delete'),
   withHypermediaCollectionAction('updateConnection', store => store.flightSearchVm.flights, 'update', { idLookup: flight => flight.id, resourceLookup: flight => flight.connection }),
   withHooks({
     onInit(store) {

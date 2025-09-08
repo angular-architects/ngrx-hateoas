@@ -45,9 +45,12 @@ const defaultCustomHeaderOptions: CustomHeadersOptions = {
 
 export interface MetadataProvider {
     isMetadataKey(keyName: string): boolean;
-    getLinks(resource: unknown): ResourceLink[];
-    getActions(resource: unknown): ResourceAction[];
-    getSockets(resource: unknown): ResourceSocket[];
+    linkLookup(resource: unknown, linkName: string): ResourceLink | undefined;
+    getAllLinks(resource: unknown): ResourceLink[];
+    actionLookup(resource: unknown, actionName: string): ResourceAction | undefined;
+    getAllActions(resource: unknown): ResourceAction[];
+    socketLookup(resource: unknown, socketName: string): ResourceSocket | undefined;
+    getAllSockets(resource: unknown): ResourceSocket[];
 }
 
 function isResource(resource: unknown): resource is Resource {
@@ -82,7 +85,13 @@ const defaultMetadataProvider: MetadataProvider = {
     isMetadataKey(keyName: string) {
         return keyName.startsWith('_');
     },
-    getLinks: function (resource: unknown): ResourceLink[] {
+    linkLookup(resource: unknown, linkName: string): ResourceLink | undefined {
+        if(isResource(resource) && isResourceLinkRecord(resource['_links']) && isResourceLink(resource['_links'][linkName]))
+            return resource['_links'][linkName];
+        else
+            return undefined;
+    },
+    getAllLinks: function (resource: unknown): ResourceLink[] {
         const result: ResourceLink[] = [];
         if(isResource(resource) && isResourceLinkRecord(resource['_links']) ) {
             for(const key in resource['_links']) {
@@ -91,7 +100,13 @@ const defaultMetadataProvider: MetadataProvider = {
         }
         return result;
     },
-    getActions: function (resource: unknown): ResourceAction[] {
+    actionLookup(resource: unknown, actionName: string): ResourceAction | undefined {
+        if(isResource(resource) && isResourceActionRecord(resource['_actions']) && isResourceAction(resource['_actions'][actionName]))
+            return resource['_actions'][actionName];
+        else
+            return undefined;
+    },
+    getAllActions: function (resource: unknown): ResourceAction[] {
         const result: ResourceAction[] = [];
         if(isResource(resource) && isResourceActionRecord(resource['_actions']) ) {
             for(const key in resource['_actions']) {
@@ -100,7 +115,13 @@ const defaultMetadataProvider: MetadataProvider = {
         }
         return result;
     },
-    getSockets: function (resource: unknown): ResourceSocket[] {
+    socketLookup(resource: unknown, socketName: string): ResourceSocket | undefined {
+        if(isResource(resource) && isResourceSocketRecord(resource['_sockets']) && isResourceSocket(resource['_sockets'][socketName]))
+            return resource['_sockets'][socketName];
+        else
+            return undefined;
+    },
+    getAllSockets: function (resource: unknown): ResourceSocket[] {
         const result: ResourceSocket[] = [];
         if(isResource(resource) && isResourceSocketRecord(resource['_sockets']) ) {
             for(const key in resource['_sockets']) {

@@ -71,13 +71,22 @@ describe('provideHateaos', () => {
                 isMetadataKey(keyName: string) {
                     return keyName === 'myMeta';
                 },
-                getLinks(): ResourceLink[] {
+                linkLookup() {
+                    return undefined;
+                },
+                getAllLinks(): ResourceLink[] {
                     return [];
                 },
-                getActions(): ResourceAction[] {
+                actionLookup() {
+                    return undefined;
+                },
+                getAllActions(): ResourceAction[] {
                     return [];
                 },
-                getSockets(): ResourceSocket[] {
+                socketLookup() {
+                    return undefined;
+                },
+                getAllSockets(): ResourceSocket[] {
                     return [];
                 }
             }
@@ -86,9 +95,12 @@ describe('provideHateaos', () => {
             const metadataProvider = TestBed.inject(HATEOAS_METADATA_PROVIDER);
 
             expect(metadataProvider.isMetadataKey).toBe(dummyMetadataProvider.isMetadataKey);
-            expect(metadataProvider.getLinks).toBe(dummyMetadataProvider.getLinks);
-            expect(metadataProvider.getActions).toBe(dummyMetadataProvider.getActions);
-            expect(metadataProvider.getSockets).toBe(dummyMetadataProvider.getSockets);
+            expect(metadataProvider.linkLookup).toBe(dummyMetadataProvider.linkLookup);
+            expect(metadataProvider.getAllLinks).toBe(dummyMetadataProvider.getAllLinks);
+            expect(metadataProvider.actionLookup).toBe(dummyMetadataProvider.actionLookup);
+            expect(metadataProvider.getAllActions).toBe(dummyMetadataProvider.getAllActions);
+            expect(metadataProvider.socketLookup).toBe(dummyMetadataProvider.socketLookup);
+            expect(metadataProvider.getAllSockets).toBe(dummyMetadataProvider.getAllSockets);
         });
 
     });
