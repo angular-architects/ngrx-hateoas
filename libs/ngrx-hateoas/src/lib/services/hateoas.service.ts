@@ -32,4 +32,16 @@ export class HateoasService {
     getSocket(resource: unknown, socketName: string): ResourceSocket | undefined {
         return this.hateoasConfig.socketLookup(resource, socketName);
     }
+
+    getLinks(resource: unknown): ResourceLink[] {
+        return this.hateoasConfig.getAllLinks(resource);
+    }
+
+    getActions(resource: unknown): ResourceAction[] {
+        return this.hateoasConfig.getAllActions(resource);
+    }
+
+    getSockets(resource: unknown): ResourceSocket[] {
+        return this.hateoasConfig.getAllSockets(resource);
+    }
 }

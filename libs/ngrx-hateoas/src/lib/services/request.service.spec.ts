@@ -327,8 +327,11 @@ describe('RequestService', () => {
                     return keyName.startsWith('_');
                 },
                 linkLookup: () => undefined,
+                getAllLinks: () => [],
                 actionLookup: () => undefined,
-                socketLookup: () => undefined
+                getAllActions: () => [],
+                socketLookup: () => undefined,
+                getAllSockets: () => []
             }
             TestBed.resetTestingModule();
             TestBed.configureTestingModule({ providers: [ 
