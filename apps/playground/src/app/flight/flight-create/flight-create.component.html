@@ -6,7 +6,7 @@
 
 <div class="row">
     <div class="col">
-        <app-action-card #saveActionCard [disabled]="!saveEnabled()" (execute)="onSaveFlight()">
+        <app-action-card #saveActionCard [disabled]="!saveEnabled()" (save)="onSaveFlight()">
             <app-flight-connection-form [model]="flightConnection()" (modelChange)="flightConnection.set($event)" />
             <app-flight-times-form [model]="flightTimes()" (modelChange)="flightTimes.set($event)" />
             <app-flight-operator-form [aircrafts]="aircrafts()" [model]="flightOperator()" (modelChange)="flightOperator.set($event)" />

@@ -1,8 +1,9 @@
 import { withHypermediaResource, withHypermediaCollectionAction } from "@angular-architects/ngrx-hateoas";
-import { signalStore, withHooks } from "@ngrx/signals";
+import { signalStore, withComputed, withHooks } from "@ngrx/signals";
 import { Flight } from "../flight.entities";
-import { inject } from "@angular/core";
+import { computed, inject } from "@angular/core";
 import { AppStore } from "../../app.store";
+import { computeMsgId } from "@angular/compiler";
 
 export type FlightSearchVm = {
   from: string,

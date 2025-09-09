@@ -71,14 +71,23 @@ describe('provideHateaos', () => {
                 isMetadataKey(keyName: string) {
                     return keyName === 'myMeta';
                 },
-                linkLookup(resource, linkName) {
-                    return { href: (resource as Record<string, Record<string, string>>)['myMeta'][`_link_${linkName}`] } satisfies ResourceLink;
+                linkLookup() {
+                    return undefined;
                 },
-                actionLookup(resource, actionName) {
-                    return { href: (resource as Record<string, Record<string, string>>)['myMeta'][`_action_${actionName}`], method: 'PUT' } satisfies ResourceAction;
+                getAllLinks(): ResourceLink[] {
+                    return [];
                 },
-                socketLookup(resource, socketName) {
-                    return { href: (resource as Record<string, Record<string, string>>)['myMeta'][`_socket_${socketName}`], event: 'update' } satisfies ResourceSocket;
+                actionLookup() {
+                    return undefined;
+                },
+                getAllActions(): ResourceAction[] {
+                    return [];
+                },
+                socketLookup() {
+                    return undefined;
+                },
+                getAllSockets(): ResourceSocket[] {
+                    return [];
                 }
             }
 
@@ -87,8 +96,11 @@ describe('provideHateaos', () => {
 
             expect(metadataProvider.isMetadataKey).toBe(dummyMetadataProvider.isMetadataKey);
             expect(metadataProvider.linkLookup).toBe(dummyMetadataProvider.linkLookup);
+            expect(metadataProvider.getAllLinks).toBe(dummyMetadataProvider.getAllLinks);
             expect(metadataProvider.actionLookup).toBe(dummyMetadataProvider.actionLookup);
+            expect(metadataProvider.getAllActions).toBe(dummyMetadataProvider.getAllActions);
             expect(metadataProvider.socketLookup).toBe(dummyMetadataProvider.socketLookup);
+            expect(metadataProvider.getAllSockets).toBe(dummyMetadataProvider.getAllSockets);
         });
 
     });
