@@ -87,7 +87,7 @@ const defaultMetadataProvider: MetadataProvider = {
     },
     linkLookup(resource: unknown, linkName: string): ResourceLink | undefined {
         if(isResource(resource) && isResourceLinkRecord(resource['_links']) && isResourceLink(resource['_links'][linkName]))
-            return resource['_links'][linkName];
+            return { rel: linkName,  href: resource['_links'][linkName].href };
         else
             return undefined;
     },
@@ -102,7 +102,7 @@ const defaultMetadataProvider: MetadataProvider = {
     },
     actionLookup(resource: unknown, actionName: string): ResourceAction | undefined {
         if(isResource(resource) && isResourceActionRecord(resource['_actions']) && isResourceAction(resource['_actions'][actionName]))
-            return resource['_actions'][actionName];
+            return { rel: actionName, href: resource['_actions'][actionName].href, method: resource['_actions'][actionName].method };
         else
             return undefined;
     },
@@ -117,7 +117,7 @@ const defaultMetadataProvider: MetadataProvider = {
     },
     socketLookup(resource: unknown, socketName: string): ResourceSocket | undefined {
         if(isResource(resource) && isResourceSocketRecord(resource['_sockets']) && isResourceSocket(resource['_sockets'][socketName]))
-            return resource['_sockets'][socketName];
+            return { rel: socketName, href: resource['_sockets'][socketName].href, event: resource['_sockets'][socketName].event };
         else
             return undefined;
     },
