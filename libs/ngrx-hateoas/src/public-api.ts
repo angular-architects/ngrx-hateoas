@@ -15,3 +15,4 @@ export * from './lib/store-features/with-initial-hypermedia-resource';
 export * from './lib/store-features/with-linked-hypermedia-resource';
 export * from './lib/store-features/with-hypermedia-action';
 export * from './lib/store-features/with-hypermedia-collection-action';
+export { type Patchable, type DeepPatchableSignal } from './lib/util/deep-patchable-signal';
