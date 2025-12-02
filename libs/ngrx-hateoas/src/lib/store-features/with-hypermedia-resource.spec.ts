@@ -226,4 +226,68 @@ describe('withHypermediaResource', () => {
         httpTestingController.verify();
     });
 
+    it('cancels the first request if two requests run in parallel', async () => {
+        const resourceSecond: TestModel = {
+            numProp: 20,
+            objProp: { stringProp: 'second response' }
+        };
+
+        let request = store.loadTestModelFromUrl('api/test-model?first=1');
+        request = store.loadTestModelFromUrl('api/test-model?second=2');
+
+        expect(store.testModelState.isLoading()).toBeTrue();
+
+        // Check that first request is cancelled
+        const req1 = httpTestingController.expectOne('api/test-model?first=1');
+        expect(req1.cancelled).toBeTrue();
+
+        // flush second request first
+        httpTestingController.expectOne('api/test-model?second=2').flush(resourceSecond);
+        await request;
+
+        // after second resolves, store should reflect second response
+        expect(store.testModel.objProp.stringProp()).toBe('second response');
+
+        // assert that the resource still contains the data from the second url
+        expect(store.testModel.objProp.stringProp()).toBe('second response');
+
+        httpTestingController.verify();
+    });
+
+    it('cancels the first reload if two reloads run in parallel', async () => {
+        const resourceFromUrl: TestModel = {
+            numProp: 2,
+            objProp: { stringProp: 'from Url' }
+        };
+
+        const resourceSecondReload: TestModel = {
+            numProp: 3,
+            objProp: { stringProp: 'from Url Reloaded - second' }
+        };
+
+        // initial load to establish url in state
+        const loadPromise = store.loadTestModelFromUrl('api/test-model');
+        httpTestingController.expectOne('api/test-model').flush(resourceFromUrl);
+        await loadPromise;
+
+        // start two reloads in parallel
+        let reloadPromise = store.reloadTestModel();
+        reloadPromise = store.reloadTestModel();
+
+        expect(store.testModelState.isLoading()).toBeTrue();
+
+        // first reload request should have been cancelled
+        const requests = httpTestingController.match(req => req.url === 'api/test-model');
+        expect(requests[0].cancelled).toBeTrue();
+
+        // flush the second reload response and await completion
+        requests[1].flush(resourceSecondReload);
+        await reloadPromise;
+
+        // store should reflect the second reload's response
+        expect(store.testModel.objProp.stringProp()).toBe('from Url Reloaded - second');
+
+        httpTestingController.verify();
+    });
+
 });

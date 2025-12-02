@@ -184,4 +184,50 @@ describe('withLinkedHypermediaResource', () => {
         httpTestingController.verify();
     });
 
+    it('cancels the first request if two reloads run in parallel', async () => {
+        const rootModelFromUrl: RootModel = {
+            apiName: 'loaded model',
+            _links: {
+                testModel: { href: '/api/test-model' }
+            }
+        };
+
+        const testModelFromLink: TestModel = {
+            name: 'from link'
+        };
+
+         const reloadedTestModelFromLink: TestModel = {
+            name: 'reloaded from link'
+        };
+
+        const loadRootModel = store.loadRootModelFromUrl('/api/root-model');
+
+        httpTestingController.expectOne('/api/root-model').flush(rootModelFromUrl);;
+        httpTestingController.verify();
+   
+        await loadRootModel;
+        await firstValueFrom(timer(0));
+
+        httpTestingController.expectOne('/api/test-model').flush(testModelFromLink);
+        httpTestingController.verify();
+
+        await firstValueFrom(timer(0));
+
+        let reloadPromise = store.reloadTestModel();
+        reloadPromise = store.reloadTestModel();
+
+        // first reload request should have been cancelled
+        const requests = httpTestingController.match(req => req.url === '/api/test-model');
+        expect(requests[0].cancelled).toBeTrue();
+
+        // flush the second reload response and await completion
+        requests[1].flush(reloadedTestModelFromLink);
+        await reloadPromise;
+
+        // store should reflect the second reload's response
+        expect(store.testModel.name()).toBe('reloaded from link');
+
+        httpTestingController.verify();
+    });
+
 });
