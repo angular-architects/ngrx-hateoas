@@ -1,4 +1,4 @@
-import { withHypermediaResource, withHypermediaAction, withWritableState } from "@angular-architects/ngrx-hateoas";
+import { withHypermediaResource, withHypermediaAction, withWritableStateCopy } from "@angular-architects/ngrx-hateoas";
 import { signalStore } from "@ngrx/signals";
 import { Aircraft, Flight, initialFlight } from "../flight.entities";
 
@@ -15,7 +15,7 @@ export const initialFlightEditVm: FlightEditVm = {
 export const FlightEditStore = signalStore(
   { providedIn: 'root' },
   withHypermediaResource('flightEditVm', initialFlightEditVm),
-  withWritableState(store => ({
+  withWritableStateCopy(store => ({
     flightConnection: store.flightEditVm.flight.connection,
     flightTimes: store.flightEditVm.flight.times,
     flightOperator: store.flightEditVm.flight.operator,
