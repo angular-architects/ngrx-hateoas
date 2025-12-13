@@ -63,6 +63,28 @@ describe('withHypermediaResource', () => {
         expect(store.testModel()).toBe(initialTestModel);
     });
 
+    it('sets default value if url is not set', async () => {
+        const resourceFromUrl: TestModel = {
+            numProp: 2,
+            objProp: {
+                stringProp: 'from Url'
+            }
+        };
+
+        const loadPromise = store.loadTestModelFromUrl('api/test-model');
+        httpTestingController.expectOne('api/test-model').flush(resourceFromUrl);
+        await loadPromise;
+
+        expect(store.testModel()).toBe(resourceFromUrl);
+
+        await store.loadTestModelFromUrl(null);
+
+        expect(store.testModelState.url()).toBe('');
+        expect(store.testModelState.isLoaded()).toBeFalse();
+        expect(store.testModelState.isLoading()).toBeFalse();
+        expect(store.testModel()).toBe(initialTestModel);
+    });
+
     it('has correct resource methods', () => {
         expect(store.loadTestModelFromLink).toBeDefined();
         expect(store.loadTestModelFromUrl).toBeDefined();
