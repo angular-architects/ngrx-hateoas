@@ -28,18 +28,29 @@ export const FlightEditStore = signalStore(
 );
 
 
+// Option 1: Reading a resource from server, creating a writable copy, and sending back the copy to the server
+export const FlightEditViewStore1 = signalStore(
+  { providedIn: 'root' },
+  withHypermediaResource('flightEditVm', initialFlightEditVm),
+  withWritableStateCopy(store => ({ writableFlightConnection: store.flightEditVm.flight.connection })),
+  withHypermediaAction('updateFlightConnection', store => store.writableFlightConnection, 'update'),
+);
+
+// Option 2: Reading a resource from server, creating a deep writable copy (suited for template driven forms),
+// and sending back the copy to the server
+export const FlightEditViewStore2 = signalStore(
+  { providedIn: 'root' },
+  withHypermediaResource('flightEditVm', initialFlightEditVm),
+  withExperimentalDeepWritableStateCopy(store => ({ deepWritableFlightConnection: store.flightEditVm.flight.connection })),
+  withHypermediaAction('updateFlightConnection', store => store.deepWritableFlightConnection, 'update'),
+);
+
+// Option 3: Reading a resource from server, creating a delegate that directly modifies the "main" state of the store,
+// and sending back parts of the main state to the server
 export const FlightEditViewStore = signalStore(
   { providedIn: 'root' },
   withHypermediaResource('flightEditVm', initialFlightEditVm),
-  withWritableStateCopy(store => ({
-    writableFlightConnection: store.flightEditVm.flight.connection,
-  })),
-  withExperimentalDeepWritableStateCopy(store => ({
-    deepWritableFlightConnection: store.flightEditVm.flight.connection,
-  })),
-  withExperimentalDeepWritableStateDelegate(store => ({
-    delegatedDeepWritableFlightConnection: store.flightEditVm.flight.connection,
-  })),
+  withExperimentalDeepWritableStateDelegate(store => ({ delegatedDeepWritableFlightConnection: store.flightEditVm.flight.connection })),
   withHypermediaAction('updateFlightConnection', store => store.delegatedDeepWritableFlightConnection, 'update'),
 );
 

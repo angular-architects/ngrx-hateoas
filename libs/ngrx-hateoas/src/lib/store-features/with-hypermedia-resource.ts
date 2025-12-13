@@ -183,14 +183,14 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
                             if (!response.body) throw new Error(`Response body is empty for URL: ${url}`)
                         })).subscribe({
                             next: response => {
-                                patchState(store, 
-                                    updateData(dataKey, response.body!), 
+                                patchState(store,
+                                    updateData(dataKey, response.body!),
                                     updateState(stateKey, { isLoading: false }));
                                 resolve();
                             },
                             error: e => {
-                                patchState(store, 
-                                    updateData(dataKey, initialValue), 
+                                patchState(store,
+                                    updateData(dataKey, initialValue),
                                     updateState(stateKey, { isLoading: false }));
                                 reject(e);
                             }
