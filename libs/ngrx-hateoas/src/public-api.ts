@@ -16,4 +16,7 @@ export * from './lib/store-features/with-linked-hypermedia-resource';
 export * from './lib/store-features/with-hypermedia-action';
 export * from './lib/store-features/with-hypermedia-collection-action';
 export * from './lib/store-features/with-writable-state-copy';
+export * from './lib/store-features/with-deep-writable-state-copy';
+export * from './lib/store-features/with-deep-writable-state-delegate';
+
 export { type Patchable, type DeepPatchableSignal } from './lib/util/deep-patchable-signal';

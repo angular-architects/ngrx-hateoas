@@ -1,7 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { withWritableStateCopy } from './with-writable-state-copy';
+import { patchState, signalMethod, signalStore, withMethods, withState } from '@ngrx/signals';
+import { HypermediaResourceData } from './with-hypermedia-resource';
+import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
+import { firstValueFrom, timer } from 'rxjs';
+import { withExperimentalDeepWritableStateCopy } from './with-deep-writable-state-copy';
 
 type TestModel = {
     numProp: number,
@@ -33,10 +35,10 @@ const testModelWithMetadata: TestModel = {
 
 const TestStore = signalStore(
     { providedIn: 'root' },
-    withState({ model: initialTestModel }),
-    withWritableStateCopy(store => ({
+    withState<HypermediaResourceData<'model', TestModel>>({ model: initialTestModel }),
+    withExperimentalDeepWritableStateCopy(store => ({
         writableObjProp: store.model.objProp,
-        subobjectWithWritableStateCopies: {
+        subObjectWithDeepStateCopies: {
             writableNumProp: store.model.objProp.numProp
         }
     })),
@@ -47,18 +49,20 @@ const TestStore = signalStore(
     }))
 );
 
-describe('withWritableStateCopy', () => {
+describe('withExperimentalDeepWritableStateCopy', () => {
 
     let store: InstanceType<typeof TestStore>;
+    let injector: Injector;
 
     beforeEach(() => {
         TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
         store = TestBed.inject(TestStore);
+        injector = TestBed.inject(Injector);
     });
 
     it('sets correct initial copy state', () => {
         expect(store.writableObjProp()).toBe(initialTestModel.objProp);
-        expect(store.subobjectWithWritableStateCopies.writableNumProp()).toBe(initialTestModel.objProp.numProp);
+        expect(store.subObjectWithDeepStateCopies.writableNumProp()).toBe(initialTestModel.objProp.numProp);
     });
 
     it('patches a signal inside the writable state', () => {
@@ -98,6 +102,38 @@ describe('withWritableStateCopy', () => {
 
         expect(store.model.objProp.stringProp()).toBe('test model string');
         expect(store.writableObjProp().stringProp).toBe('test model string');
+    });
+
+    it('triggers deep computed signals on writable state copy', async () => {
+
+        let stringPropTriggered = false;
+        let numPropTriggered = false;
+
+        runInInjectionContext(injector, () => {
+            signalMethod(() => stringPropTriggered = true)(store.writableObjProp.stringProp);
+            signalMethod(() => numPropTriggered = true)(store.writableObjProp.numProp);
+        });
+
+        await firstValueFrom(timer(0));
+        stringPropTriggered = false;
+        numPropTriggered = false;
+
+        store.writableObjProp.set({ stringProp: 'overridden string', numProp: 42 });
+
+        await firstValueFrom(timer(10));
+
+        expect(stringPropTriggered).toBe(true);
+        expect(numPropTriggered).toBe(false);
+
+        stringPropTriggered = false;
+        numPropTriggered = false;
+
+        store.writableObjProp.set({ stringProp: 'next overridden string', numProp: 100 });
+
+        await firstValueFrom(timer(0));
+
+        expect(stringPropTriggered).toBe(true);
+        expect(numPropTriggered).toBe(true);
     });
 
 });
