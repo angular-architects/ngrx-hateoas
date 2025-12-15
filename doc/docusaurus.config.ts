@@ -6,7 +6,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'ngrx-hateoas',
-  tagline: 'Hypermedia integration for the NgRx Signal Store',
+  tagline: 'Using server side state within the NgRx Signal Store made easy',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
