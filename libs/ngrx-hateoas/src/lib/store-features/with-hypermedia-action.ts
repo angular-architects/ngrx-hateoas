@@ -44,7 +44,7 @@ export type HypermediaActionMethods<ActionName extends string> = ExecuteHypermed
 
 type StoreForActionLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']> & Input['props'];
     
-type ActionLinkRootFn<T extends SignalStoreFeatureResult> = (store: StoreForActionLinkRoot<T>) => Signal<Resource | undefined>
+type ActionLinkRootFn<T extends SignalStoreFeatureResult> = (store: StoreForActionLinkRoot<T>) => Signal<Resource | undefined | null>
 
 function getState(store: unknown, stateKey: string): HypermediaActionStateProps {
     return (store as Record<string, Signal<HypermediaActionStateProps>>)[stateKey]()
@@ -72,7 +72,7 @@ export function withHypermediaAction<ActionName extends string, Input extends Si
 
     const stateKey = `${actionName}State`;
     const executeMethodName = generateExecuteHypermediaActionMethodName(actionName);
-    let linkRoot: Signal<Resource | undefined> | undefined = undefined;
+    let linkRoot: Signal<Resource | undefined | null> | undefined = undefined;
 
     return signalStoreFeature(
         withState({
@@ -116,7 +116,7 @@ export function withHypermediaAction<ActionName extends string, Input extends Si
             onInit(store, hateoasService = inject(HateoasService)) {
                 linkRoot = linkRootFn(store as unknown as StoreForActionLinkRoot<Input>);
                 // Wire up linked object with state
-                rxMethod<Resource | undefined>(
+                rxMethod<Resource | undefined | null>(
                     pipe( 
                         tap(() => patchState(store, updateState(stateKey, { href: '', method: '', isAvailable: false } ))),
                         filter(resource => resource !== undefined),

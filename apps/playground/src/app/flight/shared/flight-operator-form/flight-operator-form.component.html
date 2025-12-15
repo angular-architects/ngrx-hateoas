@@ -1,15 +1,15 @@
 <h5 class="card-title">Operator</h5>
 
-<form (appUpdate)="model.set($event)">
+<form>
     <div class="mb-3">
         <label for="name" class="form-label">Name</label>
-        <input class="form-control" id="name" name="name" required [ngModel]="model().name">
+        <input class="form-control" id="name" [field]="operator().name">
     </div>
     <div class="mb-3">
         <label for="shortName" class="form-label">Short Name</label>
-        <input class="form-control" id="shortName" name="shortName" required [ngModel]="model().shortName">
+        <input class="form-control" id="shortName" [field]="operator().shortName">
     </div>
-    <select class="form-select form-select-lg mb-3" name="aircraftId" [ngModel]="model().aircraftId">
+    <select class="form-select form-select-lg mb-3" [field]="operator().aircraftId">
         @for(aircraft of aircrafts(); track aircraft.id) {
             <option [value]="aircraft.id">{{aircraft.registration}} - {{aircraft.type}}</option>
         }

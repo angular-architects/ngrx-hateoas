@@ -4,37 +4,28 @@
     </div>
 </div>
 
-<pre>
-State
-{{ store.flightEditVm.flight.connection() | json }}
-WritableState
-{{ store.flightConnection() | json }}
-Local Flight Connection
-{{ localFlightConnection() | json }}    
-</pre>
-
 <div class="row">
     <div class="col">
         <app-action-card #connection
                          [disabled]="!store.updateFlightConnectionState.isAvailable()" 
                          (save)="onUpdateConnection()">
-            <app-flight-connection-form [(model)]="flightConnection" />
+            <app-flight-connection-form [connection]="flightForm.connection" />
         </app-action-card>
         <app-action-card #times
                          [disabled]="!store.updateFlightTimesState.isAvailable()" 
                          (save)="onUpdateTimes()">
-            <app-flight-times-form [(model)]="flightTimes" />
+            <app-flight-times-form [times]="flightForm.times" />
         </app-action-card>
         <app-action-card #operator
                          [disabled]="!store.updateFlightOperatorState.isAvailable()" 
                          (save)="onUpdateOperator()">
-            <app-flight-operator-form [aircrafts]="store.flightEditVm.aircrafts()" [(model)]="flightOperator" />
+            <app-flight-operator-form [aircrafts]="store.flightEditVm.aircrafts()" [operator]="flightForm.operator" />
         </app-action-card>
-        @if(flightPrice(); as flightPriceValue) {
+        @if(flightForm.price().value(); as flightPriceValue) {
             <app-action-card #price
                              [disabled]="!store.updateFlightPriceState.isAvailable()" 
                              (save)="onUpdatePrice()">
-                <app-flight-price-form [model]="flightPriceValue" (modelChange)="flightPrice.set($event)" />
+                <app-flight-price-form [price]="$any(flightForm.price)" />
             </app-action-card>
         }
     </div>

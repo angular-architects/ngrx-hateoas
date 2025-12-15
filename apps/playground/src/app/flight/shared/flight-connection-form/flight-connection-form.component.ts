@@ -1,13 +1,12 @@
-import { Component, model } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { initialFlightConnection } from '../../flight.entities';
-import { FormUpdateDirective } from '../../../shared/directives/form-update.directive';
+import { Component, input } from '@angular/core';
+import { FlightConnection } from '../../flight.entities';
+import { Field, FieldTree } from '@angular/forms/signals';
 
 @Component({
     selector: 'app-flight-connection-form',
-    imports: [FormsModule, FormUpdateDirective],
+    imports: [Field],
     templateUrl: './flight-connection-form.component.html'
 })
 export class FlightConnectionFormComponent {
-  model = model(initialFlightConnection);
+  connection = input.required<FieldTree<FlightConnection>>();
 }

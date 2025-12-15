@@ -1,3 +1,4 @@
+import { apply, applyWhenValue, maxLength, min, required, schema } from "@angular/forms/signals";
 
 export type Aircraft = {
     id: number,
@@ -25,6 +26,13 @@ export const initialFlightConnection: FlightConnection = {
     icaoTo: ''
 };
 
+export const flightConnectionSchema = schema<FlightConnection>(flightConnection => {
+    required(flightConnection.from);
+    required(flightConnection.to);
+    maxLength(flightConnection.icaoFrom, 4);
+    maxLength(flightConnection.icaoTo, 4);
+});
+
 export type FlightTimes = {
     takeOff: string;
     landing: string;
@@ -35,16 +43,27 @@ export const initialFlightTimes: FlightTimes = {
     landing: ''
 };
 
+export const flightTimesSchema = schema<FlightTimes>(flightTimes => {
+    required(flightTimes.takeOff);
+    required(flightTimes.landing);
+});
+
 export type FlightOperator = {
     name: string;
     shortName: string;
-    aircraftId?: number;
+    aircraftId: string;
 };
 
 export const initialFlightOperator: FlightOperator = {
     name: '',
-    shortName: ''
+    shortName: '',
+    aircraftId: ''
 };
+
+export const flightOperatorSchema = schema<FlightOperator>(flightOperator => {
+    required(flightOperator.name);
+    required(flightOperator.shortName);
+});
 
 export type FlightPrice = {
     basePrice: number;
@@ -56,12 +75,17 @@ export const initialFlightPrice: FlightPrice = {
     seatReservationSurcharge: 0
 };
 
+export const flightPriceSchema = schema<FlightPrice>(flightPrice => {
+    min(flightPrice.basePrice, 0);
+    min(flightPrice.seatReservationSurcharge, 0);
+});
+
 export type Flight = {
     id: number;
     connection: FlightConnection;
     times: FlightTimes;
     operator: FlightOperator;
-    price: FlightPrice | undefined;
+    price: FlightPrice | null;
 };
 
 export const initialFlight: Flight = {
@@ -69,5 +93,12 @@ export const initialFlight: Flight = {
     connection: initialFlightConnection,
     times: initialFlightTimes,
     operator: initialFlightOperator,
-    price: undefined
+    price: null
 };
+
+export const flightSchema = schema<Flight>(flight => {
+    apply(flight.connection, flightConnectionSchema);
+    apply(flight.times, flightTimesSchema);
+    apply(flight.operator, flightOperatorSchema);
+    applyWhenValue(flight.price, price => price !== null, flightPriceSchema);
+});

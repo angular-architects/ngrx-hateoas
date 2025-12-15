@@ -35,6 +35,7 @@ const TestStore = signalStore(
     { providedIn: 'root' },
     withState({ model: initialTestModel }),
     withWritableStateCopy(store => ({
+        writableModel: store.model,
         writableObjProp: store.model.objProp,
         subobjectWithWritableStateCopies: {
             writableNumProp: store.model.objProp.numProp
@@ -56,9 +57,19 @@ describe('withWritableStateCopy', () => {
         store = TestBed.inject(TestStore);
     });
 
-    it('sets correct initial copy state', () => {
-        expect(store.writableObjProp()).toBe(initialTestModel.objProp);
-        expect(store.subobjectWithWritableStateCopies.writableNumProp()).toBe(initialTestModel.objProp.numProp);
+    it('sets correct initial state copy and initializes writable signals', () => {
+        expect(store.writableModel()).toEqual(initialTestModel);
+        expect(store.writableModel.objProp()).toEqual(initialTestModel.objProp);
+        expect(store.writableModel.objProp.stringProp()).toEqual(initialTestModel.objProp.stringProp);
+        expect(store.writableModel.objProp.numProp()).toEqual(initialTestModel.objProp.numProp);    
+        expect(store.writableModel.set).toBeDefined();
+        expect(store.writableModel.update).toBeDefined();
+        expect(store.writableObjProp()).toEqual(initialTestModel.objProp);
+        expect(store.writableObjProp.set).toBeDefined();
+        expect(store.writableObjProp.update).toBeDefined();
+        expect(store.subobjectWithWritableStateCopies.writableNumProp()).toEqual(initialTestModel.objProp.numProp);
+        expect(store.subobjectWithWritableStateCopies.writableNumProp.set).toBeDefined();
+        expect(store.subobjectWithWritableStateCopies.writableNumProp.update).toBeDefined();
     });
 
     it('patches a signal inside the writable state', () => {

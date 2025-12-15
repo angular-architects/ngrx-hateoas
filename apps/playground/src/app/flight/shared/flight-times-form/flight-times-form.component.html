@@ -1,12 +1,12 @@
 <h5 class="card-title">Times</h5>
 
-<form (appUpdate)="model.set($event)">
+<form>
     <div class="mb-3">
         <label for="takeOff" class="form-label">Take Off</label>
-        <input class="form-control" type="datetime" id="takeOff" name="takeOff" [ngModel]="model().takeOff">
+        <input class="form-control" type="datetime" id="takeOff" [field]="times().takeOff">
     </div>
     <div class="mb-3">
         <label for="landing" class="form-label">Landing</label>
-        <input class="form-control" type="datetime" id="landing" name="landing" [ngModel]="model().landing">
+        <input class="form-control" type="datetime" id="landing" [field]="times().landing">
     </div>
 </form>
