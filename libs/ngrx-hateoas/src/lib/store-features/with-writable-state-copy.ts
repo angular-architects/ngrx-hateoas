@@ -1,5 +1,5 @@
 import { isSignal, linkedSignal, Signal, WritableSignal } from "@angular/core";
-import { DeepSignal, signalStoreFeature, SignalStoreFeature, SignalStoreFeatureResult, StateSignals, withProps } from "@ngrx/signals";
+import { deepComputed, DeepSignal, signalStoreFeature, SignalStoreFeature, SignalStoreFeatureResult, StateSignals, withProps } from "@ngrx/signals";
 
 type StoreForWritableStateCopy<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']>;
 
@@ -13,10 +13,21 @@ export type WritableStateCopy<State extends ObjectWithSignalsForStateCopy> = {
         [Key in keyof State]: State[Key] extends ObjectWithSignalsForStateCopy ? 
         WritableStateCopy<State[Key]> 
         : State[Key] extends Signal<infer InnerType> ? 
-        WritableSignal<InnerType> : never;
+        WritableDeepSignal<InnerType> : never;
       };
 
-type SelectStateFn<Input extends SignalStoreFeatureResult, StateSelection extends ObjectWithSignalsForStateCopy> = (store: StoreForWritableStateCopy<Input>) => StateSelection
+type SelectStateFn<Input extends SignalStoreFeatureResult, StateSelection extends ObjectWithSignalsForStateCopy> = (store: StoreForWritableStateCopy<Input>) => StateSelection;
+
+function withDeepSignalProxy<T>(signal: WritableSignal<T>): WritableDeepSignal<T> {
+    return new Proxy(signal, {
+        get(target: any, prop) {
+            if(!target[prop] && target()[prop] !== undefined) {
+                target[prop] = deepComputed(() => target()[prop]);
+            }
+            return target[prop];
+        }
+    });
+};
 
 function toWritableStateCopy<T extends ObjectWithSignalsForStateCopy>(stateSelection: T): WritableStateCopy<T> {
     const result: ObjectWithSignalsForStateCopy = {};
@@ -24,7 +35,8 @@ function toWritableStateCopy<T extends ObjectWithSignalsForStateCopy>(stateSelec
         const value = stateSelection[key];
 
         if(isSignal(value)) {
-            result[key] = linkedSignal(() => value());
+            const writableSignal = linkedSignal(() => value());
+            result[key] = withDeepSignalProxy(writableSignal);
         } else {
             result[key] = toWritableStateCopy(value as ObjectWithSignalsForStateCopy);
         }

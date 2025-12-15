@@ -15,7 +15,7 @@ export const initialFlightEditVm: FlightEditVm = {
 export const FlightEditStore = signalStore(
   { providedIn: 'root' },
   withHypermediaResource('flightEditVm', initialFlightEditVm),
-  withExperimentalDeepWritableStateCopy(store => ({
+  withWritableStateCopy(store => ({
     localFlight: store.flightEditVm.flight
   })),
   withHypermediaAction('updateFlightConnection', store => store.localFlight.connection, 'update'),
