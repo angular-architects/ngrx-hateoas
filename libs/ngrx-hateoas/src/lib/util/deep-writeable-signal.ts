@@ -1,6 +1,6 @@
 import { Signal, WritableSignal, linkedSignal, signal } from "@angular/core";
 
-export function isRecord(value: unknown): value is Record<string, unknown> {
+function isRecord(value: unknown): value is Record<string, unknown> {
   return value?.constructor === Object;
 }
 

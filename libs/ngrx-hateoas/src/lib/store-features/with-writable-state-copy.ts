@@ -20,6 +20,7 @@ type SelectStateFn<Input extends SignalStoreFeatureResult, StateSelection extend
 
 function withDeepSignalProxy<T>(signal: WritableSignal<T>): WritableDeepSignal<T> {
     return new Proxy(signal, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         get(target: any, prop) {
             if(!target[prop] && target()[prop] !== undefined) {
                 target[prop] = deepComputed(() => target()[prop]);
