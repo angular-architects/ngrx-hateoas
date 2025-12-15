@@ -1,24 +1,21 @@
-import { Component, inject, linkedSignal, viewChild } from '@angular/core';
+import { Component, inject, viewChild } from '@angular/core';
 import { ActionCardComponent } from '../../shared/ui/action-card/action-card.component';
 import { FlightConnectionFormComponent } from '../shared/flight-connection-form/flight-connection-form.component';
 import { FlightOperatorFormComponent } from '../shared/flight-operator-form/flight-operator-form.component';
 import { FlightPriceFormComponent } from '../shared/flight-price-form/flight-price-form.component';
 import { FlightTimesFormComponent } from '../shared/flight-times-form/flight-times-form.component';
 import { FlightEditStore } from './flight-edit.store';
-import { JsonPipe } from "@angular/common";
+import { flightSchema } from '../flight.entities';
+import { form } from '@angular/forms/signals';
 
 @Component({
     selector: 'app-flight-edit',
-    imports: [ActionCardComponent, FlightConnectionFormComponent, FlightOperatorFormComponent, FlightTimesFormComponent, FlightPriceFormComponent, JsonPipe],
+    imports: [ActionCardComponent, FlightConnectionFormComponent, FlightOperatorFormComponent, FlightTimesFormComponent, FlightPriceFormComponent],
     templateUrl: './flight-edit.component.html'
 })
 export class FlightEditComponent {
   store = inject(FlightEditStore);
-  flightConnection = this.store.flightConnection;
-  localFlightConnection = linkedSignal(() => this.store.flightEditVm.flight.connection());
-  flightTimes = this.store.flightTimes;
-  flightOperator = this.store.flightOperator;
-  flightPrice = this.store.flightPrice;
+  flightForm = form(this.store.localFlight, flightSchema)
 
   _connectionCard = viewChild.required<ActionCardComponent>('connection');
   _timesCard = viewChild.required<ActionCardComponent>('times');
@@ -36,7 +33,7 @@ export class FlightEditComponent {
 
   onUpdateTimes() {
     try {
-      this.store.updateFlightConnection();
+      this.store.updateFlightTimes();
       this._timesCard().showSuccess();
     } catch {
       this._timesCard().showError();
@@ -45,7 +42,7 @@ export class FlightEditComponent {
 
   onUpdateOperator() {
     try {
-      this.store.updateFlightConnection();
+      this.store.updateFlightOperator();
       this._operatorCard().showSuccess();
     } catch {
       this._operatorCard().showError();
@@ -54,7 +51,7 @@ export class FlightEditComponent {
 
   onUpdatePrice() {
     try {
-      this.store.updateFlightConnection();
+      this.store.updateFlightPrice();
       this._priceCard()?.showSuccess();
     } catch {
       this._priceCard()?.showError();

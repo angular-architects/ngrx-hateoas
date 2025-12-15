@@ -1,13 +1,12 @@
-import { Component, model } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { initialFlightTimes } from '../../flight.entities';
-import { FormUpdateDirective } from '../../../shared/directives/form-update.directive';
+import { Component, input } from '@angular/core';
+import { Field, FieldTree } from '@angular/forms/signals';
+import { FlightTimes } from '../../flight.entities';
 
 @Component({
     selector: 'app-flight-times-form',
-    imports: [FormsModule, FormUpdateDirective],
+    imports: [Field],
     templateUrl: './flight-times-form.component.html'
 })
 export class FlightTimesFormComponent {
-  model = model(initialFlightTimes);
+  times = input.required<FieldTree<FlightTimes>>();
 }

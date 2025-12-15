@@ -14,13 +14,9 @@ export class FlightSearchComponent {
   hateoasService = inject(HateoasService);
   router = inject(Router);
   store = inject(FlightSearchStore);
-  viewModel = this.store.getFlightSearchVmAsPatchable();
-  from = this.viewModel['from'];
-  to = this.viewModel['to'];
 
   onSearch() {
-    let url = this.hateoasService.getLink(this.viewModel(), 'flightSearchVm')?.href;
-    url = url + '?from=' + (this.from() ?? '') + '&to=' + (this.to() ?? '');
+    const url = this.hateoasService.getUrl(this.store.flightSearchVm(), 'flightSearchVm', { from: this.store.flightSearchVm.from() ?? '', to: this.store.flightSearchVm.to() ?? '' });
     this.router.navigate(['/flight/search', url]);
   }
 

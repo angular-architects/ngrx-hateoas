@@ -46,7 +46,7 @@ server.get('/views/flightSearchVm', (req, res) => {
   }
 
   if (req.query.to) {
-    flights = flights.fill(f => f.connection.to === req.query.to);
+    flights = flights.filter(f => f.connection.to === req.query.to);
   }
 
   if (req.query.from === undefined && req.query.to === undefined) {
@@ -88,7 +88,7 @@ server.get('/views/flightCreateVm', (req, res) => {
       operator: {
         name: '',
         shortName: '',
-        aircraftId: 0
+        aircraftId: ''
       }
     },
     aircrafts: db.aircrafts

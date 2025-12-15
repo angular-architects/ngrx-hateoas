@@ -1,12 +1,12 @@
 <h5 class="card-title">Price</h5>
 
-<form (appUpdate)="model.set($event)">
+<form>
     <div class="mb-3">
         <label for="basePrice" class="form-label">Base Price</label>
-        <input class="form-control" type="number" id="amount" name="basePrice" [ngModel]="model().basePrice">
+        <input class="form-control" type="number" id="amount" [field]="price().basePrice">
     </div>
     <div class="mb-3">
         <label for="seatReservationSurcharge" class="form-label">Seat Reservation Surcharge</label>
-        <input class="form-control" type="number" id="amount" name="seatReservationSurcharge" [ngModel]="model().seatReservationSurcharge">
+        <input class="form-control" type="number" id="amount" [field]="price().seatReservationSurcharge">
     </div>
 </form>

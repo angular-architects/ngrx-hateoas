@@ -1,25 +1,28 @@
-import { withHypermediaResource, withHypermediaCollectionAction } from "@angular-architects/ngrx-hateoas";
-import { signalStore, withComputed, withHooks } from "@ngrx/signals";
+import { withHypermediaResource, withHypermediaCollectionAction, withExperimentalDeepWritableStateDelegate } from "@angular-architects/ngrx-hateoas";
+import { signalStore, withHooks } from "@ngrx/signals";
 import { Flight } from "../flight.entities";
-import { computed, inject } from "@angular/core";
+import { inject } from "@angular/core";
 import { AppStore } from "../../app.store";
-import { computeMsgId } from "@angular/compiler";
 
 export type FlightSearchVm = {
-  from: string,
-  to: string,
+  from: string | null,
+  to: string | null,
   flights: Flight[]
 }
 
 const initialFlightSearchVm: FlightSearchVm = {
-  from: '',
-  to: '',
+  from: null,
+  to: null,
   flights: []
 }
 
 export const FlightSearchStore = signalStore(
   { providedIn: 'root' },
   withHypermediaResource('flightSearchVm', initialFlightSearchVm),
+  withExperimentalDeepWritableStateDelegate(store => ({
+    flightSearchVmToDelegate: store.flightSearchVm.to,
+    flightSearchVmFromDelegate: store.flightSearchVm.from
+  })),
   withHypermediaCollectionAction('deleteFlight', store => store.flightSearchVm.flights, 'delete'),
   withHypermediaCollectionAction('updateConnection', store => store.flightSearchVm.flights, 'update', { idLookup: flight => flight.id, resourceLookup: flight => flight.connection }),
   withHooks({

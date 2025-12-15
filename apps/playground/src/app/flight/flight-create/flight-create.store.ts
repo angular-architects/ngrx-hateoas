@@ -1,4 +1,4 @@
-import { withHypermediaAction, withLinkedHypermediaResource } from "@angular-architects/ngrx-hateoas";
+import { withHypermediaAction, withLinkedHypermediaResource, withWritableStateCopy } from "@angular-architects/ngrx-hateoas";
 import { signalStore } from "@ngrx/signals";
 import { FlightConnection, FlightTimes, FlightOperator, Aircraft, initialFlightConnection, initialFlightTimes, initialFlightOperator } from "../flight.entities";
 import { FlightSearchStore } from "../flight-search/flight-search.store";
@@ -25,5 +25,8 @@ export const initialFlightCreateVm: FlightCreateVm = {
 export const FlightCreateStore = signalStore(
   { providedIn: 'root' },
   withLinkedHypermediaResource('flightCreateVm', initialFlightCreateVm, () => inject(FlightSearchStore).flightSearchVm, 'flightCreateVm'),
-  withHypermediaAction('createFlight', store => store.flightCreateVm.template, 'create')
+  withWritableStateCopy(store => ({
+    localTemplate: store.flightCreateVm.template
+  })),
+  withHypermediaAction('createFlight', store => store.localTemplate, 'create')
 );

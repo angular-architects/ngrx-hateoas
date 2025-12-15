@@ -31,7 +31,7 @@
             "operator": {
                 "name": "Lufthansa",
                 "shortName": "LH",
-                "aircraftId": 1
+                "aircraftId": "1"
             },
             "price": {
                 "basePrice": 100,
@@ -55,19 +55,19 @@
             "operator": {
                 "name": "Lufthansa",
                 "shortName": "LH",
-                "aircraftId": 2
+                "aircraftId": "2"
             },
             "price": null
         }
     ],
     "aircrafts": [
         {
-            "id": 1,
+            "id": "1",
             "registration": "D-EYPA",
             "type": "PA28"
         },
         {
-            "id": 2,
+            "id": "2",
             "registration": "D-AATW",
             "type": "A220-100"
         }

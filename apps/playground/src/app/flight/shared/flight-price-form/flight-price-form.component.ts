@@ -1,13 +1,12 @@
-import { Component, model } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { initialFlightPrice } from '../../flight.entities';
-import { FormUpdateDirective } from '../../../shared/directives/form-update.directive';
+import { Component, input } from '@angular/core';
+import { Field, FieldTree } from '@angular/forms/signals';
+import { FlightPrice } from '../../flight.entities';
 
 @Component({
     selector: 'app-flight-price-form',
-    imports: [FormsModule, FormUpdateDirective],
+    imports: [Field],
     templateUrl: './flight-price-form.component.html'
 })
 export class FlightPriceFormComponent {
-  model = model(initialFlightPrice);
+  price = input.required<FieldTree<FlightPrice>>();
 }

@@ -15,16 +15,13 @@ export const initialFlightEditVm: FlightEditVm = {
 export const FlightEditStore = signalStore(
   { providedIn: 'root' },
   withHypermediaResource('flightEditVm', initialFlightEditVm),
-  withWritableStateCopy(store => ({
-    flightConnection: store.flightEditVm.flight.connection,
-    flightTimes: store.flightEditVm.flight.times,
-    flightOperator: store.flightEditVm.flight.operator,
-    flightPrice: store.flightEditVm.flight.price
+  withExperimentalDeepWritableStateCopy(store => ({
+    localFlight: store.flightEditVm.flight
   })),
-  withHypermediaAction('updateFlightConnection', store => store.flightConnection, 'update'),
-  withHypermediaAction('updateFlightTimes', store => store.flightTimes, 'update'),
-  withHypermediaAction('updateFlightOperator', store => store.flightOperator, 'update'),
-  withHypermediaAction('updateFlightPrice', store => store.flightPrice, 'update')
+  withHypermediaAction('updateFlightConnection', store => store.localFlight.connection, 'update'),
+  withHypermediaAction('updateFlightTimes', store => store.localFlight.times, 'update'),
+  withHypermediaAction('updateFlightOperator', store => store.localFlight.operator, 'update'),
+  withHypermediaAction('updateFlightPrice', store => store.localFlight.price, 'update')
 );
 
 

@@ -23,8 +23,6 @@ export function toDeepWritableSignal<T>(setFunc: (newVal: T) => void, signal: Si
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     get(target: any, prop) {
 
-      console.log('getting from target', target());
-
       if (prop === 'set') {
         return (newVal: T) => setFunc(newVal);
       }
@@ -33,7 +31,7 @@ export function toDeepWritableSignal<T>(setFunc: (newVal: T) => void, signal: Si
         return true;
       }
 
-      if (!target[prop]?.isDeepWritableSignal && target()[prop]) {
+      if (!target[prop]?.isDeepWritableSignal && target() && target()[prop] !== undefined) {
         const childSignal = linkedSignal(() => target()[prop]);
         const childSetFunc = (newVal: T) => setFunc({ ...target(), [prop]: isRecord(target[prop]()) ? { ...target[prop](), ...newVal } : newVal });
         try {
