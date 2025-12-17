@@ -11,8 +11,8 @@ import { Resource } from "../models";
 export type LinkedHypermediaResourceStateProps = {
     url: string,
     isLoading: boolean,
-    isAvailable: boolean,
-    initiallyLoaded: boolean
+    isLoaded: boolean,
+    isAvailable: boolean
 }
 
 export type LinkedHypermediaResourceData<ResourceName extends string, TResource> = {
@@ -92,8 +92,8 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
             [stateKey]: {
                 url: '',
                 isLoading: false,
-                isAvailable: false,
-                initiallyLoaded: false
+                isLoaded: false,
+                isAvailable: false
             },
             [dataKey]: initialValue
         }),
@@ -120,13 +120,13 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                             next: response => {
                                 patchState(store,
                                     updateData(dataKey, response.body!),
-                                    updateState(stateKey, { isLoading: false }));
+                                    updateState(stateKey, { isLoading: false, isLoaded: true }));
                                 resolve();
                             },
                             error: e => {
                                 patchState(store,
                                     updateData(dataKey, initialValue),
-                                    updateState(stateKey, { isLoading: false }));
+                                    updateState(stateKey, { isLoading: false, isLoaded: false }));
                                 reject(e);
                             }
                         });
@@ -160,9 +160,9 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                         switchMap(href => requestService.requestWithObservable<TResource>('GET', href)),
                         tap(response => response.body ? patchState(store,
                             updateData(dataKey, response.body),
-                            updateState(stateKey, { isLoading: false, initiallyLoaded: true }))
+                            updateState(stateKey, { isLoading: false, isLoaded: true }))
                             : patchState(store,
-                                updateState(stateKey, { isLoading: false, url: undefined, isAvailable: false, initiallyLoaded: false })))
+                                updateState(stateKey, { isLoading: false, url: undefined, isAvailable: false, isLoaded: false })))
                     )
                 )(linkRoot);
             },

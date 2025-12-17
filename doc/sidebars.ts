@@ -28,6 +28,15 @@ const sidebars: SidebarsConfig = {
         'guide/configuration/anti-forgery'
       ],
     },
+    {
+      type: 'category',
+      label: 'Loading Features',
+      items: [
+        'guide/loading_features/withHypermediaResource',
+        'guide/loading_features/withInitialHypermediaResource',
+        'guide/loading_features/withLinkedHypermediaResource'
+      ],
+    },
     'guide/pipes'
   ]
 

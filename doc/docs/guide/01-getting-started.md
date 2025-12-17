@@ -114,7 +114,7 @@ export const initialFlight: Flight = {
 ```
 
 ## 1. Load a Resource from the Backend into the Store
-To load a resource from the backend into the NgRx Signal Store you can use the `withHypermediaResource` feature from **ngrx-hateoas**. This feature adds state, metastate and methods to the store to work with this resource. The following snippet shows how to set up a signal store for the flight resource:
+To load a resource from the backend into the NgRx Signal Store you can use the `withHypermediaResource(<ModelName>, <InitialState>)` feature from **ngrx-hateoas**. This feature adds state, metastate and methods to the store to work with this resource. The following snippet shows how to set up a signal store for the flight resource:
 
 ```ts
 import { signalStore } from '@ngrx/signals';
@@ -126,21 +126,21 @@ export const FlightEditStore = signalStore(
 );
 ```
 
-The store can be injected in your Angular component, a router activator or a router resolver. The `withHypermediaResource` add a method called `load<ModelName>FromUrl` which load the resource from the backend into the store. In our case the model name is `flightModel`. Also a property called `flightModel` is added to the store which holds the current state of the resource in form a NgRx deep signal. The following code snippet shows how to inject the store, load data from the backend and access the singals holding the data;
+The store can be injected in your Angular component, a router activator or a router resolver. The `withHypermediaResource` adds a method called `load<ModelName>FromUrl` which loads the resource from the backend into the store. In our case the model name is `flightModel`. Also a property named with the provided `<ModelName>`, in our case `flightModel` is added to the store which holds the current state of the resource in form a NgRx deep signal. The following code snippet shows how to inject the store, load data from the backend and access the singals holding the data;
 
 ```ts
 // Inject the store using Angular's inject function
 store = inject(FlightEditStore);
 
 // Load the flight resource from the backend into the store via an async call
-await this.store.loadFlightModelFromUrl('/api/flights/123');
+await store.loadFlightModelFromUrl('/api/flights/123');
 
 // Access signals holding data from the store
-const idSignal = this.store.flightModel.id;
-const connectionSignal = this.store.flightModel.connection;
+const idSignal = store.flightModel.id;
+const connectionSignal = store.flightModel.connection;
 
 ```
-The `withHypermediaResource` feature also adds a property called `<modelName>State` to the store which holds metastate information about the resource. This can be used to e.g. show loading spinners in the UI while the resource is loaded from the backend. The following code snippet shows how to access some of the metastate signals:
+The `withHypermediaResource` feature also adds a property called `<ModelName>State` to the store which holds metastate information about the resource. This can be used to e.g. show loading spinners in the UI while the resource is loaded from the backend. The following code snippet shows how to access some of the metastate signals:
 
 ```ts
 // A signal toggling between true and false to indicate if the 
@@ -194,8 +194,12 @@ export const FlightEditStore = signalStore(
 
 You can now set a new state of the connection object by using the `writableFlightConnection` signal on the store like this: `store.writableFlightConnection.set(<new value>)`.
 
+:::info
+The store properties created by the `withWritableStateCopy` feature are writable signals and are deep signals at the same time. Therefore you can get fine grained signals from the state copy the same way as you get them from the store state itself.
+:::
+
 ### Option 3: Use a Deep Writable State Copy
-In case you want want to bind your state to a template driven form you can use the `withExperimentalDeepWritableStateCopy` feature from **ngrx-hateoas**. While `withWritableStateCopy` creates a writable signal for the root object only, the `withExperimentalDeepWritableStateCopy` feature creates a deep writable signal which allows you to set each key of the object individually. This is especiall helpfull in cases where you want to bind your data to a form with the help of `ngModel`. The following code snippet shows how to set up the store with this feature:
+While `withWritableStateCopy` creates a writable signal for the root object only, the `withExperimentalDeepWritableStateCopy` feature creates a deep writable signal which allows you to set each key of the object individually. This is especiall helpfull in cases where you want to bind your data to a form with the help of `ngModel`. The following code snippet shows how to set up the store with this feature:
 
 ```ts
 import { signalStore, withMethods, patchState } from "@ngrx/signals";
@@ -211,14 +215,14 @@ export const FlightEditStore = signalStore(
 );
 ```
 
-You can now set a new state of the connection object by using the `writableFlightConnection` signal on the store like this: `store.writableFlightConnection.from.set('<new value>')`.
+You can now set a new state of individual prperties of the connection object by using the `writableFlightConnection` signal on the store like this: `store.writableFlightConnection.from.set('<new value>')`.
 
 :::info
 This feature is currently experimental and might change in future releases.
 :::
 
 ### Option 4: Use a Deep Writable State Delegate
-If you want to have a writalbe signal in the interface of your store which directly modifies the state in the store you can use the `withExperimentalDeepWritableStateDelegate` feature from **ngrx-hateoas**. This feature creates a writable signal graph which directly modifies the state in the store when you call `set` on it. Because it is a deep writable it works well with template driven forms as well as signal firms. The following code snippet shows how to set up the store with this feature:
+If you want to have a writalbe signal in the interface of your store which directly modifies the state in the store you can use the `withExperimentalDeepWritableStateDelegate` feature from **ngrx-hateoas**. This feature creates a writable signal graph which directly modifies the state in the store when you call `set` on it. Because it is a deep writable it works well with template driven forms as well as signal forms. The following code snippet shows how to set up the store with this feature:
 
 ```ts
 import { signalStore, withMethods, patchState } from "@ngrx/signals";
@@ -263,7 +267,7 @@ To send changed state back to the server you can use the `withHypermediaAction` 
 The `_actions` key holds the metadata for the actions available for this object. In this case there is an action called `update` which uses the HTTP verb `PUT` to send the updated connection object back to the server to the specified URL in the `href` property.
 
 :::info
-If your metadata have different names or structure you can customize this via the `HateoasConfig` when you provide the **ngrx-hateoas** services in your application. For this have a look into the [Metadata Provider](./configuration/01-metadata-provider.md) section.
+If your metadata has different names or a different structure you can customize this via the `HateoasConfig` when you provide the **ngrx-hateoas** services in your application. For this have a look into the [Metadata Provider](./configuration/01-metadata-provider.md) section.
 :::
 
 The following code snippet shows how to set up the store with an action that sends back the changed connection object to the server using the metadata provided in the resource:
@@ -282,7 +286,7 @@ export const FlightEditStore = signalStore(
     withHypermediaAction('updateFlightConnection', store => store.writableFlightConnection, 'update')
 );
 ```
-Through the `withHypermediaAction` feature a method called `updateFlightConnection` is added to the store which can be called to send the connection object pointed to by the lambda in the second argument back to the server. The following code snippet shows how to call this method:
+Through the `withHypermediaAction(<MethodName>, <LambdaToAffectedState>, <ActionName>)` feature a method called `updateFlightConnection` is added to the store which can be called to send the connection object pointed to by the lambda in the second argument back to the server. The following code snippet shows how to call this method:
 
 ```ts
 await this.store.updateFlightConnection();
@@ -357,7 +361,7 @@ export const FlightEditStore = signalStore(
 ```
 
 The  store, as shown in the previous code sample is able to do the following things:
-* read the JSON from backend into the store and provide it as state by providing a url
+* read the JSON from backend into the store and provide it as reactive deep signal
 * rectively read a linked json object triggered by changes from the main object
 * provide writable copies of parts of the state
 * provide metastate about the requests to the backend (e.g. such as if a request is currently running)

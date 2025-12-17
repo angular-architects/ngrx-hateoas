@@ -67,8 +67,11 @@ To use a custom hypermedia JSON format with **ngrx-hateoas** you have to impleme
 export interface MetadataProvider {
     isMetadataKey(keyName: string): boolean;
     linkLookup(resource: unknown, linkName: string): ResourceLink | undefined;
+    getAllLinks(resource: unknown): ResourceLink[];
     actionLookup(resource: unknown, actionName: string): ResourceAction | undefined;
+    getAllActions(resource: unknown): ResourceAction[];
     socketLookup(resource: unknown, socketName: string): ResourceSocket | undefined;
+    getAllSockets(resource: unknown): ResourceSocket[];
 }
 ```
 
@@ -94,7 +97,7 @@ Lets imagine our hypermedia JSON looks like the following:
         "_metadata": {
             "_link_aLinkToAResource": { "href": "/api/..." },
             "_action_anActionOnSubobject": { "href": "/api/...", "verb": "PUT" },
-            "_sockets_aSocketForSubobject": { "href": "/api/...", "event": "newMessageForSubobject" }
+            "_socket_aSocketForSubobject": { "href": "/api/...", "event": "newMessageForSubobject" }
         }
     },
     "_metadata": {
@@ -115,6 +118,13 @@ const customMetadataProvider: MetadataProvider = {
     linkLookup(resource: unknown, linkName: string): ResourceLink | undefined {
         return resource['_metadata']?.['_link_' + linkName];
     },
+    getAllLinks(resource: unknown): ResourceLink[]; {
+        const linksMetadata = resource['_metadata'];
+        if(!linksMetadata) return [];
+        return Object.keys(linksMetadata)
+                     .filter(key => key.startsWith('_link_'))
+                     .map(key => linksMetadata[key]);
+    },
     actionLookup(resource: unknown, actionName: string): ResourceAction | undefined {
         const actionMetadata = resource['_metadata']?.['_action_' + actionName];
         // ResourceAction has the two keys href and method, 
@@ -122,8 +132,25 @@ const customMetadataProvider: MetadataProvider = {
         if(actionMetadata) return { href: actionMetadata.href, method: actionMetadata.verb };
         else return undefined;
     },
+    getAllActions(resource: unknown): ResourceAction[] {
+        const actionsMetadata = resource['_metadata'];
+        if(!actionsMetadata) return [];
+        return Object.keys(actionsMetadata)
+                     .filter(key => key.startsWith('_action_'))
+                     .map(key => {
+                         const actionMetadata = actionsMetadata[key];
+                         return { href: actionMetadata.href, method: actionMetadata.verb };
+                     });
+    },
     socketLookup(resource: unknown, socketName: string): ResourceSocket | undefined {
         return resource['_metadata']?.['_socket_' + socketName];
+    },
+    getAllSockets(resource: unknown): ResourceSocket[] {
+        const socketsMetadata = resource['_metadata'];
+        if(!socketsMetadata) return [];
+        return Object.keys(socketsMetadata)
+                     .filter(key => key.startsWith('_socket_'))
+                     .map(key => socketsMetadata[key]);
     }
 }
 ```
