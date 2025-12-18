@@ -267,7 +267,7 @@ To send changed state back to the server you can use the `withHypermediaAction` 
 The `_actions` key holds the metadata for the actions available for this object. In this case there is an action called `update` which uses the HTTP verb `PUT` to send the updated connection object back to the server to the specified URL in the `href` property.
 
 :::info
-If your metadata has different names or a different structure you can customize this via the `HateoasConfig` when you provide the **ngrx-hateoas** services in your application. For this have a look into the [Metadata Provider](./configuration/01-metadata-provider.md) section.
+If your metadata has different names or a different structure you can customize this via the `HateoasConfig` when you provide the **ngrx-hateoas** services in your application. For this have a look into the [Metadata Provider](./03-configuration/01-metadata-provider.md) section.
 :::
 
 The following code snippet shows how to set up the store with an action that sends back the changed connection object to the server using the metadata provided in the resource:
