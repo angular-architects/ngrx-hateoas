@@ -145,10 +145,10 @@ The `withHypermediaResource` feature also adds a property called `<ModelName>Sta
 ```ts
 // A signal toggling between true and false to indicate if the 
 // resource was loaded at least once from the backend
-const isLoadedSignal = this.store.flightModelState.isLoaded;
+const isLoadedSignal = store.flightModelState.isLoaded;
 // A signal toggling between true and false to indicate if an HTTP 
 // request is currently running to get the state of this resource
-const isLoadingSignal = this.store.flightModelState.isLoading;
+const isLoadingSignal = store.flightModelState.isLoading;
 ```
 
 ## 2. Make Mutations to the State
@@ -299,11 +299,11 @@ The `withHypermediaAction` adds a method with the specified name to the store to
 ```ts
 // A signal indicating if the action is available, means the specified 
 // metadata is available in the currently loaded resource.
-const isAvailableSignal = this.store.updateFlightConnectionState.isAvailable;
+const isAvailableSignal = store.updateFlightConnectionState.isAvailable;
 // A signal indicating if a request is currently running. Means a request
 // was sent to the backend and the client is waiting for the response. You
 // can use this e.g. for showing a loading spinner or progress bar in your UI.
-const isExecutingSignal = this.store.updateFlightConnectionState.isExecuting;
+const isExecutingSignal = store.updateFlightConnectionState.isExecuting;
 ```
 
 ## Full Example

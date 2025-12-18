@@ -37,6 +37,23 @@ const sidebars: SidebarsConfig = {
         'guide/loading_features/withLinkedHypermediaResource'
       ],
     },
+    {
+      type: 'category',
+      label: 'State Mutation Features',
+      items: [
+        'guide/state_mutation_features/withWritableStateCopy',
+        'guide/state_mutation_features/withDeepWritableStateCopy',
+        'guide/state_mutation_features/withDeepWritableStateDelegate'
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Action Features',
+      items: [
+        'guide/action_features/withHypermediaAction',
+        'guide/action_features/withHypermediaCollectionAction'
+      ],
+    },
     'guide/pipes'
   ]
 

@@ -54,7 +54,7 @@ Loads the resource from the provided URL.
 
 ### Load the Resource from a Link
 ```ts
-load<resourceName>FromLink(linkRoot: unknown, linkName: string) => Promise<void>
+load<resourceName>FromLink(linkRoot: unknown, linkName: string): Promise<void>
 ```
 Loads the resource from the provided URL. 
 
