@@ -43,10 +43,6 @@ export function generateExecuteHypermediaCollectionActionMethodName(actionName: 
     return actionName;
 }
 
-export function generateConnectHypermediaCollectionActionMethodName(actionName: string) {
-    return `_connect${actionName.charAt(0).toUpperCase() + actionName.slice(1)}`;
-}
-
 export type HypermediaCollectionActionMethods<ActionName extends string> = ExecuteHypermediaCollectionActionMethod<ActionName>
 
 type StoreForCollectionActionLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']> & Input['props'];

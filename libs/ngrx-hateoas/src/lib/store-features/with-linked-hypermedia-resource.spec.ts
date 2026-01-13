@@ -49,7 +49,7 @@ describe('withLinkedHypermediaResource', () => {
 
     it('sets correct initial resource state', () => {
         expect(store.testModelState.url()).toBe('');
-        expect(store.testModelState.initiallyLoaded()).toBeFalse();
+        expect(store.testModelState.isLoaded()).toBeFalse();
         expect(store.testModelState.isAvailable()).toBeFalse();
         expect(store.testModelState.isLoading()).toBeFalse();
         expect(store.testModel()).toBe(initialTestModel);
@@ -81,7 +81,7 @@ describe('withLinkedHypermediaResource', () => {
         await firstValueFrom(timer(0));
 
         expect(store.testModelState.url()).toBe('/api/test-model');
-        expect(store.testModelState.initiallyLoaded()).toBeFalse();
+        expect(store.testModelState.isLoaded()).toBeFalse();
         expect(store.testModelState.isLoading()).toBeTrue();
         expect(store.testModelState.isAvailable()).toBeTrue();
 
@@ -91,7 +91,7 @@ describe('withLinkedHypermediaResource', () => {
         await firstValueFrom(timer(0));
 
         expect(store.testModelState.url()).toBe('/api/test-model');
-        expect(store.testModelState.initiallyLoaded()).toBeTrue();
+        expect(store.testModelState.isLoaded()).toBeTrue();
         expect(store.testModelState.isLoading()).toBeFalse();
         expect(store.testModelState.isAvailable()).toBeTrue();
 
@@ -104,7 +104,7 @@ describe('withLinkedHypermediaResource', () => {
         await firstValueFrom(timer(0));
 
         expect(store.testModelState.url()).toBe('/api/test-model-changed');
-        expect(store.testModelState.initiallyLoaded()).toBeTrue();
+        expect(store.testModelState.isLoaded()).toBeTrue();
         expect(store.testModelState.isLoading()).toBeTrue();
         expect(store.testModelState.isAvailable()).toBeTrue();
 
@@ -129,7 +129,7 @@ describe('withLinkedHypermediaResource', () => {
         await firstValueFrom(timer(0));
 
         expect(store.testModelState.url()).toBe('/api/test-model');
-        expect(store.testModelState.initiallyLoaded()).toBeFalse();
+        expect(store.testModelState.isLoaded()).toBeFalse();
         expect(store.testModelState.isLoading()).toBeTrue();
         expect(store.testModelState.isAvailable()).toBeTrue();
 
@@ -139,7 +139,7 @@ describe('withLinkedHypermediaResource', () => {
         await firstValueFrom(timer(0));
 
         expect(store.testModelState.url()).toBeUndefined();
-        expect(store.testModelState.initiallyLoaded()).toBeFalse();
+        expect(store.testModelState.isLoaded()).toBeFalse();
         expect(store.testModelState.isLoading()).toBeFalse();
         expect(store.testModelState.isAvailable()).toBeFalse();
     });
@@ -170,7 +170,7 @@ describe('withLinkedHypermediaResource', () => {
         await firstValueFrom(timer(0));
 
         expect(store.testModelState.url()).toBe('/api/test-model');
-        expect(store.testModelState.initiallyLoaded()).toBeTrue();
+        expect(store.testModelState.isLoaded()).toBeTrue();
         expect(store.testModelState.isLoading()).toBeFalse();
         expect(store.testModelState.isAvailable()).toBeTrue();
 
