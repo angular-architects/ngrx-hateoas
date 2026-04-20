@@ -8,12 +8,16 @@ Creates a resource in the store which gets automatically loaded when an instance
 ## API
 ```ts
 function withInitialHypermediaResource<ResourceName extends string, TResource>(
-    resourceName: ResourceName, initialValue: TResource, url: string | (() => string)): SignalStoreFeature;
+    resourceName: ResourceName, initialValue: TResource, url: string | Promise<string> | (() => string | Promise<string>)): SignalStoreFeature;
 ```
 
 * **resourceName**: The name of how the resource will be declared in the store.
 * **initialValue**: The initial value of the resource before it is loaded from a URL.
-* **url**: The URL from which the resource will be loaded. Can also be a function returning a string. If a function is provided, it will be executed at the time the store is created.
+* **url**: The URL from which the resource will be loaded. Accepts four forms:
+  - A `string`: the URL is used directly at store creation time.
+  - A `Promise<string>`: the promise is awaited and the resolved value is used as the URL.
+  - A function returning a `string`: the function is called at store creation time, allowing injection of Angular services (e.g. `() => inject(MyToken)`).
+  - A function returning a `Promise<string>`: the function is called at store creation time and the resulting promise is awaited before loading. Useful for asynchronous URL resolution via injected services.
 
 ## State
 With this feature the following state properties are added to the interface of the store:
@@ -66,3 +70,11 @@ Loads the resource from the provided URL.
 reload<resourceName>(): Promise<void>
 ```
 Reloads the resource from the last used URL.
+
+### Connect the Resource to a URL Signal
+```ts
+connect<resourceName>ToUrl(url: string | Signal<string>): EffectRef
+```
+Reactively connects the resource to a URL signal. Whenever the signal emits a new URL value, the resource is automatically loaded from that URL. If a plain `string` is passed instead of a signal, the resource is loaded once from that URL.
+
+* **url**: A `Signal<string>` whose value is used as the URL. Whenever the signal changes, the resource is reloaded automatically. Can also be a plain `string` for a one-time load.

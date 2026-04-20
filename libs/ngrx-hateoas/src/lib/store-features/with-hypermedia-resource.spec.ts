@@ -4,7 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { signalStore } from '@ngrx/signals';
 import { withHypermediaResource } from './with-hypermedia-resource';
 import { provideHateoas } from '../provide';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 
 type RootModel = {
     apiName: string
@@ -88,6 +88,7 @@ describe('withHypermediaResource', () => {
     it('has correct resource methods', () => {
         expect(store.loadTestModelFromLink).toBeDefined();
         expect(store.loadTestModelFromUrl).toBeDefined();
+        expect(store.connectTestModelToUrl).toBeDefined();
         expect(store.reloadTestModel).toBeDefined();
         expect(store.getTestModelAsPatchable).toBeDefined();
     });
@@ -310,6 +311,64 @@ describe('withHypermediaResource', () => {
         expect(store.testModel.objProp.stringProp()).toBe('from Url Reloaded - second');
 
         httpTestingController.verify();
+    });
+
+    it('connects resource to a static url and loads it', (done: DoneFn) => {
+        const resourceFromUrl: TestModel = {
+            numProp: 2,
+            objProp: { stringProp: 'from connect' }
+        };
+
+        store.connectTestModelToUrl('api/test-model');
+
+        expect(store.testModelState.isLoading()).toBeTrue();
+        expect(store.testModelState.isLoaded()).toBeFalse();
+
+        httpTestingController.expectOne('api/test-model').flush(resourceFromUrl);
+        httpTestingController.verify();
+
+        setTimeout(() => {
+            expect(store.testModelState.url()).toBe('api/test-model');
+            expect(store.testModelState.isLoading()).toBeFalse();
+            expect(store.testModelState.isLoaded()).toBeTrue();
+            expect(store.testModel.objProp.stringProp()).toBe('from connect');
+            done();
+        }, 0);
+    });
+
+    it('connects resource reactively to a url signal and reloads when signal changes', (done: DoneFn) => {
+        const resourceFirst: TestModel = {
+            numProp: 2,
+            objProp: { stringProp: 'first response' }
+        };
+        const resourceSecond: TestModel = {
+            numProp: 3,
+            objProp: { stringProp: 'second response' }
+        };
+
+        const urlSignal = signal('api/test-model?version=1');
+        store.connectTestModelToUrl(urlSignal);
+
+        TestBed.flushEffects();
+
+        expect(store.testModelState.isLoading()).toBeTrue();
+        httpTestingController.expectOne('api/test-model?version=1').flush(resourceFirst);
+
+        setTimeout(() => {
+            expect(store.testModel.objProp.stringProp()).toBe('first response');
+
+            urlSignal.set('api/test-model?version=2');
+            TestBed.flushEffects();
+
+            expect(store.testModelState.isLoading()).toBeTrue();
+            httpTestingController.expectOne('api/test-model?version=2').flush(resourceSecond);
+
+            setTimeout(() => {
+                expect(store.testModel.objProp.stringProp()).toBe('second response');
+                httpTestingController.verify();
+                done();
+            }, 0);
+        }, 0);
     });
 
 });

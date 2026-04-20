@@ -65,3 +65,11 @@ Loads the resource from the provided URL.
 reload<resourceName>(): Promise<void>
 ```
 Reloads the resource from the last used URL.
+
+### Connect the Resource to a URL Signal
+```ts
+connect<resourceName>ToUrl(url: string | Signal<string>): EffectRef
+```
+Reactively connects the resource to a URL signal. Whenever the signal emits a new URL value, the resource is automatically loaded from that URL. If a plain `string` is passed instead of a signal, the resource is loaded once from that URL.
+
+* **url**: A `Signal<string>` whose value is used as the URL. Whenever the signal changes, the resource is reloaded automatically. Can also be a plain `string` for a one-time load.

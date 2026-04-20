@@ -1,5 +1,5 @@
 import { inject, Signal } from "@angular/core";
-import { SignalStoreFeature, patchState, signalStoreFeature, withMethods, withState } from "@ngrx/signals";
+import { SignalMethod, SignalStoreFeature, patchState, signalMethod, signalStoreFeature, withMethods, withState } from "@ngrx/signals";
 import { DeepPatchableSignal, toDeepPatchableSignal } from "../util/deep-patchable-signal";
 import { HateoasService } from "../services/hateoas.service";
 import { RequestService } from "../services/request.service";
@@ -39,6 +39,14 @@ export function generateLoadHypermediaResourceFromLinkMethodName(resourceName: s
     return `load${resourceName.charAt(0).toUpperCase() + resourceName.slice(1)}FromLink`;
 }
 
+export type ConnectHypermediaResourceToUrlMethod<ResourceName extends string> = {
+    [K in ResourceName as `connect${Capitalize<ResourceName>}ToUrl`]: SignalMethod<string>
+};
+
+export function generateConnectHypermediaResourceToUrlMethodName(resourceName: string) {
+    return `connect${resourceName.charAt(0).toUpperCase() + resourceName.slice(1)}ToUrl`;
+}
+
 export type ReloadHypermediaResourceMethod<ResourceName extends string> = {
     [K in ResourceName as `reload${Capitalize<ResourceName>}`]: () => Promise<void>
 };
@@ -58,6 +66,7 @@ export function generateGetAsPatchableHypermediaResourceMethodName(resourceName:
 export type HypermediaResourceStoreMethods<ResourceName extends string, TResource> =
     LoadHypermediaResourceFromUrlMethod<ResourceName>
     & LoadHypermediaResourceFromLinkMethod<ResourceName>
+    & ConnectHypermediaResourceToUrlMethod<ResourceName>
     & ReloadHypermediaResourceMethod<ResourceName>
     & GetAsPatchableHypermediaResourceMethod<ResourceName, TResource>;
 
@@ -99,6 +108,7 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
     const stateKey = `${resourceName}State`;
     const loadFromUrlMethodName = generateLoadHypermediaResourceFromUrlMethodName(resourceName);
     const loadFromLinkMethodName = generateLoadHypermediaResourceFromLinkMethodName(resourceName);
+    const connectToUrlMethodName = generateConnectHypermediaResourceToUrlMethodName(resourceName);
     const reloadMethodName = generateReloadHypermediaResourceMethodName(resourceName);
     const getAsPatchableMethodName = generateGetAsPatchableHypermediaResourceMethodName(resourceName);
 
@@ -166,6 +176,8 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
                 }
             };
 
+            const connectToUrlMethod = signalMethod<string>(url => loadFromUrlMethod(url));
+
             const reloadMethod = (): Promise<void> => {
                 if (currentRequestSub) {
                     currentRequestSub.unsubscribe();
@@ -207,6 +219,7 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
             return {
                 [loadFromUrlMethodName]: loadFromUrlMethod,
                 [loadFromLinkMethodName]: loadFromLinkMethod,
+                [connectToUrlMethodName]: connectToUrlMethod,
                 [reloadMethodName]: reloadMethod,
                 [getAsPatchableMethodName]: getAsPatchableMethod
             };
