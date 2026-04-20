@@ -7,11 +7,10 @@ import { FlightTimesFormComponent } from '../shared/flight-times-form/flight-tim
 import { FlightEditStore } from './flight-edit.store';
 import { flightSchema } from '../flight.entities';
 import { form } from '@angular/forms/signals';
-import { HasActionPipe } from '@angular-architects/ngrx-hateoas';
 
 @Component({
     selector: 'app-flight-edit',
-    imports: [ActionCardComponent, FlightConnectionFormComponent, FlightOperatorFormComponent, FlightTimesFormComponent, FlightPriceFormComponent, HasActionPipe],
+    imports: [ActionCardComponent, FlightConnectionFormComponent, FlightOperatorFormComponent, FlightTimesFormComponent, FlightPriceFormComponent],
     templateUrl: './flight-edit.component.html'
 })
 export class FlightEditComponent {

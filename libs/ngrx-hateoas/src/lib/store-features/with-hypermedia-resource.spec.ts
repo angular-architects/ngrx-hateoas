@@ -88,7 +88,6 @@ describe('withHypermediaResource', () => {
     it('has correct resource methods', () => {
         expect(store.loadTestModelFromLink).toBeDefined();
         expect(store.loadTestModelFromUrl).toBeDefined();
-        expect(store.connectTestModelToUrl).toBeDefined();
         expect(store.reloadTestModel).toBeDefined();
         expect(store.getTestModelAsPatchable).toBeDefined();
     });
@@ -210,6 +209,75 @@ describe('withHypermediaResource', () => {
         expect(store.testModel.objProp.stringProp()).toBe('from Url Reloaded');
     });
 
+    it('skips loading if fromCache is true and resource is already loaded from the same url', async () => {
+        const resourceFromUrl: TestModel = {
+            numProp: 2,
+            objProp: { stringProp: 'from Url' }
+        };
+
+        const loadPromise = store.loadTestModelFromUrl('api/test-model');
+        httpTestingController.expectOne('api/test-model').flush(resourceFromUrl);
+        await loadPromise;
+
+        // second call with same url and fromCache=true — should not trigger a new request
+        await store.loadTestModelFromUrl('api/test-model', true);
+
+        httpTestingController.expectNone('api/test-model');
+        httpTestingController.verify();
+
+        expect(store.testModelState.isLoaded()).toBeTrue();
+        expect(store.testModel.objProp.stringProp()).toBe('from Url');
+    });
+
+    it('loads again if fromCache is true but url has changed', async () => {
+        const resourceFromUrl: TestModel = {
+            numProp: 2,
+            objProp: { stringProp: 'from Url' }
+        };
+
+        const resourceFromNewUrl: TestModel = {
+            numProp: 3,
+            objProp: { stringProp: 'from New Url' }
+        };
+
+        const loadPromise = store.loadTestModelFromUrl('api/test-model');
+        httpTestingController.expectOne('api/test-model').flush(resourceFromUrl);
+        await loadPromise;
+
+        // call with a different url and fromCache=true — should still load
+        const reloadPromise = store.loadTestModelFromUrl('api/test-model?v=2', true);
+        httpTestingController.expectOne('api/test-model?v=2').flush(resourceFromNewUrl);
+        httpTestingController.verify();
+        await reloadPromise;
+
+        expect(store.testModelState.url()).toBe('api/test-model?v=2');
+        expect(store.testModel.objProp.stringProp()).toBe('from New Url');
+    });
+
+    it('loads again if fromCache is false even when already loaded from the same url', async () => {
+        const resourceFromUrl: TestModel = {
+            numProp: 2,
+            objProp: { stringProp: 'from Url' }
+        };
+
+        const resourceReloaded: TestModel = {
+            numProp: 3,
+            objProp: { stringProp: 'reloaded' }
+        };
+
+        let loadPromise = store.loadTestModelFromUrl('api/test-model');
+        httpTestingController.expectOne('api/test-model').flush(resourceFromUrl);
+        await loadPromise;
+
+        // call with same url and fromCache=false (default) — should load again
+        loadPromise = store.loadTestModelFromUrl('api/test-model');
+        httpTestingController.expectOne('api/test-model').flush(resourceReloaded);
+        httpTestingController.verify();
+        await loadPromise;
+
+        expect(store.testModel.objProp.stringProp()).toBe('reloaded');
+    });
+
     it('gets the resource as patchable', () => {
         const resource = store.getTestModelAsPatchable();
 
@@ -264,16 +332,11 @@ describe('withHypermediaResource', () => {
         const req1 = httpTestingController.expectOne('api/test-model?first=1');
         expect(req1.cancelled).toBeTrue();
 
-        // flush second request first
+        // flush second request
         httpTestingController.expectOne('api/test-model?second=2').flush(resourceSecond);
         await request;
 
-        // after second resolves, store should reflect second response
         expect(store.testModel.objProp.stringProp()).toBe('second response');
-
-        // assert that the resource still contains the data from the second url
-        expect(store.testModel.objProp.stringProp()).toBe('second response');
-
         httpTestingController.verify();
     });
 
@@ -313,30 +376,7 @@ describe('withHypermediaResource', () => {
         httpTestingController.verify();
     });
 
-    it('connects resource to a static url and loads it', (done: DoneFn) => {
-        const resourceFromUrl: TestModel = {
-            numProp: 2,
-            objProp: { stringProp: 'from connect' }
-        };
-
-        store.connectTestModelToUrl('api/test-model');
-
-        expect(store.testModelState.isLoading()).toBeTrue();
-        expect(store.testModelState.isLoaded()).toBeFalse();
-
-        httpTestingController.expectOne('api/test-model').flush(resourceFromUrl);
-        httpTestingController.verify();
-
-        setTimeout(() => {
-            expect(store.testModelState.url()).toBe('api/test-model');
-            expect(store.testModelState.isLoading()).toBeFalse();
-            expect(store.testModelState.isLoaded()).toBeTrue();
-            expect(store.testModel.objProp.stringProp()).toBe('from connect');
-            done();
-        }, 0);
-    });
-
-    it('connects resource reactively to a url signal and reloads when signal changes', (done: DoneFn) => {
+    it('loads the resource reactively from a url signal and reloads when signal changes', (done: DoneFn) => {
         const resourceFirst: TestModel = {
             numProp: 2,
             objProp: { stringProp: 'first response' }
@@ -347,7 +387,7 @@ describe('withHypermediaResource', () => {
         };
 
         const urlSignal = signal('api/test-model?version=1');
-        store.connectTestModelToUrl(urlSignal);
+        store.loadTestModelFromUrl(urlSignal);
 
         TestBed.flushEffects();
 

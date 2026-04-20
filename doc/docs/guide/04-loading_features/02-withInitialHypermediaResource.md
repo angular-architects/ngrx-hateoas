@@ -50,11 +50,13 @@ With this feature the following methods are added to the interface of the store:
 ### Load the Resource from an URL
 ```ts
 load<resourceName>FromUrl(url: string | null, fromCache?: boolean): Promise<void>
+load<resourceName>FromUrl(url: Signal<string | null>): EffectRef
 ```
-Loads the resource from the provided URL. 
+Loads the resource from the provided URL. Two overloads are available:
 
-* **url**: The URL from which the resource should be loaded. If `null` is provided the resource is reset to its initial value.
-* **fromCache**: Whether to load the resource even if the the current state is loaded from the same URL. If not provided, defaults to `false`.
+* When called with a **plain value** (`string | null`): loads the resource immediately and returns a `Promise<void>` that resolves when the request completes. Passing `null` resets the resource to its initial value.
+  * **fromCache**: When `true`, skips loading if the resource is already loaded from the same URL. Defaults to `false`.
+* When called with a **`Signal<string | null>`**: sets up a reactive effect that automatically reloads the resource whenever the signal's value changes, and returns an `EffectRef` that can be used to destroy the effect.
 
 ### Load the Resource from a Link
 ```ts
@@ -70,11 +72,3 @@ Loads the resource from the provided URL.
 reload<resourceName>(): Promise<void>
 ```
 Reloads the resource from the last used URL.
-
-### Connect the Resource to a URL Signal
-```ts
-connect<resourceName>ToUrl(url: string | Signal<string>): EffectRef
-```
-Reactively connects the resource to a URL signal. Whenever the signal emits a new URL value, the resource is automatically loaded from that URL. If a plain `string` is passed instead of a signal, the resource is loaded once from that URL.
-
-* **url**: A `Signal<string>` whose value is used as the URL. Whenever the signal changes, the resource is reloaded automatically. Can also be a plain `string` for a one-time load.
