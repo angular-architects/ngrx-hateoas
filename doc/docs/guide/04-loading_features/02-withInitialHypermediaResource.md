@@ -8,12 +8,16 @@ Creates a resource in the store which gets automatically loaded when an instance
 ## API
 ```ts
 function withInitialHypermediaResource<ResourceName extends string, TResource>(
-    resourceName: ResourceName, initialValue: TResource, url: string | (() => string)): SignalStoreFeature;
+    resourceName: ResourceName, initialValue: TResource, url: string | Promise<string> | (() => string | Promise<string>)): SignalStoreFeature;
 ```
 
 * **resourceName**: The name of how the resource will be declared in the store.
 * **initialValue**: The initial value of the resource before it is loaded from a URL.
-* **url**: The URL from which the resource will be loaded. Can also be a function returning a string. If a function is provided, it will be executed at the time the store is created.
+* **url**: The URL from which the resource will be loaded. Accepts four forms:
+  - A `string`: the URL is used directly at store creation time.
+  - A `Promise<string>`: the promise is awaited and the resolved value is used as the URL.
+  - A function returning a `string`: the function is called at store creation time, allowing injection of Angular services (e.g. `() => inject(MyToken)`).
+  - A function returning a `Promise<string>`: the function is called at store creation time and the resulting promise is awaited before loading. Useful for asynchronous URL resolution via injected services.
 
 ## State
 With this feature the following state properties are added to the interface of the store:
@@ -46,11 +50,13 @@ With this feature the following methods are added to the interface of the store:
 ### Load the Resource from an URL
 ```ts
 load<resourceName>FromUrl(url: string | null, fromCache?: boolean): Promise<void>
+load<resourceName>FromUrl(url: Signal<string | null>): EffectRef
 ```
-Loads the resource from the provided URL. 
+Loads the resource from the provided URL. Two overloads are available:
 
-* **url**: The URL from which the resource should be loaded. If `null` is provided the resource is reset to its initial value.
-* **fromCache**: Whether to load the resource even if the the current state is loaded from the same URL. If not provided, defaults to `false`.
+* When called with a **plain value** (`string | null`): loads the resource immediately and returns a `Promise<void>` that resolves when the request completes. Passing `null` resets the resource to its initial value.
+  * **fromCache**: When `true`, skips loading if the resource is already loaded from the same URL. Defaults to `false`.
+* When called with a **`Signal<string | null>`**: sets up a reactive effect that automatically reloads the resource whenever the signal's value changes, and returns an `EffectRef` that can be used to destroy the effect.
 
 ### Load the Resource from a Link
 ```ts

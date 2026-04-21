@@ -22,6 +22,7 @@ export class FlightEditComponent {
   _operatorCard = viewChild.required<ActionCardComponent>('operator');
   _priceCard = viewChild<ActionCardComponent>('price');
 
+
   async onUpdateConnection() {
     try {
       await this.store.updateFlightConnection();
@@ -31,27 +32,27 @@ export class FlightEditComponent {
     }
   }
 
-  onUpdateTimes() {
+  async onUpdateTimes() {
     try {
-      this.store.updateFlightTimes();
+      await this.store.updateFlightTimes();
       this._timesCard().showSuccess();
     } catch {
       this._timesCard().showError();
     }
   }
 
-  onUpdateOperator() {
+  async onUpdateOperator() {
     try {
-      this.store.updateFlightOperator();
+      await this.store.updateFlightOperator();
       this._operatorCard().showSuccess();
     } catch {
       this._operatorCard().showError();
     }
   }
 
-  onUpdatePrice() {
+  async onUpdatePrice() {
     try {
-      this.store.updateFlightPrice();
+      await this.store.updateFlightPrice();
       this._priceCard()?.showSuccess();
     } catch {
       this._priceCard()?.showError();

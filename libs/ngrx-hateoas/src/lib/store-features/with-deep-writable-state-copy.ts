@@ -2,7 +2,7 @@ import { isSignal, linkedSignal, Signal } from "@angular/core";
 import { signalStoreFeature, SignalStoreFeature, SignalStoreFeatureResult, StateSignals, withProps } from "@ngrx/signals";
 import { deepWritableFromSignal, DeepWritableSignal } from "../util/deep-writeable-signal";
 
-type StoreForDeepWritableStateCopy<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']>;
+type StoreForDeepWritableStateCopy<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']> & Input['props'];
 
 export type ObjectWithSignalsForDeepStateCopy = {
     [key: string]: Signal<unknown> | ObjectWithSignalsForDeepStateCopy;

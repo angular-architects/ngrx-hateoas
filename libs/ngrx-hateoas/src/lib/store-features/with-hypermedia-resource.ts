@@ -1,5 +1,5 @@
-import { inject, Signal } from "@angular/core";
-import { SignalStoreFeature, patchState, signalStoreFeature, withMethods, withState } from "@ngrx/signals";
+import { inject, isSignal, EffectRef, Signal } from "@angular/core";
+import { SignalStoreFeature, patchState, signalMethod, signalStoreFeature, withMethods, withState } from "@ngrx/signals";
 import { DeepPatchableSignal, toDeepPatchableSignal } from "../util/deep-patchable-signal";
 import { HateoasService } from "../services/hateoas.service";
 import { RequestService } from "../services/request.service";
@@ -24,7 +24,10 @@ export type HypermediaResourceStoreState<ResourceName extends string, TResource>
     & HypermediaResourceState<ResourceName>;
 
 export type LoadHypermediaResourceFromUrlMethod<ResourceName extends string> = {
-    [K in ResourceName as `load${Capitalize<ResourceName>}FromUrl`]: (url: string | null, fromCache?: boolean) => Promise<void>
+    [K in ResourceName as `load${Capitalize<ResourceName>}FromUrl`]: {
+        (url: string | null, fromCache?: boolean): Promise<void>;
+        (url: Signal<string | null>): EffectRef;
+    }
 };
 
 export function generateLoadHypermediaResourceFromUrlMethodName(resourceName: string) {
@@ -120,7 +123,7 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
 
             let currentRequestSub: Subscription | undefined;
 
-            const loadFromUrlMethod = (url: string | null, fromCache = false): Promise<void> => {
+            function loadFromUrl(url: string | null, fromCache = false): Promise<void> {
                 if (currentRequestSub) {
                     currentRequestSub.unsubscribe();
                     currentRequestSub = undefined;
@@ -130,7 +133,9 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
                         updateData(dataKey, initialValue),
                         updateState(stateKey, { url: '', isLoading: false, isLoaded: false }));
                     return Promise.resolve();
-                } else if (!fromCache || hateoasService.getLink(getData(store, dataKey), 'self')?.href !== url) {
+                } else if (fromCache && getState(store, stateKey).isLoaded && getState(store, stateKey).url === url) {
+                    return Promise.resolve();
+                } else {
                     patchState(store, updateState(stateKey, { url: '', isLoading: true }));
 
                     const request = requestService.requestWithObservable<TResource>('GET', url);
@@ -153,16 +158,25 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
                             }
                         });
                     });
-                } else {
-                    return Promise.resolve();
                 }
             };
+
+            const loadFromUrlReactive = signalMethod<string | null>(url => loadFromUrl(url).catch(() => undefined));
+
+            function loadFromUrlOverload(url: string | null, fromCache?: boolean): Promise<void>;
+            function loadFromUrlOverload(url: Signal<string | null>): EffectRef;
+            function loadFromUrlOverload(url: string | null | Signal<string | null>, fromCache?: boolean): Promise<void> | EffectRef {
+                if (isSignal(url)) return loadFromUrlReactive(url as Signal<string | null>);
+                return loadFromUrl(url as string | null, fromCache);
+            }
+
+            const loadFromUrlMethod = loadFromUrlOverload;
 
             const loadFromLinkMethod = async (linkRoot: unknown, linkName: string, params?: Record<string, unknown>): Promise<void> => {
                 const link = hateoasService.getLink(linkRoot, linkName);
                 if (link) {
                     const url = hateoasService.getUrl(linkRoot, linkName, params);
-                    await loadFromUrlMethod(url);
+                    await loadFromUrl(url);
                 }
             };
 

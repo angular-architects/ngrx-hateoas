@@ -6,27 +6,19 @@
 
 <div class="row">
     <div class="col">
-        <app-action-card #connection
-                         [disabled]="!store.updateFlightConnectionState.isAvailable()" 
-                         (save)="onUpdateConnection()">
+        <app-action-card #connection [disabled]="!store.updateFlightConnectionState.isAvailable()" (save)="onUpdateConnection()">
             <app-flight-connection-form [connection]="flightForm.connection" />
         </app-action-card>
-        <app-action-card #times
-                         [disabled]="!store.updateFlightTimesState.isAvailable()" 
-                         (save)="onUpdateTimes()">
+        <app-action-card #times [disabled]="!store.updateFlightTimesState.isAvailable()" (save)="onUpdateTimes()">
             <app-flight-times-form [times]="flightForm.times" />
         </app-action-card>
-        <app-action-card #operator
-                         [disabled]="!store.updateFlightOperatorState.isAvailable()" 
-                         (save)="onUpdateOperator()">
+        <app-action-card #operator [disabled]="!store.updateFlightOperatorState.isAvailable()" (save)="onUpdateOperator()">
             <app-flight-operator-form [aircrafts]="store.flightEditVm.aircrafts()" [operator]="flightForm.operator" />
         </app-action-card>
         @if(flightForm.price().value(); as flightPriceValue) {
-            <app-action-card #price
-                             [disabled]="!store.updateFlightPriceState.isAvailable()" 
-                             (save)="onUpdatePrice()">
-                <app-flight-price-form [price]="$any(flightForm.price)" />
-            </app-action-card>
+        <app-action-card #price [disabled]="!store.updateFlightPriceState.isAvailable()" (save)="onUpdatePrice()">
+            <app-flight-price-form [price]="$any(flightForm.price)" />
+        </app-action-card>
         }
     </div>
 </div>
