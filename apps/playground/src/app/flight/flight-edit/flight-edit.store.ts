@@ -1,4 +1,4 @@
-import { withHypermediaResource, withHypermediaAction, withWritableStateCopy, withExperimentalDeepWritableStateCopy, withExperimentalDeepWritableStateDelegate } from "@angular-architects/ngrx-hateoas";
+import { withHypermediaResource, withHypermediaAction, withWritableStateCopy, withExperimentalDeepWritableStateCopy, withExperimentalDeepWritableStateDelegate, withDeepWritableStateProjection } from "@angular-architects/ngrx-hateoas";
 import { signalStore, withMethods } from "@ngrx/signals";
 import { Aircraft, Flight, initialFlight } from "../flight.entities";
 
@@ -51,6 +51,15 @@ export const FlightEditViewStore3 = signalStore(
   { providedIn: 'root' },
   withHypermediaResource('flightEditVm', initialFlightEditVm),
   withExperimentalDeepWritableStateDelegate(store => ({ deepWritableFlightConnectionDelegate: store.flightEditVm.flight.connection })),
+  withHypermediaAction('updateFlightConnection', store => store.flightEditVm.flight.connection, 'update'),
+);
+
+// Option 4: Reading a resource from server, creating a deep writable state projection (suited for reactive forms), 
+// and sending back parts of the main state to the server
+export const FlightEditViewStore4 = signalStore(
+  { providedIn: 'root' },
+  withHypermediaResource('flightEditVm', initialFlightEditVm),
+  withDeepWritableStateProjection(store => ({ flightFormModel: { from: store.flightEditVm.flight.connection.from, to: store.flightEditVm.flight.connection.to } })),
   withHypermediaAction('updateFlightConnection', store => store.flightEditVm.flight.connection, 'update'),
 );
 

@@ -1,4 +1,4 @@
-import { computed, isSignal, Signal } from '@angular/core';
+import { computed, isSignal, Signal, WritableSignal } from '@angular/core';
 import {
   patchState,
   signalStoreFeature,
@@ -8,32 +8,29 @@ import {
   withProps,
   WritableStateSource,
 } from '@ngrx/signals';
-import { DeepWritableSignal } from '../util/deep-writeable-signal';
 
-export type DeepWritableStateProjectionSelection = {
-  [key: string]: Signal<unknown> | DeepWritableStateProjectionSelection;
+export type StateProjectionSelection = {
+  [key: string]: Signal<unknown> | StateProjectionSelection;
 };
 
-type ProjectedValue<Node> = Node extends Signal<infer Value>
+type TypeFromSelection<Node> = Node extends Signal<infer Value>
   ? Value
-  : Node extends DeepWritableStateProjectionSelection
-    ? { [Key in keyof Node]: ProjectedValue<Node[Key]> }
+  : Node extends StateProjectionSelection
+    ? { [Key in keyof Node]: TypeFromSelection<Node[Key]> }
     : never;
 
-export type DeepWritableStateProjection<Selection extends DeepWritableStateProjectionSelection> = {
-  [Key in keyof Selection]: DeepWritableSignal<ProjectedValue<Selection[Key]>>;
+export type DeepWritableStateSignal<T> = WritableSignal<T> &
+  (T extends Record<string, unknown> ? Readonly<{ [K in keyof T]: DeepWritableStateSignal<T[K]> }> : unknown);
+
+export type DeepWritableStateProjection<Selection extends StateProjectionSelection> = {
+  [Key in keyof Selection]: DeepWritableStateSignal<TypeFromSelection<Selection[Key]>>;
 };
 
 type MappedStoreState<Input extends SignalStoreFeatureResult> = {
-  [Key in keyof StateSignals<Input['state']>]: StateSignals<Input['state']>[Key] extends Signal<infer Value>
-    ? DeepWritableSignal<Value>
-    : never;
+  [Key in keyof StateSignals<Input['state']>]: StateSignals<Input['state']>[Key] extends Signal<infer Value> ? DeepWritableStateSignal<Value> : never;
 };
 
-type SelectStateFn<
-  Input extends SignalStoreFeatureResult,
-  Selection extends DeepWritableStateProjectionSelection,
-> = (store: MappedStoreState<Input>) => Selection;
+type SelectStateFn<Input extends SignalStoreFeatureResult, Selection extends StateProjectionSelection> = (store: MappedStoreState<Input>) => Selection;
 
 type StateRecord = Record<PropertyKey, unknown>;
 
@@ -44,7 +41,7 @@ type StateWrite = {
 
 const statePath = Symbol('deepWritableStateProjectionPath');
 
-type StateProjectionSignal<T> = DeepWritableSignal<T> & {
+type StateProjectionSignal<T> = DeepWritableStateSignal<T> & {
   [statePath]: PropertyKey[];
 };
 
@@ -71,7 +68,7 @@ function createStateProjectionSignal<T>(
   path: PropertyKey[],
   commit: (writes: StateWrite[]) => void,
 ): StateProjectionSignal<T> {
-  const children = new Map<PropertyKey, DeepWritableSignal<unknown>>();
+  const children = new Map<PropertyKey, DeepWritableStateSignal<unknown>>();
 
   return new Proxy(source, {
     get(target, property, receiver) {
@@ -113,7 +110,7 @@ function createStateProjectionSignal<T>(
 }
 
 function collectWrites(
-  selection: Signal<unknown> | DeepWritableStateProjectionSelection,
+  selection: Signal<unknown> | StateProjectionSelection,
   value: unknown,
   writes: StateWrite[],
 ): void {
@@ -131,10 +128,10 @@ function collectWrites(
   }
 }
 
-function createCompositeProjectionSignal<Selection extends DeepWritableStateProjectionSelection>(
+function createCompositeProjectionSignal<Selection extends StateProjectionSelection>(
   selection: Selection,
   commit: (writes: StateWrite[]) => void,
-): DeepWritableSignal<ProjectedValue<Selection>> {
+): DeepWritableStateSignal<TypeFromSelection<Selection>> {
   const children = Object.fromEntries(
     Object.entries(selection).map(([key, child]) => [
       key,
@@ -144,9 +141,9 @@ function createCompositeProjectionSignal<Selection extends DeepWritableStateProj
 
   const source = computed(() =>
     Object.fromEntries(Object.entries(children).map(([key, child]) => [key, child()])),
-  ) as Signal<ProjectedValue<Selection>>;
+  ) as Signal<TypeFromSelection<Selection>>;
 
-  const set = (value: ProjectedValue<Selection>) => {
+  const set = (value: TypeFromSelection<Selection>) => {
     const writes: StateWrite[] = [];
     collectWrites(selection, value, writes);
     commit(writes);
@@ -159,7 +156,7 @@ function createCompositeProjectionSignal<Selection extends DeepWritableStateProj
       }
 
       if (property === 'update') {
-        return (updateFn: (value: ProjectedValue<Selection>) => ProjectedValue<Selection>) =>
+        return (updateFn: (value: TypeFromSelection<Selection>) => TypeFromSelection<Selection>) =>
           set(updateFn(target()));
       }
 
@@ -173,10 +170,10 @@ function createCompositeProjectionSignal<Selection extends DeepWritableStateProj
 
       return Reflect.get(target, property, receiver);
     },
-  }) as DeepWritableSignal<ProjectedValue<Selection>>;
+  }) as DeepWritableStateSignal<TypeFromSelection<Selection>>;
 }
 
-function createProjection<Selection extends DeepWritableStateProjectionSelection>(
+function createProjection<Selection extends StateProjectionSelection>(
   selection: Selection,
   commit: (writes: StateWrite[]) => void,
 ): DeepWritableStateProjection<Selection> {
@@ -188,10 +185,7 @@ function createProjection<Selection extends DeepWritableStateProjectionSelection
   ) as DeepWritableStateProjection<Selection>;
 }
 
-export function withDeepWritableStateProjection<
-  Input extends SignalStoreFeatureResult,
-  Selection extends DeepWritableStateProjectionSelection,
->(
+export function withDeepWritableStateProjection<Input extends SignalStoreFeatureResult, Selection extends StateProjectionSelection>(
   stateMapFn: SelectStateFn<Input, Selection>,
 ): SignalStoreFeature<
   Input,
@@ -199,10 +193,9 @@ export function withDeepWritableStateProjection<
     props: DeepWritableStateProjection<Selection>;
   }
 >;
-export function withDeepWritableStateProjection<
-  Input extends SignalStoreFeatureResult,
-  Selection extends DeepWritableStateProjectionSelection,
->(stateMapFn: SelectStateFn<Input, Selection>) {
+export function withDeepWritableStateProjection<Input extends SignalStoreFeatureResult, Selection extends StateProjectionSelection>(
+  stateMapFn: SelectStateFn<Input, Selection>
+) {
   return signalStoreFeature(
     withProps((store: WritableStateSource<object> & Record<string, Signal<unknown>>) => {
       const commit = (writes: StateWrite[]) => {
@@ -215,14 +208,10 @@ export function withDeepWritableStateProjection<
         });
       };
 
-      const mappedStoreState: Record<string, DeepWritableSignal<unknown>> = {};
+      const mappedStoreState: Record<string, DeepWritableStateSignal<unknown>> = {};
       for (const key in store) {
         if (isSignal(store[key])) {
-          mappedStoreState[key] = createStateProjectionSignal(
-            computed(() => store[key]()),
-            [key],
-            commit,
-          );
+          mappedStoreState[key] = createStateProjectionSignal(computed(() => store[key]()), [key], commit);
         }
       }
 
