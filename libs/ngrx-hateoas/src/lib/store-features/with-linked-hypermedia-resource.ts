@@ -153,6 +153,13 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                     pipe(
                         filter(resource => resource !== undefined),
                         map(resource => hateoasService.getLink(resource, linkMetaName)?.href),
+                        tap(href => {
+                            if (!isValidHref(href)) {
+                                patchState(store,
+                                    updateData(dataKey, initialValue),
+                                    updateState(stateKey, { url: '', isLoading: false, isLoaded: false, isAvailable: false }));
+                            }
+                        }),
                         filter(href => isValidHref(href)),
                         map(href => href!),
                         filter(href => getState(store, stateKey).url !== href),

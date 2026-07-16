@@ -376,6 +376,36 @@ describe('withHypermediaResource', () => {
         httpTestingController.verify();
     });
 
+    it('resets state when url signal changes to null after being loaded', (done: DoneFn) => {
+        const resourceFirst: TestModel = {
+            numProp: 2,
+            objProp: { stringProp: 'first response' }
+        };
+
+        const urlSignal = signal<string | null>('api/test-model');
+        store.loadTestModelFromUrl(urlSignal);
+
+        TestBed.flushEffects();
+
+        httpTestingController.expectOne('api/test-model').flush(resourceFirst);
+
+        setTimeout(() => {
+            expect(store.testModelState.isLoaded()).toBeTrue();
+            expect(store.testModel.objProp.stringProp()).toBe('first response');
+
+            urlSignal.set(null);
+            TestBed.flushEffects();
+
+            expect(store.testModelState.url()).toBe('');
+            expect(store.testModelState.isLoaded()).toBeFalse();
+            expect(store.testModelState.isLoading()).toBeFalse();
+            expect(store.testModel()).toBe(initialTestModel);
+
+            httpTestingController.verify();
+            done();
+        }, 0);
+    });
+
     it('loads the resource reactively from a url signal and reloads when signal changes', (done: DoneFn) => {
         const resourceFirst: TestModel = {
             numProp: 2,
