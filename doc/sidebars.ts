@@ -43,7 +43,8 @@ const sidebars: SidebarsConfig = {
       items: [
         'guide/state_mutation_features/withWritableStateCopy',
         'guide/state_mutation_features/withDeepWritableStateCopy',
-        'guide/state_mutation_features/withDeepWritableStateDelegate'
+        'guide/state_mutation_features/withDeepWritableStateDelegate',
+        'guide/state_mutation_features/withDeepWritableStateProjection'
       ],
     },
     {
