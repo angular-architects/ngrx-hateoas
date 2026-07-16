@@ -230,4 +230,50 @@ describe('withLinkedHypermediaResource', () => {
         httpTestingController.verify();
     });
 
+    it('resets state when link disappears from root resource after being loaded', async () => {
+        const rootModelFromUrl: RootModel = {
+            apiName: 'loaded model',
+            _links: {
+                testModel: { href: '/api/test-model' }
+            }
+        };
+
+        const testModelFromLink: TestModel = {
+            name: 'from link'
+        };
+
+        const loadRootModel = store.loadRootModelFromUrl('/api/root-model');
+
+        httpTestingController.expectOne('/api/root-model').flush(rootModelFromUrl);
+        httpTestingController.verify();
+
+        await loadRootModel;
+        await firstValueFrom(timer(0));
+
+        httpTestingController.expectOne('/api/test-model').flush(testModelFromLink);
+        httpTestingController.verify();
+
+        await firstValueFrom(timer(0));
+
+        expect(store.testModelState.isLoaded()).toBeTrue();
+        expect(store.testModelState.isAvailable()).toBeTrue();
+        expect(store.testModel.name()).toBe('from link');
+
+        // Reload root model without the link
+        const reloadRootModel = store.reloadRootModel();
+
+        httpTestingController.expectOne('/api/root-model').flush({ apiName: 'loaded model', _links: {} } satisfies RootModel);
+        httpTestingController.verify();
+
+        await reloadRootModel;
+        await firstValueFrom(timer(0));
+
+        expect(store.testModelState.isLoaded()).toBeFalse();
+        expect(store.testModelState.isAvailable()).toBeFalse();
+        expect(store.testModelState.isLoading()).toBeFalse();
+        expect(store.testModel()).toBe(initialTestModel);
+
+        httpTestingController.verify();
+    });
+
 });
