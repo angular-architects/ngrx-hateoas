@@ -11,6 +11,12 @@ describe('provideHateaos', () => {
 
     describe('withAntiForgery', () => {
 
+        it('registers default anti forgery options', () => {
+            TestBed.configureTestingModule({ providers: [provideHateoas(withAntiForgery())] });
+
+            expect(TestBed.inject(HATEOAS_ANTI_FORGERY)).toEqual({ cookieName: 'XSRF-TOKEN', headerName: 'X-XSRF-TOKEN' });
+        });
+
         it('registers custom anti forgery options in injection context', () => {
 
             const dummyAntiForgeryOptions: AntiForgeryOptions = {
@@ -28,6 +34,12 @@ describe('provideHateaos', () => {
     });
 
     describe('withLoginRedirect', () => {
+
+        it('registers default login redirect options', () => {
+            TestBed.configureTestingModule({ providers: [provideHateoas(withLoginRedirect())] });
+
+            expect(TestBed.inject(HATEOAS_LOGIN_REDIRECT)).toEqual({ loginUrl: '/login', redirectUrlParamName: 'redirectUrl' });
+        });
 
         it('registers custom login redirect options in injection context', () => {
 
@@ -47,6 +59,12 @@ describe('provideHateaos', () => {
 
     describe('withCustomHeaders', () => {
 
+        it('registers empty default headers', () => {
+            TestBed.configureTestingModule({ providers: [provideHateoas(withCustomHeaders())] });
+
+            expect(TestBed.inject(HATEOAS_CUSTOM_HEADERS).headers).toEqual({});
+        });
+
         it('registers custom header options in injection context', () => {
 
             const dummyCustomHeaderOptions: CustomHeadersOptions = {
@@ -64,6 +82,23 @@ describe('provideHateaos', () => {
     });
 
     describe('withMedatadaProvider', () => {
+
+        it('collects valid default metadata and ignores invalid entries', () => {
+            TestBed.configureTestingModule({ providers: [provideHateoas()] });
+            const provider = TestBed.inject(HATEOAS_METADATA_PROVIDER);
+            const resource = {
+                _links: { self: { href: '/self' }, invalid: null },
+                _actions: { save: { href: '/save', method: 'PUT' }, invalid: { href: '/invalid' } },
+                _sockets: { changes: { href: '/changes', event: 'changed' }, invalid: { href: '/invalid' } }
+            };
+
+            expect(provider.getAllLinks(resource)).toEqual([{ rel: 'self', href: '/self' }]);
+            expect(provider.getAllActions(resource)).toEqual([{ rel: 'save', href: '/save', method: 'PUT' }]);
+            expect(provider.getAllSockets(resource)).toEqual([{ rel: 'changes', href: '/changes', event: 'changed' }]);
+            expect(provider.getAllLinks(null)).toEqual([]);
+            expect(provider.getAllActions({ _actions: null })).toEqual([]);
+            expect(provider.getAllSockets({ _sockets: 'invalid' })).toEqual([]);
+        });
 
         it('registers custom metadataprovider in injection context', () => {
 

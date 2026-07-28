@@ -57,7 +57,13 @@ describe('withLinkedHypermediaResource', () => {
 
     it('has correct resource methods', () => {
         expect(store.reloadTestModel).toBeDefined();
-        expect(store.getTestModelAsPatchable).toBeDefined();
+    });
+
+    it('does not request anything when reloaded before a link is available', async () => {
+        await store.reloadTestModel();
+
+        httpTestingController.expectNone(() => true);
+        expect(store.testModelState.isLoading()).toBeFalse();
     });
 
     it('loads the linked resource after link in root resource is available or has changed', async () => {
@@ -228,6 +234,25 @@ describe('withLinkedHypermediaResource', () => {
         expect(store.testModel.name()).toBe('reloaded from link');
 
         httpTestingController.verify();
+    });
+
+    it('resets the resource and rejects when a reload fails', async () => {
+        const rootLoad = store.loadRootModelFromUrl('/api/root-model');
+        httpTestingController.expectOne('/api/root-model').flush({
+            apiName: 'loaded', _links: { testModel: { href: '/api/test-model' } }
+        } satisfies RootModel);
+        await rootLoad;
+        await firstValueFrom(timer(0));
+        httpTestingController.expectOne('/api/test-model').flush({ name: 'loaded' } satisfies TestModel);
+        await firstValueFrom(timer(0));
+
+        const reloadPromise = store.reloadTestModel();
+        httpTestingController.expectOne('/api/test-model').flush('failed', { status: 500, statusText: 'Server Error' });
+
+        await expectAsync(reloadPromise).toBeRejected();
+        expect(store.testModel()).toBe(initialTestModel);
+        expect(store.testModelState.isLoading()).toBeFalse();
+        expect(store.testModelState.isLoaded()).toBeFalse();
     });
 
     it('resets state when link disappears from root resource after being loaded', async () => {

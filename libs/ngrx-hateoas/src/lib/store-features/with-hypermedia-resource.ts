@@ -1,6 +1,5 @@
 import { inject, isSignal, EffectRef, Signal } from "@angular/core";
 import { SignalStoreFeature, patchState, signalMethod, signalStoreFeature, withMethods, withState } from "@ngrx/signals";
-import { DeepPatchableSignal, toDeepPatchableSignal } from "../util/deep-patchable-signal";
 import { HateoasService } from "../services/hateoas.service";
 import { RequestService } from "../services/request.service";
 import { Subscription, tap } from "rxjs";
@@ -50,19 +49,10 @@ export function generateReloadHypermediaResourceMethodName(resourceName: string)
     return `reload${resourceName.charAt(0).toUpperCase() + resourceName.slice(1)}`;
 }
 
-export type GetAsPatchableHypermediaResourceMethod<ResourceName extends string, TResource> = {
-    [K in ResourceName as `get${Capitalize<ResourceName>}AsPatchable`]: () => DeepPatchableSignal<TResource>
-};
-
-export function generateGetAsPatchableHypermediaResourceMethodName(resourceName: string) {
-    return `get${resourceName.charAt(0).toUpperCase() + resourceName.slice(1)}AsPatchable`;
-}
-
-export type HypermediaResourceStoreMethods<ResourceName extends string, TResource> =
+export type HypermediaResourceStoreMethods<ResourceName extends string> =
     LoadHypermediaResourceFromUrlMethod<ResourceName>
     & LoadHypermediaResourceFromLinkMethod<ResourceName>
-    & ReloadHypermediaResourceMethod<ResourceName>
-    & GetAsPatchableHypermediaResourceMethod<ResourceName, TResource>;
+    & ReloadHypermediaResourceMethod<ResourceName>;
 
 function getData<TResource>(store: unknown, dataKey: string): TResource {
     return (store as Record<string, Signal<TResource>>)[dataKey]()
@@ -92,7 +82,7 @@ export function withHypermediaResource<ResourceName extends string, TResource>(
         {
             state: HypermediaResourceStoreState<ResourceName, TResource>;
             computed: Record<string, Signal<unknown>>;
-            methods: HypermediaResourceStoreMethods<ResourceName, TResource>;
+            methods: HypermediaResourceStoreMethods<ResourceName>;
             props: object;
         }
     >;
@@ -103,7 +93,6 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
     const loadFromUrlMethodName = generateLoadHypermediaResourceFromUrlMethodName(resourceName);
     const loadFromLinkMethodName = generateLoadHypermediaResourceFromLinkMethodName(resourceName);
     const reloadMethodName = generateReloadHypermediaResourceMethodName(resourceName);
-    const getAsPatchableMethodName = generateGetAsPatchableHypermediaResourceMethodName(resourceName);
 
     return signalStoreFeature(
         withState({
@@ -115,11 +104,8 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
             [dataKey]: initialValue
         }),
         withMethods((store) => {
-
             const requestService = inject(RequestService);
             const hateoasService = inject(HateoasService);
-
-            const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [dataKey]: newVal }), (store as Record<string, Signal<TResource>>)[dataKey]);
 
             let currentRequestSub: Subscription | undefined;
 
@@ -214,15 +200,10 @@ export function withHypermediaResource<ResourceName extends string, TResource>(r
                 return Promise.resolve();
             };
 
-            const getAsPatchableMethod = (): DeepPatchableSignal<TResource> => {
-                return patchableSignal;
-            };
-
             return {
                 [loadFromUrlMethodName]: loadFromUrlMethod,
                 [loadFromLinkMethodName]: loadFromLinkMethod,
-                [reloadMethodName]: reloadMethod,
-                [getAsPatchableMethodName]: getAsPatchableMethod
+                [reloadMethodName]: reloadMethod
             };
         })
     );

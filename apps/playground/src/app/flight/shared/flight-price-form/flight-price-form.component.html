@@ -3,10 +3,10 @@
 <form>
     <div class="mb-3">
         <label for="basePrice" class="form-label">Base Price</label>
-        <input class="form-control" type="number" id="amount" [field]="price().basePrice">
+        <input class="form-control" type="number" id="amount" [formField]="price().basePrice">
     </div>
     <div class="mb-3">
         <label for="seatReservationSurcharge" class="form-label">Seat Reservation Surcharge</label>
-        <input class="form-control" type="number" id="amount" [field]="price().seatReservationSurcharge">
+        <input class="form-control" type="number" id="amount" [formField]="price().seatReservationSurcharge">
     </div>
 </form>
