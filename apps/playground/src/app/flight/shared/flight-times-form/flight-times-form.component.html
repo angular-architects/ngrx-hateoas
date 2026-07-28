@@ -3,10 +3,10 @@
 <form>
     <div class="mb-3">
         <label for="takeOff" class="form-label">Take Off</label>
-        <input class="form-control" type="datetime" id="takeOff" [field]="times().takeOff">
+        <input class="form-control" type="datetime" id="takeOff" [formField]="times().takeOff">
     </div>
     <div class="mb-3">
         <label for="landing" class="form-label">Landing</label>
-        <input class="form-control" type="datetime" id="landing" [field]="times().landing">
+        <input class="form-control" type="datetime" id="landing" [formField]="times().landing">
     </div>
 </form>

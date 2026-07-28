@@ -3,18 +3,18 @@
 <form>
     <div class="mb-3">
         <label for="from" class="form-label">From</label>
-        <input class="form-control" id="from" [field]="connection().from">
+        <input class="form-control" id="from" [formField]="connection().from">
     </div>
     <div class="mb-3">
         <label for="to" class="form-label">To</label>
-        <input class="form-control" id="to" [field]="connection().to">
+        <input class="form-control" id="to" [formField]="connection().to">
     </div>
     <div class="mb-3">
         <label for="icaoFrom" class="form-label">ICAO From</label>
-        <input class="form-control" id="icaoFrom" [field]="connection().icaoFrom">
+        <input class="form-control" id="icaoFrom" [formField]="connection().icaoFrom">
     </div>
     <div class="mb-3">
         <label for="icaoTo" class="form-label">ICAO To</label>
-        <input class="form-control" id="icaoTo" [field]="connection().icaoTo">
+        <input class="form-control" id="icaoTo" [formField]="connection().icaoTo">
     </div>
 </form>

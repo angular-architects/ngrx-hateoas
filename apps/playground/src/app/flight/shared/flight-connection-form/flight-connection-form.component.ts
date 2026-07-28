@@ -1,10 +1,10 @@
 import { Component, input } from '@angular/core';
 import { FlightConnection } from '../../flight.entities';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 
 @Component({
     selector: 'app-flight-connection-form',
-    imports: [Field],
+    imports: [FormField],
     templateUrl: './flight-connection-form.component.html'
 })
 export class FlightConnectionFormComponent {
