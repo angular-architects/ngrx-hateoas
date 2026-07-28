@@ -19,5 +19,3 @@ export * from './lib/store-features/with-writable-state-copy';
 export * from './lib/store-features/with-deep-writable-state-copy';
 export * from './lib/store-features/with-deep-writable-state-delegate';
 export * from './lib/store-features/with-deep-writable-state-projection';
-
-export { type Patchable, type DeepPatchableSignal } from './lib/util/deep-patchable-signal';

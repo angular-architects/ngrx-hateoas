@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { signalStore } from '@ngrx/signals';
 import { provideHateoas } from '../provide';
-import { withInitialHypermediaResource } from './with-initial-hypermedia-resource';
+import { InitialUrlOrResolver, withInitialHypermediaResource } from './with-initial-hypermedia-resource';
 import { inject, InjectionToken, provideZonelessChangeDetection } from '@angular/core';
 
 type RootModel = {
@@ -37,6 +37,16 @@ const TestStoreWithPromiseUrl = signalStore(
 const TestStoreWithAsyncResolverUrl = signalStore(
     { providedIn: 'root' },
     withInitialHypermediaResource('rootModel', initialRootModel, () => Promise.resolve('/api/async-resolved'))
+);
+
+const TestStoreWithInvalidUrl = signalStore(
+    { providedIn: 'root' },
+    withInitialHypermediaResource('rootModel', initialRootModel, 42 as unknown as InitialUrlOrResolver)
+);
+
+const TestStoreWithInvalidResolver = signalStore(
+    { providedIn: 'root' },
+    withInitialHypermediaResource('rootModel', initialRootModel, () => 42 as unknown as string)
 );
 
 describe('withInitialHypermediaResource', () => {
@@ -108,5 +118,17 @@ describe('withInitialHypermediaResource', () => {
                 done();
             }, 0);
         }, 0);
+    });
+
+    it('rejects an invalid initial url type', () => {
+        expect(() => TestBed.inject(TestStoreWithInvalidUrl)).toThrowError(
+            'Invalid initial url type. Expected string, Promise<string>, function returning string, or function returning Promise<string>.'
+        );
+    });
+
+    it('rejects an invalid resolver return type', () => {
+        expect(() => TestBed.inject(TestStoreWithInvalidResolver)).toThrowError(
+            'Invalid initial url resolver return type. Expected string or Promise<string>.'
+        );
     });
 });

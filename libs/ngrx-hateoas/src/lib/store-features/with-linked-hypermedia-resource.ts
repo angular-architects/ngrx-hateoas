@@ -3,7 +3,6 @@ import { SignalStoreFeature, SignalStoreFeatureResult, StateSignals, patchState,
 import { filter, map, pipe, Subscription, switchMap, tap } from "rxjs";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { isValidHref } from "../util/is-valid-href";
-import { DeepPatchableSignal, toDeepPatchableSignal } from "../util/deep-patchable-signal";
 import { RequestService } from "../services/request.service";
 import { HateoasService } from "../services/hateoas.service";
 import { Resource } from "../models";
@@ -35,17 +34,8 @@ export function generateReloadLinkedHypermediaResourceMethodName(resourceName: s
     return `reload${resourceName.charAt(0).toUpperCase() + resourceName.slice(1)}`;
 }
 
-export type GetAsPatchableLinkedHypermediaResourceMethod<ResourceName extends string, TResource> = {
-    [K in ResourceName as `get${Capitalize<ResourceName>}AsPatchable`]: () => DeepPatchableSignal<TResource>
-};
-
-export function generateGetAsPatchableLinkedHypermediaResourceMethodName(resourceName: string) {
-    return `get${resourceName.charAt(0).toUpperCase() + resourceName.slice(1)}AsPatchable`;
-}
-
-export type LinkedHypermediaResourceMethods<ResourceName extends string, TResource> =
-    ReloadLinkedHypermediaResourceMethod<ResourceName>
-    & GetAsPatchableLinkedHypermediaResourceMethod<ResourceName, TResource>;
+export type LinkedHypermediaResourceMethods<ResourceName extends string> =
+    ReloadLinkedHypermediaResourceMethod<ResourceName>;
 
 type StoreForResourceLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']>;
 
@@ -72,7 +62,7 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
         Input,
         Input & {
             state: LinkedHypermediaResourceStoreState<ResourceName, TResource>;
-            methods: LinkedHypermediaResourceMethods<ResourceName, TResource>;
+            methods: LinkedHypermediaResourceMethods<ResourceName>;
         }
     >;
 export function withLinkedHypermediaResource<ResourceName extends string, TResource, Input extends SignalStoreFeatureResult>(
@@ -84,7 +74,6 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
     const dataKey = `${resourceName}`;
     const stateKey = `${resourceName}State`;
     const reloadMethodName = generateReloadLinkedHypermediaResourceMethodName(resourceName);
-    const getAsPatchableMethodName = generateGetAsPatchableLinkedHypermediaResourceMethodName(resourceName);
     let linkRoot: Signal<Resource | undefined> | undefined = undefined;
 
     return signalStoreFeature(
@@ -98,8 +87,6 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
             [dataKey]: initialValue
         }),
         withMethods((store, requestService = inject(RequestService)) => {
-            const patchableSignal = toDeepPatchableSignal<TResource>(newVal => patchState(store, { [dataKey]: newVal }), (store as unknown as Record<string, Signal<TResource>>)[dataKey]);
-
             let currentRequestSub: Subscription | undefined;
 
             const reloadMethod = async (): Promise<void> => {
@@ -136,13 +123,8 @@ export function withLinkedHypermediaResource<ResourceName extends string, TResou
                 }
             };
 
-            const getAsPatchableMethod = (): DeepPatchableSignal<TResource> => {
-                return patchableSignal;
-            }
-
             return {
-                [reloadMethodName]: reloadMethod,
-                [getAsPatchableMethodName]: getAsPatchableMethod
+                [reloadMethodName]: reloadMethod
             };
         }),
         withHooks({
