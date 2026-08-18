@@ -144,6 +144,7 @@ A custom metadata provider can adapt these conventions to another hypermedia for
 
 - [Documentation](https://angular-architects.github.io/ngrx-hateoas/)
 - [Getting Started guide](https://angular-architects.github.io/ngrx-hateoas/docs/guide/getting-started)
+- [Self-contained LLM usage reference](./LLM-REFERENCE.md)
 - [Playground application](https://github.com/angular-architects/ngrx-hateoas/tree/main/apps/playground)
 - [Real-world sample application](https://github.com/fancyDevelopment/Fancy.ResourceLinker.Sample)
 - [Issues and feature requests](https://github.com/angular-architects/ngrx-hateoas/issues)
