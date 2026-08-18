@@ -5,7 +5,6 @@ import { withHypermediaResource } from './with-hypermedia-resource';
 import { withLinkedHypermediaResource } from './with-linked-hypermedia-resource';
 import { provideHateoas } from '../provide';
 import { firstValueFrom, timer } from 'rxjs';
-import { provideZonelessChangeDetection } from '@angular/core';
 
 type RootModel = {
     apiName: string

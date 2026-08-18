@@ -5,7 +5,6 @@ import { withHypermediaResource } from './with-hypermedia-resource';
 import { provideHateoas } from '../provide';
 import { firstValueFrom, timer } from 'rxjs';
 import { withHypermediaAction } from './with-hypermedia-action';
-import { provideZonelessChangeDetection } from '@angular/core';
 
 type TestModel = {
     name: string,

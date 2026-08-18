@@ -13,7 +13,6 @@ If you register **ngrx-hateoas** linke shown in the following code snippet...
 ```ts
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(),
     provideHateoas(withLoginRedirect({
         loginUrl: '/my/login/route';
         redirectUrlParamName: 'redirectUri';

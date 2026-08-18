@@ -12,16 +12,14 @@ npm install @angular-architects/ngrx-hateoas @ngrx/signals
 
 ## Setup
 
-Register the Angular HTTP client and the services provided by `ngrx-hateoas` in your application configuration:
+Register the services provided by `ngrx-hateoas` in your application configuration:
 
 ```ts
 import { ApplicationConfig } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
 import { provideHateoas } from '@angular-architects/ngrx-hateoas';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(),
     provideHateoas()
   ]
 };

@@ -5,7 +5,6 @@ import { withHypermediaResource } from './with-hypermedia-resource';
 import { provideHateoas } from '../provide';
 import { config, firstValueFrom, timer } from 'rxjs';
 import { withHypermediaCollectionAction } from './with-hypermedia-collection-action';
-import { provideZonelessChangeDetection } from '@angular/core';
 
 type TestModel = {
     items: {

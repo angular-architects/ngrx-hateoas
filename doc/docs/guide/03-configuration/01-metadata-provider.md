@@ -80,7 +80,6 @@ The interface has a sparate method to lookup each kind of the three supported me
 ```ts
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(),
     provideHateoas(withMetadataProvider(MyCustomMetadataProvider))
   ]
 };
