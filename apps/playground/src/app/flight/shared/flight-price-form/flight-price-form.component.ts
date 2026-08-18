@@ -1,10 +1,10 @@
 import { Component, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FieldTree, FormField } from '@angular/forms/signals';
 import { FlightPrice } from '../../flight.entities';
 
 @Component({
     selector: 'app-flight-price-form',
-    imports: [Field],
+    imports: [FormField],
     templateUrl: './flight-price-form.component.html'
 })
 export class FlightPriceFormComponent {

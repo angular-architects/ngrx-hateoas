@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { signalStore } from '@ngrx/signals';
 import { withHypermediaResource } from './with-hypermedia-resource';
@@ -84,7 +83,7 @@ describe('withHypermediaCollectionAction', () => {
 
     beforeEach(async () => {
         TestBed.configureTestingModule({
-            providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting(), provideHateoas()]
+            providers: [provideHttpClientTesting(), provideHateoas()]
         });
         store = TestBed.inject(TestStore);
         await firstValueFrom(timer(0));

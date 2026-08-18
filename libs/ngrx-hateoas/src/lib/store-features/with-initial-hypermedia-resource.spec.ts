@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { signalStore } from '@ngrx/signals';
 import { provideHateoas } from '../provide';
@@ -45,7 +44,7 @@ describe('withInitialHypermediaResource', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting(), provideHateoas()]
+            providers: [provideHttpClientTesting(), provideHateoas()]
         });
         httpTestingController = TestBed.inject(HttpTestingController);
     });
