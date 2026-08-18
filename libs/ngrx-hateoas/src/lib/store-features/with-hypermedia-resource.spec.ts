@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { signalStore } from '@ngrx/signals';
 import { withHypermediaResource } from './with-hypermedia-resource';
 import { provideHateoas } from '../provide';
+import { signal } from '@angular/core';
 
 type RootModel = {
     apiName: string
