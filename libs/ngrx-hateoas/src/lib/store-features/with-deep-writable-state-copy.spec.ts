@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { patchState, signalMethod, signalStore, withMethods, withState } from '@ngrx/signals';
 import { HypermediaResourceData } from './with-hypermedia-resource';
-import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
+import { Injector, runInInjectionContext } from '@angular/core';
 import { firstValueFrom, timer } from 'rxjs';
 import { withExperimentalDeepWritableStateCopy } from './with-deep-writable-state-copy';
 
@@ -55,7 +55,7 @@ describe('withExperimentalDeepWritableStateCopy', () => {
     let injector: Injector;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+        TestBed.configureTestingModule({});
         store = TestBed.inject(TestStore);
         injector = TestBed.inject(Injector);
     });

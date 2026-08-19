@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HateoasService } from '../services/hateoas.service';
 import { HasLinkPipe } from './has-link.pipe';
-import { provideZonelessChangeDetection } from '@angular/core';
 
 const testModel = {
   _links: {
@@ -14,7 +13,7 @@ describe('HasLinkPipe', () => {
   let hasLinkPipe: HasLinkPipe;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [HasLinkPipe, HateoasService, provideZonelessChangeDetection()]});
+    TestBed.configureTestingModule({ providers: [HasLinkPipe, HateoasService]});
     hasLinkPipe = TestBed.inject(HasLinkPipe);
   });
     

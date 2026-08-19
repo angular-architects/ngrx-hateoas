@@ -1245,7 +1245,7 @@ describe('FlightStore', () => {
 });
 ```
 
-For reactive URL signals, call `TestBed.flushEffects()` after changing the
+For reactive URL signals, call `TestBed.tick()` after changing the
 signal before expecting the next HTTP request.
 
 ## 15. Compact Public API Index

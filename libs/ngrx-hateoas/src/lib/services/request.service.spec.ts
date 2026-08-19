@@ -3,7 +3,6 @@ import { TestBed } from '@angular/core/testing';
 import { RequestService, WINDOW } from './request.service';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
 
 describe('RequestService', () => {
 
@@ -14,7 +13,7 @@ describe('RequestService', () => {
 
         beforeEach(() => {
             TestBed.resetTestingModule();
-            TestBed.configureTestingModule({ providers: [ RequestService, provideZonelessChangeDetection(), provideHttpClient(withXhr()), provideHttpClientTesting() ]});
+            TestBed.configureTestingModule({ providers: [ RequestService, provideHttpClient(withXhr()), provideHttpClientTesting() ]});
             requestService = TestBed.inject(RequestService);
             httpTestingController = TestBed.inject(HttpTestingController);
         });
@@ -83,7 +82,6 @@ describe('RequestService', () => {
             TestBed.configureTestingModule({ providers: [ 
                 RequestService, 
                 { provide: HATEOAS_ANTI_FORGERY, useValue: antiForgeryOptions },
-                provideZonelessChangeDetection(),
                 provideHttpClient(withXhr()), 
                 provideHttpClientTesting() 
             ]});
@@ -173,7 +171,6 @@ describe('RequestService', () => {
                 RequestService, 
                 { provide: WINDOW, useValue: windowsStub },
                 { provide: HATEOAS_LOGIN_REDIRECT, useValue: loginRedirectOptions },
-                provideZonelessChangeDetection(), 
                 provideHttpClient(withXhr()), 
                 provideHttpClientTesting() 
             ]});
@@ -253,7 +250,6 @@ describe('RequestService', () => {
             TestBed.configureTestingModule({ providers: [ 
                 RequestService,
                 { provide: HATEOAS_CUSTOM_HEADERS, useValue: customHeaderOptions },
-                provideZonelessChangeDetection(), 
                 provideHttpClient(withXhr()),
                 provideHttpClientTesting() 
             ]});
@@ -337,7 +333,6 @@ describe('RequestService', () => {
             TestBed.configureTestingModule({ providers: [ 
                 RequestService, 
                 { provide: HATEOAS_METADATA_PROVIDER, useValue: customMetadataProvider },
-                provideZonelessChangeDetection(),
                 provideHttpClient(withXhr()), 
                 provideHttpClientTesting() 
             ]});

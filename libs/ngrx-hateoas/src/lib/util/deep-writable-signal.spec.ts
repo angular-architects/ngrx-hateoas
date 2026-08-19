@@ -1,6 +1,6 @@
 import { TestBed } from "@angular/core/testing";
 import { deepComputed, signalMethod } from "@ngrx/signals";
-import { computed, Injector, isSignal, provideZonelessChangeDetection, runInInjectionContext, signal } from "@angular/core";
+import { computed, Injector, isSignal, runInInjectionContext, signal } from "@angular/core";
 import { DeepWritableSignal, deepWritableSignal, toDeepWritableSignal } from "./deep-writeable-signal";
 import { firstValueFrom, timer } from "rxjs";
 
@@ -51,7 +51,7 @@ describe('deepWritableSignal', () => {
     describe('from initial value', () => {
 
         beforeEach(async () => {
-            TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+            TestBed.configureTestingModule({});
             const injector = TestBed.inject(Injector);
             target = deepWritableSignal(initialTestModel);
             wireUpNotifications(injector);
@@ -177,7 +177,7 @@ describe('deepWritableSignal', () => {
     describe('from existing signal', () => {
 
         beforeEach(async() => {
-            TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+            TestBed.configureTestingModule({});
             const injector = TestBed.inject(Injector);
             const existingSignal = signal(initialTestModel);
             target = toDeepWritableSignal(newVal => existingSignal.set(newVal), existingSignal);
@@ -305,7 +305,7 @@ describe('deepWritableSignal', () => {
     describe('from existing deep signal', () => {
 
         beforeEach(() => {
-            TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+            TestBed.configureTestingModule({});
             const injector = TestBed.inject(Injector);
             const existingSignal = signal(initialTestModel);
             const existingDeepSignal = deepComputed(() => existingSignal());
