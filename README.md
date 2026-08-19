@@ -1,22 +1,98 @@
-# NGRX Hateoas
+# ngrx-hateoas
 
-A library to bring hypermedia json into the ngrx signal store following the HATEOAS approach to make it easily useable within Angular.
+`ngrx-hateoas` is an Angular library for loading hypermedia JSON into the NgRx Signal Store, following related-resource links, editing state, and executing actions described by the backend.
 
-## Repo Usage
+This repository contains the published library, an interactive playground with a local demo API, and the documentation website.
 
-The repository provides the library itself, a playground app and a dummy backend which provides some Hypermedia Web APIs.``
+## Project Links
 
-To run the playground app clone the repository and run an `npm install`. Then start the backend with `npm run server` and the playground app with `npm start`.
+- [npm package](https://www.npmjs.com/package/@angular-architects/ngrx-hateoas)
+- [Library quick start](./libs/ngrx-hateoas/README.md)
+- [Documentation](https://angular-architects.github.io/ngrx-hateoas/)
+- [Getting Started guide](https://angular-architects.github.io/ngrx-hateoas/docs/guide/getting-started)
+- [Issues and feature requests](https://github.com/angular-architects/ngrx-hateoas/issues)
 
-## Playground applicaiton
+## Repository Structure
 
-Use and review the playground application inside the repository to understand how to use the library. Also you can review the http responses and requests in the browser network tab to get an impression of how hypermedia json can look like. 
+| Path | Purpose |
+| --- | --- |
+| [`libs/ngrx-hateoas`](./libs/ngrx-hateoas) | Angular library source, public API, and unit tests |
+| [`apps/playground`](./apps/playground) | Angular application demonstrating the library |
+| [`apps/playground/server.js`](./apps/playground/server.js) | Local demo API |
+| [`apps/playground/db.json`](./apps/playground/db.json) | Data used by the local demo API |
+| [`doc`](./doc) | Docusaurus documentation website |
 
-## Lib Usage
-The library is available as npm package here: https://www.npmjs.com/package/@angular-architects/ngrx-hateoas
+## Install Dependencies
 
-## Documentation
-Find the documentation here: https://angular-architects.github.io/ngrx-hateoas/
+Clone the repository and install the root workspace dependencies:
 
-## Real World Sample Application
-There is a sample application [Fancy.ResourceLinker.Sample](https://github.com/fancyDevelopment/Fancy.ResourceLinker.Sample) which demonstrates end to end real world usage of hypermedia in Angular and also some other aspects of a real wold system.
+```bash
+npm i
+```
+
+## Run the Playground
+
+Start the demo API in one terminal:
+
+```bash
+npm run server
+```
+
+The API listens on `http://localhost:5100`.
+
+Start the Angular playground in another terminal:
+
+```bash
+npm start
+```
+
+Open `http://localhost:4200` and use the browser network tools to inspect the hypermedia responses and the requests derived from their links and actions.
+
+## Build and Verify the Library
+
+Build the Angular library:
+
+```bash
+npm run build
+```
+
+Run the complete headless test suite with coverage:
+
+```bash
+npm run test
+```
+
+Run linting:
+
+```bash
+npm run lint
+```
+
+## Work on the Documentation
+
+The documentation website has its own dependencies. Install and start it from the `doc` directory:
+
+```bash
+cd doc
+npm i
+npm start
+```
+
+Create a production documentation build with:
+
+```bash
+cd doc
+npm run build
+```
+
+## Real-World Sample
+
+The [Fancy.ResourceLinker.Sample](https://github.com/fancyDevelopment/Fancy.ResourceLinker.Sample) project demonstrates end-to-end hypermedia usage with Angular and a .NET backend.
+
+## Contributing
+
+Bug reports, feature proposals, documentation improvements, and pull requests are welcome. Before opening a pull request, run the headless tests, library build, and lint checks described above.
+
+## License
+
+This project is licensed under the terms of the [repository license](./LICENSE).

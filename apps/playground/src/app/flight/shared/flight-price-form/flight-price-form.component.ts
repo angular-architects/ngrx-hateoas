@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { FormField, FieldTree } from '@angular/forms/signals';
+import { FieldTree, FormField } from '@angular/forms/signals';
 import { FlightPrice } from '../../flight.entities';
 
 @Component({

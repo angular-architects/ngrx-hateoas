@@ -1,7 +1,6 @@
 import {
   Injector,
   isSignal,
-  provideZonelessChangeDetection,
   runInInjectionContext,
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
@@ -73,7 +72,7 @@ describe('withDeepWritableStateProjection', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection(), TestStore],
+      providers: [TestStore],
     });
     store = TestBed.inject(TestStore);
   });

@@ -1,7 +1,6 @@
 import { HasActionPipe } from './has-action.pipe';
 import { TestBed } from '@angular/core/testing';
 import { HateoasService } from '../services/hateoas.service';
-import { provideZonelessChangeDetection } from '@angular/core';
 
 const testModel = {
   _actions: {
@@ -14,7 +13,7 @@ describe('HasActionPipe', () => {
   let hasActionPipe: HasActionPipe
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [HasActionPipe, HateoasService, provideZonelessChangeDetection()]});
+    TestBed.configureTestingModule({ providers: [HasActionPipe, HateoasService]});
     hasActionPipe = TestBed.inject(HasActionPipe);
   });
     

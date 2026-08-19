@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
-import { provideZonelessChangeDetection } from '@angular/core';
 import { withWritableStateCopy } from './with-writable-state-copy';
 
 type TestModel = {
@@ -53,7 +52,7 @@ describe('withWritableStateCopy', () => {
     let store: InstanceType<typeof TestStore>;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+        TestBed.configureTestingModule({});
         store = TestBed.inject(TestStore);
     });
 

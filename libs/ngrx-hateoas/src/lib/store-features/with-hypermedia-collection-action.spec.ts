@@ -1,12 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { signalStore } from '@ngrx/signals';
 import { withHypermediaResource } from './with-hypermedia-resource';
 import { provideHateoas } from '../provide';
 import { config, firstValueFrom, timer } from 'rxjs';
 import { withHypermediaCollectionAction } from './with-hypermedia-collection-action';
-import { provideZonelessChangeDetection } from '@angular/core';
 
 type TestModel = {
     items: {
@@ -84,7 +82,7 @@ describe('withHypermediaCollectionAction', () => {
 
     beforeEach(async () => {
         TestBed.configureTestingModule({
-            providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting(), provideHateoas()]
+            providers: [provideHttpClientTesting(), provideHateoas()]
         });
         store = TestBed.inject(TestStore);
         await firstValueFrom(timer(0));

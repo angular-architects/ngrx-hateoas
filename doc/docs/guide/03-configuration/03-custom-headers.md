@@ -14,7 +14,6 @@ If you register **ngrx-hateoas** linke shown in the following code snippet...
 ```ts
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(),
     provideHateoas(withCustomHeaders({
         headers: {
             'X-Custom-Header-1': 'Value1',

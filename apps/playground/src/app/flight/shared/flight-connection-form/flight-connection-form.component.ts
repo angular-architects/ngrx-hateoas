@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { FlightConnection } from '../../flight.entities';
-import { FormField, FieldTree } from '@angular/forms/signals';
+import { FieldTree, FormField } from '@angular/forms/signals';
 
 @Component({
     selector: 'app-flight-connection-form',

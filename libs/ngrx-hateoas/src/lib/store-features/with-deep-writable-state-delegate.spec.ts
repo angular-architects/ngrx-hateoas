@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { signalMethod, signalStore, withState } from '@ngrx/signals';
-import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
+import { Injector, runInInjectionContext } from '@angular/core';
 import { firstValueFrom, timer } from 'rxjs';
 import { withExperimentalDeepWritableStateDelegate } from './with-deep-writable-state-delegate';
 
@@ -70,7 +70,7 @@ describe('withExperimentalDeepWritableStateDelegate', () => {
 
 
     beforeEach(async () => {
-        TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+        TestBed.configureTestingModule({});
         store = TestBed.inject(TestStore);
         const injector = TestBed.inject(Injector);
 
