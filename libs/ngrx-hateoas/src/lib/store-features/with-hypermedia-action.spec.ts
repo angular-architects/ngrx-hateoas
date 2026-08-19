@@ -41,6 +41,16 @@ describe('withHypermediaAction', () => {
         httpTestingController = TestBed.inject(HttpTestingController);
     });
 
+    async function loadAvailableAction(method = 'PUT') {
+        const loadPromise = store.loadTestModelFromUrl('/api/test-model');
+        httpTestingController.expectOne('/api/test-model').flush({
+            name: 'foobar',
+            _actions: { doSomething: { href: '/api/do-something', method } }
+        } satisfies TestModel);
+        await loadPromise;
+        await firstValueFrom(timer(0));
+    }
+
     it('sets correct initial resource state', () => {
         expect(store.doSomethingState.href()).toBe('');
         expect(store.doSomethingState.method()).toBe('');
@@ -60,12 +70,7 @@ describe('withHypermediaAction', () => {
     });
 
     it('executes an action successfully after it is available', async () => {
-
-        const testModel = store.getTestModelAsPatchable();
-        testModel.name.patch('foobar');
-        testModel._actions.patch({ doSomething: { href: '/api/do-something', method: 'PUT' } });
-
-        await firstValueFrom(timer(0));
+        await loadAvailableAction();
 
         expect(store.doSomethingState.href()).toBe('/api/do-something');
         expect(store.doSomethingState.method()).toBe('PUT');
@@ -101,6 +106,44 @@ describe('withHypermediaAction', () => {
         expect(store.doSomethingState.isExecuting()).toBeFalse();
         expect(store.doSomethingState.hasError()).toBeFalse();
         expect(store.doSomethingState.error()).toBeNull();
+    });
+
+    it('stores an HTTP action error and rejects', async () => {
+        await loadAvailableAction();
+
+        const actionPromise = store.doSomething();
+        httpTestingController.expectOne('/api/do-something').flush('failed', { status: 500, statusText: 'Server Error' });
+
+        await expectAsync(actionPromise).toBeRejected();
+        expect(store.doSomethingState.isExecuting()).toBeFalse();
+        expect(store.doSomethingState.hasError()).toBeTrue();
+        expect(store.doSomethingState.error()).toBeDefined();
+    });
+
+    it('sends no body for DELETE actions', async () => {
+        await loadAvailableAction('DELETE');
+
+        const actionPromise = store.doSomething();
+        const request = httpTestingController.expectOne('/api/do-something');
+        expect(request.request.body).toBeNull();
+        request.flush(null);
+
+        await actionPromise;
+    });
+
+    it('resets availability when the action disappears or becomes invalid', async () => {
+        await loadAvailableAction();
+
+        for (const [url, actions] of [
+            ['/api/without-action', {}],
+            ['/api/with-invalid-action', { doSomething: { href: '', method: 'TRACE' } }]
+        ] as const) {
+            const loadPromise = store.loadTestModelFromUrl(url);
+            httpTestingController.expectOne(url).flush({ name: 'updated', _actions: actions });
+            await loadPromise;
+            await firstValueFrom(timer(0));
+            expect(store.doSomethingState.isAvailable()).toBeFalse();
+        }
     });
 
 });

@@ -17,7 +17,7 @@ export function withInitialHypermediaResource<ResourceName extends string, TReso
         {
             state: HypermediaResourceStoreState<ResourceName, TResource>;
             computed: Record<string, Signal<unknown>>;
-            methods: HypermediaResourceStoreMethods<ResourceName, TResource>;
+            methods: HypermediaResourceStoreMethods<ResourceName>;
             props: object;
         }
     >;
@@ -28,22 +28,26 @@ export function withInitialHypermediaResource<ResourceName extends string, TReso
     return signalStoreFeature(
         withHypermediaResource<ResourceName, TResource>(resourceName, initialValue),
         withHooks({
-            async onInit(store) {
-                let initialUrl: string;
+            onInit(store) {
+                let initialUrl: InitialUrl;
                 if(typeof url === 'string') {
                     initialUrl = url;
                 } else if (url instanceof Promise) {
-                    initialUrl = await url;
+                    initialUrl = url;
                 } else if (typeof url === 'function') {
                     const initialUrlPromiseOrResolver = url();
                     if (typeof initialUrlPromiseOrResolver === 'string') initialUrl = initialUrlPromiseOrResolver;
-                    else if (initialUrlPromiseOrResolver instanceof Promise) initialUrl = await initialUrlPromiseOrResolver;
+                    else if (initialUrlPromiseOrResolver instanceof Promise) initialUrl = initialUrlPromiseOrResolver;
                     else throw new Error('Invalid initial url resolver return type. Expected string or Promise<string>.');
                 } else {
                     throw new Error('Invalid initial url type. Expected string, Promise<string>, function returning string, or function returning Promise<string>.');
                 }
 
-                ((store as Record<string, unknown>)[loadFromUrlMethodName] as (url: string) => void)(initialUrl);
+                const loadFromUrl = (resolvedUrl: string) =>
+                    ((store as Record<string, unknown>)[loadFromUrlMethodName] as (url: string) => void)(resolvedUrl);
+
+                if (initialUrl instanceof Promise) initialUrl.then(loadFromUrl);
+                else loadFromUrl(initialUrl);
             }
         })
     );

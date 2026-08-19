@@ -4,6 +4,7 @@ import { signalStore } from '@ngrx/signals';
 import { withHypermediaResource } from './with-hypermedia-resource';
 import { provideHateoas } from '../provide';
 import { signal } from '@angular/core';
+import { firstValueFrom, timer } from 'rxjs';
 
 type RootModel = {
     apiName: string
@@ -88,7 +89,6 @@ describe('withHypermediaResource', () => {
         expect(store.loadTestModelFromLink).toBeDefined();
         expect(store.loadTestModelFromUrl).toBeDefined();
         expect(store.reloadTestModel).toBeDefined();
-        expect(store.getTestModelAsPatchable).toBeDefined();
     });
 
     it('loads the resource from url and sets state correctly', async () => {
@@ -173,6 +173,27 @@ describe('withHypermediaResource', () => {
         expect(store.testModel.objProp.stringProp()).toBe('initial string');
     });
 
+    it('resets state and rejects when loading from url fails', async () => {
+        const loadPromise = store.loadTestModelFromUrl('api/test-model');
+        httpTestingController.expectOne('api/test-model').flush('failed', { status: 500, statusText: 'Server Error' });
+
+        await expectAsync(loadPromise).toBeRejected();
+        expect(store.testModel()).toBe(initialTestModel);
+        expect(store.testModelState.url()).toBe('api/test-model');
+        expect(store.testModelState.isLoading()).toBeFalse();
+        expect(store.testModelState.isLoaded()).toBeFalse();
+    });
+
+    it('resets state and rejects when loading from link fails', async () => {
+        const loadPromise = store.loadTestModelFromLink(store.rootModel(), 'testModel');
+        httpTestingController.expectOne('api/test-model?origin=fromLink').flush('failed', { status: 500, statusText: 'Server Error' });
+
+        await expectAsync(loadPromise).toBeRejected();
+        expect(store.testModel()).toBe(initialTestModel);
+        expect(store.testModelState.isLoading()).toBeFalse();
+        expect(store.testModelState.isLoaded()).toBeFalse();
+    });
+
     it('reloads the resource and sets state correctly', async () => {
         const resourceFromUrl: TestModel = {
             numProp: 2,
@@ -206,6 +227,21 @@ describe('withHypermediaResource', () => {
         expect(store.testModelState.isLoading()).toBeFalse();
         expect(store.testModelState.isLoaded()).toBeTrue();
         expect(store.testModel.objProp.stringProp()).toBe('from Url Reloaded');
+    });
+
+    it('resets the resource and rejects when reloading fails', async () => {
+        const loadPromise = store.loadTestModelFromUrl('api/test-model');
+        httpTestingController.expectOne('api/test-model').flush({
+            numProp: 2, objProp: { stringProp: 'loaded' }
+        } satisfies TestModel);
+        await loadPromise;
+
+        const reloadPromise = store.reloadTestModel();
+        httpTestingController.expectOne('api/test-model').flush('failed', { status: 500, statusText: 'Server Error' });
+
+        await expectAsync(reloadPromise).toBeRejected();
+        expect(store.testModel()).toBe(initialTestModel);
+        expect(store.testModelState.isLoading()).toBeFalse();
     });
 
     it('skips loading if fromCache is true and resource is already loaded from the same url', async () => {
@@ -275,20 +311,6 @@ describe('withHypermediaResource', () => {
         await loadPromise;
 
         expect(store.testModel.objProp.stringProp()).toBe('reloaded');
-    });
-
-    it('gets the resource as patchable', () => {
-        const resource = store.getTestModelAsPatchable();
-
-        resource.patch({ numProp: 5, objProp: { stringProp: 'patched1' } });
-
-        expect(store.testModel.numProp()).toBe(5);
-        expect(store.testModel.objProp.stringProp()).toBe('patched1');
-
-        resource.objProp.stringProp.patch('patched2');
-
-        expect(store.testModel.numProp()).toBe(5);
-        expect(store.testModel.objProp.stringProp()).toBe('patched2');
     });
 
     it('uses self url on reload', async () => {
@@ -384,7 +406,7 @@ describe('withHypermediaResource', () => {
         const urlSignal = signal<string | null>('api/test-model');
         store.loadTestModelFromUrl(urlSignal);
 
-        TestBed.flushEffects();
+        TestBed.tick();
 
         httpTestingController.expectOne('api/test-model').flush(resourceFirst);
 
@@ -393,7 +415,7 @@ describe('withHypermediaResource', () => {
             expect(store.testModel.objProp.stringProp()).toBe('first response');
 
             urlSignal.set(null);
-            TestBed.flushEffects();
+            TestBed.tick();
 
             expect(store.testModelState.url()).toBe('');
             expect(store.testModelState.isLoaded()).toBeFalse();
@@ -418,7 +440,7 @@ describe('withHypermediaResource', () => {
         const urlSignal = signal('api/test-model?version=1');
         store.loadTestModelFromUrl(urlSignal);
 
-        TestBed.flushEffects();
+        TestBed.tick();
 
         expect(store.testModelState.isLoading()).toBeTrue();
         httpTestingController.expectOne('api/test-model?version=1').flush(resourceFirst);
@@ -427,7 +449,7 @@ describe('withHypermediaResource', () => {
             expect(store.testModel.objProp.stringProp()).toBe('first response');
 
             urlSignal.set('api/test-model?version=2');
-            TestBed.flushEffects();
+            TestBed.tick();
 
             expect(store.testModelState.isLoading()).toBeTrue();
             httpTestingController.expectOne('api/test-model?version=2').flush(resourceSecond);
@@ -438,6 +460,19 @@ describe('withHypermediaResource', () => {
                 done();
             }, 0);
         }, 0);
+    });
+
+    it('swallows reactive loading errors and resets state', async () => {
+        const urlSignal = signal('api/failing');
+        store.loadTestModelFromUrl(urlSignal);
+        TestBed.tick();
+
+        httpTestingController.expectOne('api/failing').flush('failed', { status: 500, statusText: 'Server Error' });
+        await firstValueFrom(timer(0));
+
+        expect(store.testModel()).toBe(initialTestModel);
+        expect(store.testModelState.isLoading()).toBeFalse();
+        expect(store.testModelState.isLoaded()).toBeFalse();
     });
 
 });
