@@ -20,7 +20,7 @@ export const FLIHGT_ROUTES: Routes = [{
 }, {
     path: "search/:url",
     component: FlightSearchComponent,
-    canActivate: [(routeSnapshot: ActivatedRouteSnapshot) => inject(FlightSearchStore).loadFlightSearchVmFromUrl(routeSnapshot.paramMap.get('url'), true)]
+    canActivate: [(routeSnapshot: ActivatedRouteSnapshot) => inject(FlightSearchStore).loadFlightSearchVmFromUrl(routeSnapshot.paramMap.get('url'))]
 }, {
     path: "edit/:url",
     component: FlightEditComponent,

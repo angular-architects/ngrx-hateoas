@@ -1,10 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { signalStore } from '@ngrx/signals';
 import { provideHateoas } from '../provide';
 import { withInitialHypermediaResource } from './with-initial-hypermedia-resource';
-import { inject, InjectionToken, provideZonelessChangeDetection } from '@angular/core';
+import { inject, InjectionToken } from '@angular/core';
 
 type RootModel = {
     apiName: string
@@ -45,7 +44,7 @@ describe('withInitialHypermediaResource', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting(), provideHateoas()]
+            providers: [provideHttpClientTesting(), provideHateoas()]
         });
         httpTestingController = TestBed.inject(HttpTestingController);
     });

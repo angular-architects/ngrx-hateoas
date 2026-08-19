@@ -59,11 +59,10 @@ Install the library and NgRx Signal Store:
 npm install @angular-architects/ngrx-hateoas @ngrx/signals
 ```
 
-Register the HTTP client and ngrx-hateoas services:
+Register the ngrx-hateoas services:
 
 ```ts
 import { ApplicationConfig } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
 import { provideHateoas } from '@angular-architects/ngrx-hateoas';
 
 export const appConfig: ApplicationConfig = {

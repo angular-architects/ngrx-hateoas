@@ -37,12 +37,11 @@ To install the **ngrx-hateoas** library run
 npm i @angular-architects/ngrx-hateoas
 ``
 
-Finally you have to add the **ngrx-hateoas** services to your application by using the `provideHateoas()` function. Since **ngrx-hateoas** uses the Angular HTTP client to make its requests to the backend you should also add `provideHttpClient()`.
+Finally you have to add the **ngrx-hateoas** services to your application by using the `provideHateoas()` function.
 
 ```ts
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(),
     provideHateoas()
   ]
 };
