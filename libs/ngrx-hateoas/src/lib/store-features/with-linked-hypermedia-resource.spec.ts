@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { signalStore } from '@ngrx/signals';
+import { signal } from '@angular/core';
+import { signalStore, withProps } from '@ngrx/signals';
 import { withHypermediaResource } from './with-hypermedia-resource';
 import { withLinkedHypermediaResource } from './with-linked-hypermedia-resource';
 import { provideHateoas } from '../provide';
@@ -32,6 +33,12 @@ const TestStore = signalStore(
     withLinkedHypermediaResource('testModel', initialTestModel, store => store.rootModel, 'testModel')
 );
 
+const TestStoreWithPropLinkRoot = signalStore(
+    { providedIn: 'root' },
+    withProps(() => ({ rootModelProp: signal(initialRootModel) })),
+    withLinkedHypermediaResource('testModel', initialTestModel, store => store.rootModelProp, 'testModel')
+);
+
 describe('withLinkedHypermediaResource', () => {
 
     let store: InstanceType<typeof TestStore>;
@@ -55,6 +62,25 @@ describe('withLinkedHypermediaResource', () => {
 
     it('has correct resource methods', () => {
         expect(store.reloadTestModel).toBeDefined();
+    });
+
+    it('loads the linked resource from a prop-based link root', async () => {
+        const storeWithPropLinkRoot = TestBed.inject(TestStoreWithPropLinkRoot);
+
+        storeWithPropLinkRoot.rootModelProp.set({
+            apiName: 'loaded model',
+            _links: {
+                testModel: { href: '/api/test-model-from-prop' }
+            }
+        });
+        await firstValueFrom(timer(0));
+
+        httpTestingController.expectOne('/api/test-model-from-prop').flush({ name: 'from prop link' } satisfies TestModel);
+        await firstValueFrom(timer(0));
+
+        expect(storeWithPropLinkRoot.testModel.name()).toBe('from prop link');
+        expect(storeWithPropLinkRoot.testModelState.isLoaded()).toBeTrue();
+        httpTestingController.verify();
     });
 
     it('does not request anything when reloaded before a link is available', async () => {

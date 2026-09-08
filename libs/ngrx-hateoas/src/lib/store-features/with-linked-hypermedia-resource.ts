@@ -37,7 +37,7 @@ export function generateReloadLinkedHypermediaResourceMethodName(resourceName: s
 export type LinkedHypermediaResourceMethods<ResourceName extends string> =
     ReloadLinkedHypermediaResourceMethod<ResourceName>;
 
-type StoreForResourceLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']>;
+type StoreForResourceLinkRoot<Input extends SignalStoreFeatureResult> = StateSignals<Input['state']> & Input['props'];
 
 type ResourceLinkRootFn<T extends SignalStoreFeatureResult> = (store: StoreForResourceLinkRoot<T>) => Signal<Resource | undefined>
 
