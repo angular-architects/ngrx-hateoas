@@ -14,7 +14,7 @@ function withLinkedHypermediaResource<ResourceName extends string, TResource, In
 
 * **resourceName**: The name of how the resource will be declared in the store.
 * **initialValue**: The initial value of the resource before it is loaded from a URL.
-* **linkRootFn**: A function which receives the store instance and returns a signal to an object containing the link to use to load the resource.
+* **linkRootFn**: A function which receives the store state and props and returns a signal to an object containing the link to use to load the resource. Props must be added by a preceding store feature to be available here.
 * **linkMetaName**: The name of the link to use to load the resource.
 
 ## State
