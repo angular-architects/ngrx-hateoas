@@ -19,7 +19,7 @@
     "@angular/forms": "^22.1.2",
     "@angular/platform-browser": "^22.1.2",
     "@angular/router": "^22.1.2",
-    "@ngrx/signals": "^22.0.0-rc.0",
+    "@ngrx/signals": "^22.0.0",
     "bootstrap": "5.3.3",
     "rxjs": "~7.8.2",
     "tslib": "^2.3.0"
